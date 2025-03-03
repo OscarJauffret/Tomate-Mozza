@@ -1,6 +1,7 @@
 from tminterface.client import Client, run_client
 from tminterface.interface import TMInterface
 import sys
+import numpy as np
 
 class MainClient(Client):
     def __init__(self) -> None:
@@ -13,7 +14,7 @@ class MainClient(Client):
     def on_run_step(self, iface: TMInterface, _time: int):
         if _time >= 0:
             state = iface.get_simulation_state()
-            #iface.execute_command(f"press up; steer {np.sin(_time / 1000) * 65535}")
+            iface.execute_command(f"press up; steer {np.sin(_time / 1000) * 65535}")
             self.prev_state = state
 
     def on_checkpoint_count_changed(self, iface: TMInterface, current: int, target: int):
