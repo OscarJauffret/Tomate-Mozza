@@ -17,15 +17,6 @@ class MainClient(Client):
 
     def on_registered(self, iface: TMInterface) -> None:
         print(f"Registered to {iface.server_name}")
-        sleep(10)
-        iface.execute_command("toggle_console")
-        pyautogui.press('tab')
-        sleep(1)
-        pyautogui.press('enter')
-        pyautogui.press('execute')
-        pyautogui.press('accept')
-        pyautogui.press('esc')
-        sleep(1)
         iface.execute_command(f"map {get_default_map()}")
 
     def on_run_step(self, iface: TMInterface, _time: int) -> None:
