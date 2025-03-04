@@ -1,6 +1,3 @@
-import threading
-
-import win32api
 from dotenv import load_dotenv
 import psutil
 import pywinctl
@@ -25,6 +22,15 @@ def get_process_pids_by_name(process_name="TMForever.exe"):
 
     return pids
 
+def get_hwnds_of_windows_named(name):
+    pids = get_process_pids_by_name(name)
+    hwnds = []
+    for pid in pids:
+        hwnd = get_main_hwnd_for_pid(pid)
+        if hwnd:
+            hwnds.append(hwnd)
+    return hwnds
+
 def get_main_hwnd_for_pid(pid):
     def callback(hwnd, hwnds):
         _, found_pid = win32process.GetWindowThreadProcessId(hwnd)
@@ -40,9 +46,14 @@ def get_main_hwnd_for_pid(pid):
 
 def focus_window(hwnd):
     if hwnd:
-        remote_thread, _ = win32process.GetWindowThreadProcessId(hwnd)
-        win32process.AttachThreadInput(threading.get_ident(), remote_thread, True)
-        win32gui.SetFocus(hwnd)
+        shell = win32com.client.Dispatch("WScript.Shell")
+        shell.SendKeys('%')
+        win32gui.SetForegroundWindow(hwnd)
+        sleep(0.1)
+        rect = win32gui.GetWindowRect(hwnd)
+        x = rect[0] + 50
+        y = rect[1] + 50
+        pyautogui.click(x, y)
     else:
         print("Window not found")
 
@@ -53,7 +64,7 @@ def focus_window_by_pid(pid):
 def focus_windows_by_pids(pids):
     for pid in pids:
         focus_window_by_pid(pid)
-        sleep(3)
+        sleep(1)
 
 def move_windows(pids):
     w, h = 640, 480
@@ -61,8 +72,10 @@ def move_windows(pids):
     windows_horizontally = 1920 // w
     windows_vertically = 1080 // h
     for i, pid in enumerate(pids):
-        hwnd = get_main_hwnd_for_pid(pid)
-        if hwnd:
+        handle = get_main_hwnd_for_pid(pid)
+        if handle:
             x = (i % windows_horizontally) * w
             y = (i // windows_horizontally % windows_vertically) * h
-            win32gui.MoveWindow(hwnd, x, y, w, h, True)
+
+            win32gui.MoveWindow(handle, x, y, w, h, True)
+
