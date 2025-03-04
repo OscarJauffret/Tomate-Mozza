@@ -1,3 +1,6 @@
+import threading
+
+import win32api
 from dotenv import load_dotenv
 import psutil
 import pywinctl
@@ -22,35 +25,30 @@ def get_process_pids_by_name(process_name="TMForever.exe"):
 
     return pids
 
-def get_hwnds_for_pid(pid):
+def get_main_hwnd_for_pid(pid):
     def callback(hwnd, hwnds):
-        #if win32gui.IsWindowVisible(hwnd) and win32gui.IsWindowEnabled(hwnd):
         _, found_pid = win32process.GetWindowThreadProcessId(hwnd)
 
-        if found_pid == pid:
+        if found_pid == pid and win32gui.IsWindowVisible(hwnd) and win32gui.IsWindowEnabled(hwnd):
             hwnds.append(hwnd)
         return True
     hwnds = []      # list to store handles of windows
     win32gui.EnumWindows(callback, hwnds)
-    return hwnds
+    if hwnds:
+        return hwnds[0]
+    return None
 
 def focus_window(hwnd):
     if hwnd:
-        shell = win32com.client.Dispatch("WScript.Shell")
-        shell.SendKeys('%')
-        win32gui.SetForegroundWindow(hwnd)
-        sleep(0.1)
-        rect = win32gui.GetWindowRect(hwnd)
-        x = rect[0] + 50
-        y = rect[1] + 50
-        pyautogui.click(x, y)
+        remote_thread, _ = win32process.GetWindowThreadProcessId(hwnd)
+        win32process.AttachThreadInput(threading.get_ident(), remote_thread, True)
+        win32gui.SetFocus(hwnd)
     else:
         print("Window not found")
 
 def focus_window_by_pid(pid):
-    hwnds = get_hwnds_for_pid(pid)
-    for hwnd in hwnds:
-        focus_window(hwnd)
+    hwnd = get_main_hwnd_for_pid(pid)
+    focus_window(hwnd)
 
 def focus_windows_by_pids(pids):
     for pid in pids:
@@ -63,10 +61,8 @@ def move_windows(pids):
     windows_horizontally = 1920 // w
     windows_vertically = 1080 // h
     for i, pid in enumerate(pids):
-        x = (i % windows_horizontally) * w
-        y = (i // windows_horizontally % windows_vertically) * h
-
-        hwnds = get_hwnds_for_pid(pid)
-        for hwnd in hwnds:
+        hwnd = get_main_hwnd_for_pid(pid)
+        if hwnd:
+            x = (i % windows_horizontally) * w
+            y = (i // windows_horizontally % windows_vertically) * h
             win32gui.MoveWindow(hwnd, x, y, w, h, True)
-
