@@ -12,9 +12,6 @@ class MainClient(Client):
     def on_registered(self, iface: TMInterface) -> None:
         print(f"Registered to {iface.server_name}")
 
-        timer = threading.Timer(15, self.launch_map, args=(iface,))
-        timer.start()
-
     def launch_map(self, iface: TMInterface) -> None:
         iface.execute_command(f"map {get_default_map()}")
 

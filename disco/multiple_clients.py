@@ -1,8 +1,12 @@
+import signal
 import subprocess
+import keyboard
 from utils import *
 from worker import Worker
+import multiprocessing
 
-num_clients = 4
+num_clients = 6
+choose_map_event = multiprocessing.Event()
 
 def launch_games():
     for i in range(num_clients):
@@ -12,6 +16,7 @@ def launch_games():
 def launch_game():
     executable, path_to_executable = get_executable_path()
     subprocess.Popen([executable], cwd=path_to_executable, shell=True)
+
 
 if __name__ == "__main__":
     launch_games()
@@ -23,9 +28,14 @@ if __name__ == "__main__":
     # Create processes
     workers = []
     for server in servers:
-        worker = Worker(server)
+        worker = Worker(server, choose_map_event)
         workers.append(worker)
         worker.start()
+
+    print("Workers started")
+    print("Press 'm' to choose map")
+    print("Press 'CTRL+C' to quit")
+    keyboard.add_hotkey('m', lambda: choose_map_event.set())
 
     # sleep(3)
     # focus_windows_by_pids(pids)
