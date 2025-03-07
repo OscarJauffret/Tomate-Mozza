@@ -1,4 +1,3 @@
-import signal
 import subprocess
 import keyboard
 from utils import *
@@ -17,6 +16,10 @@ def launch_game():
     executable, path_to_executable = get_executable_path()
     subprocess.Popen([executable], cwd=path_to_executable, shell=True)
 
+def trigger_map_event():
+    choose_map_event.set()
+    sleep(2)
+    focus_windows_by_name("TrackMania Nations Forever (TMInterface 1.4.3)")
 
 if __name__ == "__main__":
     launch_games()
@@ -34,12 +37,11 @@ if __name__ == "__main__":
 
     print("Workers started")
     print("Press 'm' to choose map")
+    print("Press 'f' to focus windows")
     print("Press 'CTRL+C' to quit")
-    keyboard.add_hotkey('m', lambda: choose_map_event.set())
 
-    # sleep(3)
-    # focus_windows_by_pids(pids)
-    # print("Windows focused")
+    keyboard.add_hotkey('m', lambda: trigger_map_event())
+    keyboard.add_hotkey('f', lambda: focus_windows_by_name("TrackMania Nations Forever (TMInterface 1.4.3)"))
 
     # Wait for all processes to finish
     try:

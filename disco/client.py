@@ -1,7 +1,6 @@
 from tminterface.client import Client
 from tminterface.interface import TMInterface
 from utils import *
-import threading
 
 class MainClient(Client):
     def __init__(self, num) -> None:

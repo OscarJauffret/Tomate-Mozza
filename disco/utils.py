@@ -5,6 +5,8 @@ import os
 import win32gui, win32process, win32con, win32com.client
 from time import sleep
 import pyautogui
+import pygetwindow as gw
+import pywinauto
 
 load_dotenv()
 
@@ -44,27 +46,14 @@ def get_main_hwnd_for_pid(pid):
         return hwnds[0]
     return None
 
-def focus_window(hwnd):
-    if hwnd:
-        shell = win32com.client.Dispatch("WScript.Shell")
-        shell.SendKeys('%')
-        win32gui.SetForegroundWindow(hwnd)
-        sleep(0.1)
-        rect = win32gui.GetWindowRect(hwnd)
-        x = rect[0] + 50
-        y = rect[1] + 50
-        pyautogui.click(x, y)
-    else:
-        print("Window not found")
-
-def focus_window_by_pid(pid):
-    hwnd = get_main_hwnd_for_pid(pid)
-    focus_window(hwnd)
-
-def focus_windows_by_pids(pids):
-    for pid in pids:
-        focus_window_by_pid(pid)
-        sleep(1)
+def focus_windows_by_name(name):
+    windows = gw.getWindowsWithTitle(name)
+    print(f"Focusing {len(windows)} windows")
+    for window in windows:
+        app = pywinauto.Application().connect(handle=window._hWnd)
+        dlg = app.top_window()
+        dlg.set_focus()
+        sleep(0.3)
 
 def move_windows(pids):
     w, h = 640, 480
