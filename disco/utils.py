@@ -1,10 +1,8 @@
 from dotenv import load_dotenv
 import psutil
-import pywinctl
 import os
-import win32gui, win32process, win32con, win32com.client
+import win32gui, win32process
 from time import sleep
-import pyautogui
 import pygetwindow as gw
 import pywinauto
 

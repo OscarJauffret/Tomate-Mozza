@@ -4,7 +4,6 @@ from time import sleep
 from tminterface.interface import TMInterface
 from client import MainClient
 import signal
-from utils import get_default_map
 
 class Worker(multiprocessing.Process):
     def __init__(self, server_id, choose_map_event):
