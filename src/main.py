@@ -5,6 +5,7 @@ import multiprocessing
 import config
 
 choose_map_event = multiprocessing.Event()
+print_state_event = multiprocessing.Event()
 
 if __name__ == "__main__":
     launch_games(config.NUMBER_OF_CLIENTS)
@@ -16,7 +17,7 @@ if __name__ == "__main__":
     # Create processes
     workers = []
     for server in servers:
-        worker = Worker(server, choose_map_event)
+        worker = Worker(server, choose_map_event, print_state_event)
         workers.append(worker)
         worker.start()
 
@@ -26,6 +27,7 @@ if __name__ == "__main__":
     print("Press 'CTRL+C' to quit")
 
     keyboard.add_hotkey('m', lambda: trigger_map_event(choose_map_event))
+    keyboard.add_hotkey('p', lambda: print_state_event.set())
     keyboard.add_hotkey('f', lambda: focus_windows_by_name(config.WINDOW_NAME))
 
     # Wait for all processes to finish
