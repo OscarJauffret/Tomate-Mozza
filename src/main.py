@@ -1,32 +1,17 @@
-import subprocess
 import keyboard
 from utils import *
 from worker import Worker
 import multiprocessing
+import config
 
-num_clients = 6
 choose_map_event = multiprocessing.Event()
 
-def launch_games():
-    for i in range(num_clients):
-        launch_game()
-        sleep(2)
-
-def launch_game():
-    executable, path_to_executable = get_executable_path()
-    subprocess.Popen([executable], cwd=path_to_executable, shell=True)
-
-def trigger_map_event():
-    choose_map_event.set()
-    sleep(2)
-    focus_windows_by_name("TrackMania Nations Forever (TMInterface 1.4.3)")
-
 if __name__ == "__main__":
-    launch_games()
-    pids = get_process_pids_by_name("TMForever.exe")
-    move_windows(pids)
+    launch_games(config.NUMBER_OF_CLIENTS)
+    sleep(1)
+    move_windows_by_name("TrackMania Nations Forever (TMInterface 1.4.3)")
 
-    servers = [i for i in range(num_clients)]
+    servers = [i for i in range(config.NUMBER_OF_CLIENTS)]
 
     # Create processes
     workers = []
@@ -40,8 +25,8 @@ if __name__ == "__main__":
     print("Press 'f' to focus windows")
     print("Press 'CTRL+C' to quit")
 
-    keyboard.add_hotkey('m', lambda: trigger_map_event())
-    keyboard.add_hotkey('f', lambda: focus_windows_by_name("TrackMania Nations Forever (TMInterface 1.4.3)"))
+    keyboard.add_hotkey('m', lambda: trigger_map_event(choose_map_event))
+    keyboard.add_hotkey('f', lambda: focus_windows_by_name(config.WINDOW_NAME))
 
     # Wait for all processes to finish
     try:

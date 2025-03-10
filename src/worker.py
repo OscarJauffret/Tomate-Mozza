@@ -1,15 +1,14 @@
 import multiprocessing
-import os
 from time import sleep
 from tminterface.interface import TMInterface
-from client import MainClient
+from client import HorizonClient
 import signal
 
 class Worker(multiprocessing.Process):
     def __init__(self, server_id, choose_map_event):
         super().__init__()
         self.server_id = server_id
-        self.client = MainClient(self.server_id)
+        self.client = HorizonClient(self.server_id)
         self.iface = TMInterface(f"TMInterface{self.server_id}")
         self.choose_map_event = choose_map_event
 

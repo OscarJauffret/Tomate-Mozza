@@ -2,9 +2,9 @@ from tminterface.client import Client
 from tminterface.interface import TMInterface
 from utils import *
 
-class MainClient(Client):
+class HorizonClient(Client):
     def __init__(self, num) -> None:
-        super(MainClient, self).__init__()
+        super(HorizonClient, self).__init__()
         self.prev_state = None
         self.num = num
 
@@ -17,6 +17,8 @@ class MainClient(Client):
     def on_run_step(self, iface: TMInterface, _time: int) -> None:
         if _time >= 0:
             state = iface.get_simulation_state()
+            print(f"Client {self.num} state: {state}")
+
             if self.num == 0:
                 iface.execute_command(f"press up")
             else:
