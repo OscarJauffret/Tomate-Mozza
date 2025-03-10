@@ -18,8 +18,8 @@ class HorizonClient(Client):
         self.model = Model().to(self.device)
         self.trainer = QTrainer(self.model, self.device, config.LEARNING_RATE, config.GAMMA)
         self.reward = 0
-        self.iteration_done = False
         self.iterations = 0
+        self.ready = False
 
     def on_registered(self, iface: TMInterface) -> None:
         print(f"Registered to {iface.server_name}")
@@ -92,10 +92,13 @@ class HorizonClient(Client):
         state = iface.get_simulation_state()
 
         if state.position[1] < 23: # If the car is below the track
+            print("Car is below the track")
             return True
         if not state.player_info.finish_not_passed:
+            print("Finish passed")
             return True
         if state.display_speed < 5 and state.race_time > 2000:
+            print("Car is stuck")
             return True
         return False
 
@@ -120,27 +123,27 @@ class HorizonClient(Client):
         self.trainer.train_step(states, actions, rewards, next_states, dones)
 
     def on_run_step(self, iface: TMInterface, _time: int) -> None:
-             
-        if _time >= 0 and not self.iteration_done and _time % 100 == 0:
-            
+        if _time == 0:
+            self.ready = True
+
+        if _time >= 0 and _time % 100 == 0 and self.ready:
             state_old = self.get_state(iface)
             action = self.get_action(state_old)
             self.send_input(iface, action)
 
             state_new = self.get_state(iface)
             current_reward = self.get_reward(state_new)
-            self.iteration_done = self.determine_done(iface, state_new)
+            done = self.determine_done(iface, state_new)
 
-            self.train_short_memory(state_old, action, current_reward, state_new, self.iteration_done)
-            self.remember(state_old, action, current_reward, state_new, self.iteration_done)
+            self.train_short_memory(state_old, action, current_reward, state_new, done)
+            self.remember(state_old, action, current_reward, state_new, done)
 
             self.reward += current_reward
-            if self.iteration_done:
+            if done:
+                self.ready = False
                 self.iterations += 1
-                print(f"Iteration: {self.iterations}")
-                print(f"DONE: {self.reward}")
+                print(f"Iteration: {self.iterations}, reward: {self.reward}")
                 self.train_long_memory()
                 self.reward = 0
                 iface.horn()
                 iface.respawn()
-                self.iteration_done = False
