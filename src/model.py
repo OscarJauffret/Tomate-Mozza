@@ -29,23 +29,24 @@ class Model(nn.Module):
 
 
 class QTrainer:
-    def __init__(self, model, lr, gamma):
+    def __init__(self, model, device, lr, gamma):
         self.lr = lr
         self.gamma = gamma
         self.model = model
+        self.device = device
         self.optimizer = torch.optim.Adam(model.parameters(), lr=self.lr)
         self.criterion = nn.MSELoss()
 
     def train_step(self, state, action, reward, next_state, done):
-        state = np.array(state)
-        next_state = np.array(next_state)
-        action = np.array(action)
-        reward = np.array(reward)
+        # state = np.array(state)
+        # next_state = np.array(next_state)
+        # action = np.array(action)
+        # reward = np.array(reward)
 
-        state = torch.tensor(state, dtype=torch.float)
-        next_state = torch.tensor(next_state, dtype=torch.float)
-        action = torch.tensor(action, dtype=torch.long)
-        reward = torch.tensor(reward, dtype=torch.float)
+        state = state.clone().detach().to(self.device)
+        next_state = next_state.clone().detach().to(self.device)
+        action = action.clone().detach().to(self.device)
+        reward = reward.clone().detach().to(self.device)
 
         if len(state.shape) == 1:
             state = torch.unsqueeze(state, 0)

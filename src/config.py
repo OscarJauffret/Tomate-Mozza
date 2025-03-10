@@ -13,4 +13,4 @@ LEARNING_RATE: float = 0.001
 GAMMA: float = 0.9
 
 MAX_MEMORY: int = 100_000
-BATCH_SIZE: int = 1000
+BATCH_SIZE: int = 128
