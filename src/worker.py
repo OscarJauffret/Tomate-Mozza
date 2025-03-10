@@ -30,4 +30,5 @@ class Worker(multiprocessing.Process):
             if self.print_state_event.is_set():
                 self.client.print_state(self.iface)
                 self.print_state_event.clear()
+
             sleep(0)

@@ -54,24 +54,24 @@ def get_next_turn(current_block_index):
             direction = ordered_blocks[i - 1] - ordered_blocks[i - 2]
             if np.array_equal(direction, (0, 1)):     # Up
                 if ordered_blocks[i][0] > current_x: # Right turn
-                    direction = "left"
+                    direction = -1.0
                 else: # Left turn
-                    direction = "right"
+                    direction = 1.0
             elif np.array_equal(direction, (0, -1)):  # Down
                 if ordered_blocks[i][0] > current_x: # Left turn
-                    direction = "right"
+                    direction = 1.0
                 else: # Right turn
-                    direction = "left"
+                    direction = -1.0
             elif np.array_equal(direction, (1, 0)):  # Right
                 if ordered_blocks[i][1] > current_y:
-                    direction = "right"
+                    direction = 1.0
                 else:
-                    direction = "left"
+                    direction = -1.0
             elif np.array_equal(direction, (-1, 0)):  # Left
                 if ordered_blocks[i][1] > current_y:
-                    direction = "left"
+                    direction = -1.0
                 else:
-                    direction = "right"
+                    direction = 1.0
 
             return ordered_blocks[i - 1], direction
     return -1
