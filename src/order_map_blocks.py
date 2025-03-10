@@ -7,7 +7,7 @@ names_lut = {"StadiumRoadMainStartLine": "Start", "StadiumPlatformToRoadMain": "
 def is_next_to(pos1, pos2):
     return abs(pos1[0] - pos2[0]) == 1 and abs(pos1[1] - pos2[1]) == 0 or abs(pos1[0] - pos2[0]) == 0 and abs(pos1[1] - pos2[1]) == 1
 
-with open("../maps/horizon_layout.txt", "r") as f:
+with open(config.MAP_GBX_OUTPUT_PATH, "r") as f:
     for line in f:
         if line.startswith("Flags") or line.startswith("Rotation"):
             continue
@@ -35,13 +35,13 @@ start_block = None
 transition_block= None
 for block in highest_blocks:
     if block[0] == "Start":
-        start_block = block
+        start_block = block[1]
         highest_blocks.remove(block)
         break
 
 for block in highest_blocks:
-    if block[0] == "Transition" and is_next_to(start_block[1], block[1]):
-        transition_block = block
+    if block[0] == "Transition" and is_next_to(start_block, block[1]):
+        transition_block = block[1]
         highest_blocks.remove(block)
         break
 
@@ -52,8 +52,8 @@ ordered_blocks = [start_block, transition_block]
 
 while highest_blocks:
     for i, block in enumerate(highest_blocks):
-        if is_next_to(ordered_blocks[-1][1], block[1]):
-            ordered_blocks.append(block)
+        if is_next_to(ordered_blocks[-1], block[1]):
+            ordered_blocks.append(block[1])
             highest_blocks.remove(block)
             break
 

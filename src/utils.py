@@ -8,6 +8,7 @@ import pygetwindow as gw
 import pywinauto
 import config
 import ast
+import numpy as np
 
 
 load_dotenv()
@@ -37,14 +38,44 @@ def get_current_block(pos_x, pos_y):
 def load_map_layout():
     with open(config.MAP_LAYOUT_PATH, "r") as f:
         ordered_blocks = f.read()
-        ordered_blocks = ast.literal_eval(ordered_blocks)
+        ordered_blocks = np.array(ast.literal_eval(ordered_blocks))
     return ordered_blocks
 
 def get_block_index(block_x, block_y):
     for i, block in enumerate(ordered_blocks):
-        if block[1][0] == block_x and block[1][1] == block_y:
+        if block[0] == block_x and block[1] == block_y:
             return i
     return -1
+
+def get_next_turn(current_block_index):
+    current_x, current_y = ordered_blocks[current_block_index]
+    for i in range(current_block_index, len(ordered_blocks)):
+        if ordered_blocks[i][0] != current_x and ordered_blocks[i][1] != current_y:
+            direction = ordered_blocks[i - 1] - ordered_blocks[i - 2]
+            if np.array_equal(direction, (0, 1)):     # Up
+                if ordered_blocks[i][0] > current_x: # Right turn
+                    direction = "left"
+                else: # Left turn
+                    direction = "right"
+            elif np.array_equal(direction, (0, -1)):  # Down
+                if ordered_blocks[i][0] > current_x: # Left turn
+                    direction = "right"
+                else: # Right turn
+                    direction = "left"
+            elif np.array_equal(direction, (1, 0)):  # Right
+                if ordered_blocks[i][1] > current_y:
+                    direction = "right"
+                else:
+                    direction = "left"
+            elif np.array_equal(direction, (-1, 0)):  # Left
+                if ordered_blocks[i][1] > current_y:
+                    direction = "left"
+                else:
+                    direction = "right"
+
+            return ordered_blocks[i - 1], direction
+    return -1
+
 
 def trigger_map_event(event):
     event.set()

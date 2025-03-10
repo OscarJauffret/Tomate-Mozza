@@ -19,6 +19,7 @@ class HorizonClient(Client):
         print(f"Position: {state.position}")
         print(f"Block position: {get_current_block(state.position[0], state.position[2])}")
         print(f"Block index: {get_block_index(*get_current_block(state.position[0], state.position[2]))}")
+        print(f"Next turn: {get_next_turn(get_block_index(*get_current_block(state.position[0], state.position[2])))}")
         print(f"Yaw, pitch roll: {state.yaw_pitch_roll}")
         print(f"Velocity: {state.velocity}")
         print(f"Race time: {state.race_time}")
