@@ -16,7 +16,7 @@ class Model(nn.Module):
         x = torch.relu(self.layer1(x))
         x = torch.relu(self.layer2(x))
         x = torch.relu(self.layer3(x))
-        x = self.layer4(x)
+        x = torch.sigmoid(self.layer4(x))
         return x
 
     def save(self, file_name='model'):

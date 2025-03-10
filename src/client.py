@@ -1,10 +1,10 @@
-from numpy.random import get_state
 from tminterface.client import Client
 from tminterface.interface import TMInterface
 from utils import *
 from model import Model, QTrainer
 import config
 import torch
+from collections import deque
 import random
 
 class HorizonClient(Client):
@@ -12,8 +12,10 @@ class HorizonClient(Client):
         super(HorizonClient, self).__init__()
         self.prev_state = None
         self.num = num
+        self.memory = deque(maxlen=config.MAX_MEMORY)
         self.model = Model()
         self.trainer = QTrainer(self.model, config.LEARNING_RATE, config.GAMMA)
+        self.reward = 0
 
     def on_registered(self, iface: TMInterface) -> None:
         print(f"Registered to {iface.server_name}")
@@ -51,41 +53,79 @@ class HorizonClient(Client):
 
     def get_action(self, state):
         epsilon = 0.9
+        move = [0] * config.OUTPUT_SIZE
         if np.random.random() > epsilon:
-            final_move = np.random.random(3)
+            final_move = np.random.randint(0, config.OUTPUT_SIZE)
+            move[final_move] = 1
         else:
             state0 = torch.tensor(state, dtype=torch.float)
             final_move = self.model(state0)
+            final_move = torch.argmax(final_move).item()
+            move[final_move] = 1
 
-        return final_move
+        return move
 
     def send_input(self, iface: TMInterface, move) -> None:
-        command = ""
-        if move[0] > 0.8:
-            command += "press up;"
-        if move[1] > move[2]:
-            command += "press left;"
-        elif move[1] < move[2]:
-            command += "press right;"
-        iface.execute_command(command)
+        if move[1] == 1:
+            iface.execute_command(f"press up")
+        elif move[2] == 1:
+            iface.execute_command(f"press right")
+        elif move[3] == 1:
+            iface.execute_command(f"press left")
+        elif move[4] == 1:
+            iface.execute_command(f"press up; press right")
+        elif move[5] == 1:
+            iface.execute_command(f"press up; press left")
+        else: # Do nothing
+            pass
+
+    def get_reward(self, state):
+        current_reward = get_current_block(state[0] * 1024, state[1] * 1024)
+        current_reward = get_block_index(*current_reward)
+        return current_reward
+
+    def determine_done(self, iface: TMInterface, state_new):
+        state = iface.get_simulation_state()
+
+        if state.position[1] < 23: # If the car is below the track
+            return True
+        if not state.player_info.finish_not_passed:
+            return True
+        return False
+
+    def remember(self, state, action, reward, next_state, done):
+        self.memory.append((state, action, reward, next_state, done))
+
+    def train_short_memory(self, state, action, reward, next_state, done):
+        self.trainer.train_step(state, action, reward, next_state, done)
+
+    def train_long_memory(self):
+        if len(self.memory) > config.BATCH_SIZE:
+            mini_sample = random.sample(self.memory, config.BATCH_SIZE)        # List of tuples
+        else:
+            mini_sample = self.memory
+
+        states, actions, rewards, next_states, dones = zip(*mini_sample)
+        self.trainer.train_step(states, actions, rewards, next_states, dones)
 
     def on_run_step(self, iface: TMInterface, _time: int) -> None:
         if _time >= 0:
-            state = iface.get_simulation_state()
+            if _time % 100 == 0:
+                state_old = self.get_state(iface)
+                move = self.get_action(state_old)
+                self.send_input(iface, move)
 
-            state_old = self.get_state(iface)
-            action = self.get_action(state_old)
-            self.send_input(iface, action)
+                state_new = self.get_state(iface)
+                current_reward = self.get_reward(state_new)
+                done = self.determine_done(iface, state_new)
 
+                self.train_short_memory(state_old, move, current_reward, state_new, done)
+                self.remember(state_old, move, current_reward, state_new, done)
 
-            #if self.num == 0:
-            #    iface.execute_command(f"press up")
-            #else:
-            #    iface.execute_command(f"press down")
-            self.prev_state = state
+                self.reward += current_reward
 
-    def on_checkpoint_count_changed(self, iface: TMInterface, current: int, target: int):
-        self.log(iface, f"Checkpoint {current}/{target}")
-
-    def log(self, iface, msg):
-        iface.execute_command(f"log {msg}")
+                if done:
+                    self.train_long_memory()
+                    self.reward = 0
+                    iface.horn()
+                    iface.respawn()
