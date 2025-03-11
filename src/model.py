@@ -1,16 +1,16 @@
 import torch
 import torch.nn as nn
-import config
+from config import Config
 import os
 import numpy as np
 
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
-        self.layer1 = nn.Linear(config.INPUT_SIZE, 128)
+        self.layer1 = nn.Linear(Config.NN.INPUT_SIZE, 128)
         self.layer2 = nn.Linear(128, 256)
         self.layer3 = nn.Linear(256, 128)
-        self.layer4 = nn.Linear(128, config.OUTPUT_SIZE)
+        self.layer4 = nn.Linear(128, Config.NN.OUTPUT_SIZE)
 
     def forward(self, x):
         x = torch.relu(self.layer1(x))

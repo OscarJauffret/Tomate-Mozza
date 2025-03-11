@@ -2,7 +2,7 @@ from tminterface.client import Client
 from tminterface.interface import TMInterface
 from utils import *
 from model import Model, QTrainer
-import config
+from config import Config
 import torch
 from collections import deque
 import random
@@ -12,11 +12,11 @@ class HorizonClient(Client):
         super(HorizonClient, self).__init__()
         self.prev_state = None
         self.num = num
-        self.memory = deque(maxlen=config.MAX_MEMORY)
+        self.memory = deque(maxlen=Config.NN.MAX_MEMORY)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print(f"Using device: {self.device}")
         self.model = Model().to(self.device)
-        self.trainer = QTrainer(self.model, self.device, config.LEARNING_RATE, config.GAMMA)
+        self.trainer = QTrainer(self.model, self.device, Config.NN.LEARNING_RATE, Config.NN.GAMMA)
         self.reward = 0
         self.iterations = 0
         self.ready = False
@@ -30,9 +30,9 @@ class HorizonClient(Client):
     def print_state(self, iface: TMInterface) -> None:
         state = iface.get_simulation_state()
         print(f"Position: {state.position}")
-        print(f"Block position: {get_current_block(state.position[0], state.position[2])}")
-        print(f"Block index: {get_block_index(*get_current_block(state.position[0], state.position[2]))}")
-        print(f"Next turn: {get_next_turn(get_block_index(*get_current_block(state.position[0], state.position[2])))}")
+        section_rel_pos, next_turn = get_section_info(state.position[0], state.position[2])
+        print(f"Section relative position: {section_rel_pos}")
+        print(f"Next turn: {next_turn}")
         print(f"Yaw, pitch roll: {state.yaw_pitch_roll}")
         print(f"Velocity: {state.velocity}")
         print(f"Race time: {state.race_time}")
@@ -40,16 +40,13 @@ class HorizonClient(Client):
 
     def get_state(self, iface: TMInterface):
         state = iface.get_simulation_state()
-        current_block = get_current_block(state.position[0], state.position[2])
-        block_index = get_block_index(*current_block)
-        next_turn = get_next_turn(block_index)
+
+        section_rel_pos, next_turn = get_section_info(state.position[0], state.position[2])
 
         current_state = torch.tensor([
-            state.position[0] / 1024,
-            state.position[2] / 1024,
-            next_turn[0][0] / 32,
-            next_turn[0][1] / 32,
-            next_turn[1],
+            section_rel_pos[0],
+            section_rel_pos[1],
+            next_turn,
             state.yaw_pitch_roll[0]
         ], dtype=torch.float, device=self.device)
 
@@ -57,9 +54,9 @@ class HorizonClient(Client):
 
     def get_action(self, state):
         epsilon = 0.7
-        move = [0] * config.OUTPUT_SIZE
+        move = [0] * Config.NN.OUTPUT_SIZE
         if np.random.random() > epsilon:
-            final_move = np.random.randint(0, config.OUTPUT_SIZE)
+            final_move = np.random.randint(0, Config.NN.OUTPUT_SIZE)
             move[final_move] = 1
         else:
             state0 = state.clone().detach().to(self.device)
@@ -109,8 +106,8 @@ class HorizonClient(Client):
         self.trainer.train_step(state, action, reward, next_state, done)
 
     def train_long_memory(self):
-        if len(self.memory) > config.BATCH_SIZE:
-            mini_sample = random.sample(self.memory, config.BATCH_SIZE)        # List of tuples
+        if len(self.memory) > Config.NN.BATCH_SIZE:
+            mini_sample = random.sample(self.memory, Config.NN.BATCH_SIZE)        # List of tuples
         else:
             mini_sample = self.memory
 

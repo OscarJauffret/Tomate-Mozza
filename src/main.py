@@ -2,17 +2,17 @@ import keyboard
 from utils import *
 from worker import Worker
 import multiprocessing
-import config
+from config import Config
 
 choose_map_event = multiprocessing.Event()
 print_state_event = multiprocessing.Event()
 
 if __name__ == "__main__":
-    launch_games(config.NUMBER_OF_CLIENTS)
+    launch_games(Config.Game.NUMBER_OF_CLIENTS)
     sleep(1)
     move_windows_by_name("TrackMania Nations Forever (TMInterface 1.4.3)")
 
-    servers = [i for i in range(config.NUMBER_OF_CLIENTS)]
+    servers = [i for i in range(Config.Game.NUMBER_OF_CLIENTS)]
 
     # Create processes
     workers = []
@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
     keyboard.add_hotkey('m', lambda: trigger_map_event(choose_map_event))
     keyboard.add_hotkey('p', lambda: print_state_event.set())
-    keyboard.add_hotkey('f', lambda: focus_windows_by_name(config.WINDOW_NAME))
+    keyboard.add_hotkey('f', lambda: focus_windows_by_name(Config.Game.WINDOW_NAME))
 
     # Wait for all processes to finish
     try:

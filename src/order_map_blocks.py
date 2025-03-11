@@ -1,7 +1,7 @@
 import ast
 import json
 
-import config
+from config import Config
 
 
 def is_next_to(pos1, pos2):
@@ -127,15 +127,16 @@ def get_sections_and_turns(blocks):
         else:
             vector_product = current_direction[0] * new_direction[1] - current_direction[1] * new_direction[0]
             if vector_product > 0:
-                turn = "right"
+                turn = 1
             else:
-                turn = "left"
+                turn = -1
             turns.append(turn)
             current_section = [current_section[0], current_section[-1]]
             sections.append(current_section)
             current_section = [blocks[i]]
             current_direction = new_direction
 
+    current_section = [current_section[0], current_section[-1]]
     sections.append(current_section)
     return sections, turns
 
@@ -153,10 +154,10 @@ def write_map_layout(blocks, sections, turns):
         "turns": turns
     }
 
-    with open(config.MAP_LAYOUT_PATH, "w") as f:
+    with open(Config.Paths.MAP_LAYOUT_PATH, "w") as f:
         f.write(json.dumps(map_layout))
 
 
-blocks = order_blocks_of_map(config.MAP_GBX_OUTPUT_PATH)
+blocks = order_blocks_of_map(Config.Paths.MAP_GBX_OUTPUT_PATH)
 sections, turns = get_sections_and_turns(blocks)
 write_map_layout(blocks, sections, turns)
