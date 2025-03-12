@@ -1,6 +1,8 @@
 import ast
 import json
 
+from sympy.physics.units import current
+
 from config import Config
 
 
@@ -109,6 +111,19 @@ def calculate_direction(block1, block2):
     """
     return (block2[0] - block1[0], block2[1] - block1[1])
 
+def calculate_turn(current_direction, new_direction):
+    """
+    Calculate the turn between two directions
+    :param current_direction: the current direction
+    :param new_direction: the new direction
+    :return: the turn between the two directions
+    """
+    vector_product = current_direction[0] * new_direction[1] - current_direction[1] * new_direction[0]
+    if vector_product > 0:
+        return 1    # Right turn
+    else:
+        return -1   # Left turn
+
 
 def get_sections_and_turns(blocks):
     """
@@ -118,27 +133,50 @@ def get_sections_and_turns(blocks):
     """
     sections = []
     turns = []
-    current_section = [blocks[0], blocks[1]]
-    current_direction = calculate_direction(current_section[0], current_section[1])
-    for i in range(2, len(blocks)):
-        new_direction = calculate_direction(current_section[-1], blocks[i])
-        if new_direction == current_direction:
+    current_section = [blocks[0]]
+    current_direction = None
+    for i in range(1, len(blocks)):
+        if len(current_section) == 1 and current_direction is None:       # If there is only one block in the current section, then we can accept any other block, and we set the direction of this section
             current_section.append(blocks[i])
+            current_direction = calculate_direction(current_section[0], current_section[1])
         else:
-            vector_product = current_direction[0] * new_direction[1] - current_direction[1] * new_direction[0]
-            if vector_product > 0:
-                turn = 1
-            else:
-                turn = -1
-            turns.append(turn)
-            current_section = [current_section[0], current_section[-1]]
-            sections.append(current_section)
-            current_section = [blocks[i]]
-            current_direction = new_direction
+            direction = calculate_direction(current_section[-1], blocks[i])
+            if direction == current_direction:  # If the new block is in the same direction, we can append it to the current section
+                current_section.append(blocks[i])
+            else:  # If the new block is not in the same direction, then we have a turn
+                current_section = [current_section[0], current_section[-1]]
+                sections.append(current_section)
+                current_section = [blocks[i]]
+                current_direction = None
 
-    current_section = [current_section[0], current_section[-1]]
-    sections.append(current_section)
+    if current_section:
+        current_section = [current_section[0], current_section[-1]]
+        sections.append(current_section)
+
+    directions =[]
+    for i in range(len(sections)):
+        section_direction = calculate_direction(sections[i][0], sections[i][1])
+        direction_norm = [0, 0]
+        for k in range(2):
+            direction_norm[k] = 0 if section_direction[k] == 0 else int(section_direction[k] / abs(section_direction[k]))
+        directions.append(tuple(direction_norm))
+
+    for i in range(len(directions) - 1):
+        if directions[i] != directions[i + 1]:
+            turns.append(calculate_turn(directions[i], directions[i + 1]))
+        else: # If the direction is the same, then it means that there are 2 quick turns in a row that make us end up in the same direction
+            # Then we will put -0.5 if the first of the two turns was a left turn, and 0.5 if it was a right turn
+            current_section = sections[i]
+            next_section = sections[i + 1]
+            direction_of_turn = calculate_direction(current_section[1], next_section[0])
+            if calculate_turn(directions[i], direction_of_turn) == 1:
+                turns.append(0.5)
+            else:
+                turns.append(-0.5)
+
     return sections, turns
+
+
 
 
 def write_map_layout(blocks, sections, turns):
