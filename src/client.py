@@ -129,7 +129,7 @@ class HorizonClient(Client):
         if _time >= 0 and _time % 100 == 0 and self.ready:
             state_old = self.get_state(iface)
             action = self.get_action(state_old)
-            # self.send_input(iface, action)
+            self.send_input(iface, action)
 
             state_new = self.get_state(iface)
             current_reward = self.get_reward(iface)
@@ -146,5 +146,6 @@ class HorizonClient(Client):
                 print(f"Iteration: {self.iterations}, reward: {self.reward}")
                 self.train_long_memory()
                 self.reward = 0.0
+                self.prev_position = None
                 iface.horn()
                 iface.respawn()
