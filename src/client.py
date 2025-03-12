@@ -18,6 +18,7 @@ class HorizonClient(Client):
         self.model = Model().to(self.device)
         self.trainer = QTrainer(self.model, self.device, Config.NN.LEARNING_RATE, Config.NN.GAMMA)
         self.reward = 0.0
+        self.epsilon = Config.NN.EPSILON_START
         self.iterations = 0
         self.ready = False
 
@@ -53,9 +54,9 @@ class HorizonClient(Client):
         return current_state
 
     def get_action(self, state):
-        epsilon = 0.7
+        self.epsilon = Config.NN.EPSILON_END + (Config.NN.EPSILON_START - Config.NN.EPSILON_END) * np.exp(-1. * self.iterations / Config.NN.EPSILON_DECAY)
         move = [0] * Config.NN.OUTPUT_SIZE
-        if np.random.random() > epsilon:
+        if np.random.random() > self.epsilon:
             final_move = np.random.randint(0, Config.NN.OUTPUT_SIZE)
             move[final_move] = 1
         else:
@@ -85,20 +86,16 @@ class HorizonClient(Client):
             return torch.tensor(0, device=self.device)
         current_position = iface.get_simulation_state().position[0], iface.get_simulation_state().position[2]
         current_reward = get_distance_reward(self.prev_position, current_position)
-        print(f"Reward: {current_reward}")
         return torch.tensor(current_reward, device=self.device)
 
     def determine_done(self, iface: TMInterface, state_new):
         state = iface.get_simulation_state()
 
         if state.position[1] < 23: # If the car is below the track
-            print("Car is below the track")
             return True
         if not state.player_info.finish_not_passed:
-            print("Finish passed")
             return True
         if state.display_speed < 5 and state.race_time > 2000:
-            print("Car is stuck")
             return True
         return False
 
