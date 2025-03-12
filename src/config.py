@@ -17,4 +17,4 @@ class Config:
         BATCH_SIZE: int = 128
         EPSILON_START: float = 0.9
         EPSILON_END: float = 0.05
-        EPSILON_DECAY: int = 2000
+        EPSILON_DECAY: int = 10000

@@ -6,6 +6,7 @@ from config import Config
 import torch
 from collections import deque
 import random
+from datetime import datetime
 
 class HorizonClient(Client):
     def __init__(self, num) -> None:
@@ -27,6 +28,12 @@ class HorizonClient(Client):
 
     def launch_map(self, iface: TMInterface) -> None:
         iface.execute_command(f"map {get_default_map()}")
+
+    def save_model(self) -> None:
+        if not os.path.isdir("models"):
+            os.makedirs("models")
+
+        torch.save(self.model.state_dict(), f"models/model_{datetime.now().strftime('%Y%m%d%H%M%S')}.pth")
 
     def print_state(self, iface: TMInterface) -> None:
         state = iface.get_simulation_state()
@@ -140,7 +147,7 @@ class HorizonClient(Client):
             if done:
                 self.ready = False
                 self.iterations += 1
-                print(f"Iteration: {self.iterations}, reward: {self.reward}")
+                print(f"Iteration: {self.iterations}, reward: {self.reward:.2f}, epsilon: {self.epsilon:.2f}")
                 self.train_long_memory()
                 self.reward = 0.0
                 self.prev_position = None
