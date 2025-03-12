@@ -7,19 +7,24 @@ import torch
 from collections import deque
 import random
 from datetime import datetime
+from map_layout import MapLayout
+import numpy as np
 
 class HorizonClient(Client):
     def __init__(self, num) -> None:
         super(HorizonClient, self).__init__()
-        self.prev_position = None
         self.num = num
-        self.memory = deque(maxlen=Config.NN.MAX_MEMORY)
+        self.map_layout = MapLayout()
+
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print(f"Using device: {self.device}")
         self.model = Model().to(self.device)
         self.trainer = QTrainer(self.model, self.device, Config.NN.LEARNING_RATE, Config.NN.GAMMA)
+
+        self.memory = deque(maxlen=Config.NN.MAX_MEMORY)
         self.reward = 0.0
         self.epsilon = Config.NN.EPSILON_START
+        self.prev_position = None
         self.iterations = 0
         self.ready = False
 
@@ -38,7 +43,7 @@ class HorizonClient(Client):
     def print_state(self, iface: TMInterface) -> None:
         state = iface.get_simulation_state()
         print(f"Position: {state.position}")
-        section_rel_pos, next_turn = get_section_info(state.position[0], state.position[2])
+        section_rel_pos, next_turn = self.map_layout.get_section_info(state.position[0], state.position[2])
         print(f"Section relative position: {section_rel_pos}")
         print(f"Next turn: {next_turn}")
         print(f"Yaw, pitch roll: {state.yaw_pitch_roll}")
@@ -49,7 +54,7 @@ class HorizonClient(Client):
     def get_state(self, iface: TMInterface):
         state = iface.get_simulation_state()
 
-        section_rel_pos, next_turn = get_section_info(state.position[0], state.position[2])
+        section_rel_pos, next_turn = self.map_layout.get_section_info(state.position[0], state.position[2])
 
         current_state = torch.tensor([
             section_rel_pos[0],
@@ -92,10 +97,10 @@ class HorizonClient(Client):
         if self.prev_position is None:
             return torch.tensor(0, device=self.device)
         current_position = iface.get_simulation_state().position[0], iface.get_simulation_state().position[2]
-        current_reward = get_distance_reward(self.prev_position, current_position)
+        current_reward = self.map_layout.get_distance_reward(self.prev_position, current_position)
         return torch.tensor(current_reward, device=self.device)
 
-    def determine_done(self, iface: TMInterface, state_new):
+    def determine_done(self, iface: TMInterface):
         state = iface.get_simulation_state()
 
         if state.position[1] < 23: # If the car is below the track
@@ -137,7 +142,7 @@ class HorizonClient(Client):
 
             state_new = self.get_state(iface)
             current_reward = self.get_reward(iface)
-            done = self.determine_done(iface, state_new)
+            done = self.determine_done(iface)
 
             self.train_short_memory(state_old, action, current_reward, state_new, done)
             self.remember(state_old, action, current_reward, state_new, done)

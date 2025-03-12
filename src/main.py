@@ -1,17 +1,20 @@
 import keyboard
-from utils import *
+from utils import trigger_map_event
 from worker import Worker
 import multiprocessing
 from config import Config
+from tm_launcher import TMLauncher
+from time import sleep
 
 choose_map_event = multiprocessing.Event()
 print_state_event = multiprocessing.Event()
 save_model_event = multiprocessing.Event()
 
 if __name__ == "__main__":
-    launch_games(Config.Game.NUMBER_OF_CLIENTS)
+    launcher = TMLauncher(Config.Game.NUMBER_OF_CLIENTS)
+    launcher.launch_games()
     sleep(1)
-    move_windows_by_name(Config.Game.WINDOW_NAME)
+    launcher.focus_windows()
 
     servers = [i for i in range(Config.Game.NUMBER_OF_CLIENTS)]
 
@@ -31,7 +34,7 @@ if __name__ == "__main__":
 
     keyboard.add_hotkey('m', lambda: trigger_map_event(choose_map_event))
     keyboard.add_hotkey('p', lambda: print_state_event.set())
-    keyboard.add_hotkey('f', lambda: focus_windows_by_name(Config.Game.WINDOW_NAME))
+    keyboard.add_hotkey('f', lambda: launcher.focus_windows())
     keyboard.add_hotkey('s', lambda: save_model_event.set())
 
     # Wait for all processes to finish
