@@ -62,8 +62,8 @@ def _get_position_relative_to_section(pos_x, pos_y):
             direction = (end_x - start_x, end_y - start_y)
             # Normalize the direction
             direction_norm = [0, 0]
-            for i in range(2):
-                direction_norm[i] = 0 if direction[i] == 0 else int(direction[i] / abs(direction[i]))
+            for j in range(2):
+                direction_norm[j] = 0 if direction[j] == 0 else int(direction[j] / abs(direction[j]))
 
             angles = {(1, 0): 0, (0, 1): np.pi/2, (-1, 0): np.pi, (0, -1): 3*np.pi/2}
             direction_norm_tuple = tuple(direction_norm)
