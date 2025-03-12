@@ -10,14 +10,14 @@ import random
 class HorizonClient(Client):
     def __init__(self, num) -> None:
         super(HorizonClient, self).__init__()
-        self.prev_state = None
+        self.prev_position = None
         self.num = num
         self.memory = deque(maxlen=Config.NN.MAX_MEMORY)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print(f"Using device: {self.device}")
         self.model = Model().to(self.device)
         self.trainer = QTrainer(self.model, self.device, Config.NN.LEARNING_RATE, Config.NN.GAMMA)
-        self.reward = 0
+        self.reward = 0.0
         self.iterations = 0
         self.ready = False
 
@@ -80,9 +80,12 @@ class HorizonClient(Client):
         else: # Do nothing
             iface.set_input_state(accelerate=False, left=False, right=False)
 
-    def get_reward(self, state):
-        current_reward = get_current_block(state[0] * 1024, state[1] * 1024)
-        current_reward = get_block_index(*current_reward)
+    def get_reward(self, iface: TMInterface):
+        if self.prev_position is None:
+            return torch.tensor(0, device=self.device)
+        current_position = iface.get_simulation_state().position[0], iface.get_simulation_state().position[2]
+        current_reward = get_distance_reward(self.prev_position, current_position)
+        print(f"Reward: {current_reward}")
         return torch.tensor(current_reward, device=self.device)
 
     def determine_done(self, iface: TMInterface, state_new):
@@ -126,21 +129,22 @@ class HorizonClient(Client):
         if _time >= 0 and _time % 100 == 0 and self.ready:
             state_old = self.get_state(iface)
             action = self.get_action(state_old)
-            self.send_input(iface, action)
+            # self.send_input(iface, action)
 
             state_new = self.get_state(iface)
-            current_reward = self.get_reward(state_new)
+            current_reward = self.get_reward(iface)
             done = self.determine_done(iface, state_new)
 
             self.train_short_memory(state_old, action, current_reward, state_new, done)
             self.remember(state_old, action, current_reward, state_new, done)
 
             self.reward += current_reward
+            self.prev_position = iface.get_simulation_state().position[0], iface.get_simulation_state().position[2]
             if done:
                 self.ready = False
                 self.iterations += 1
                 print(f"Iteration: {self.iterations}, reward: {self.reward}")
                 self.train_long_memory()
-                self.reward = 0
+                self.reward = 0.0
                 iface.horn()
                 iface.respawn()

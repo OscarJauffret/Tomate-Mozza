@@ -92,6 +92,31 @@ def get_current_block(pos_x, pos_y):
     block_y = floor(pos_y / 32)
     return block_x, block_y
 
+def _get_section_dimension(section_index):
+    start_x, start_y = sections[section_index][0]
+    end_x, end_y = sections[section_index][1]
+
+    return np.array([(abs(start_x - end_x) + abs(start_y - end_y)) * 32, 16])
+    
+def get_distance_reward(prev_pos, current_pos):
+    prev_pos_in_section, prev_section_index = _get_position_relative_to_section(*prev_pos)
+    current_pos_in_section, current_section_index = _get_position_relative_to_section(*current_pos)
+
+    prev_section_dimension = _get_section_dimension(prev_section_index)
+    current_section_dimension = _get_section_dimension(current_section_index)
+
+    if prev_section_index == -1 or current_section_index == -1:
+        return 0
+    
+    if prev_section_index == current_section_index:
+        mul = -1 if current_pos_in_section[0] < prev_pos_in_section[0] else 1
+        dist = np.linalg.norm(np.array(prev_pos_in_section) * prev_section_dimension - np.array(current_pos_in_section) * current_section_dimension)
+        return mul * dist
+
+    mul = -1 if current_section_index < prev_section_index else 1
+    dist = np.linalg.norm(np.array(prev_pos) - np.array(current_pos))
+    return mul * dist
+
 def _load_map_layout():
     with open(Config.Paths.MAP_LAYOUT_PATH, "r") as f:
         data = json.load(f)

@@ -10,7 +10,7 @@ print_state_event = multiprocessing.Event()
 if __name__ == "__main__":
     launch_games(Config.Game.NUMBER_OF_CLIENTS)
     sleep(1)
-    move_windows_by_name("TrackMania Nations Forever (TMInterface 1.4.3)")
+    move_windows_by_name(Config.Game.WINDOW_NAME)
 
     servers = [i for i in range(Config.Game.NUMBER_OF_CLIENTS)]
 
