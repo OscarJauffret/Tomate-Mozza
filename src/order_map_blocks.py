@@ -1,8 +1,6 @@
 import ast
 import json
 
-from sympy.physics.units import current
-
 from config import Config
 
 
