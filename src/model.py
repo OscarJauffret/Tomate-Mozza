@@ -8,15 +8,11 @@ class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
         self.layer1 = nn.Linear(Config.NN.INPUT_SIZE, 128)
-        self.layer2 = nn.Linear(128, 256)
-        self.layer3 = nn.Linear(256, 128)
-        self.layer4 = nn.Linear(128, Config.NN.OUTPUT_SIZE)
+        self.layer2 = nn.Linear(128, Config.NN.OUTPUT_SIZE)
 
     def forward(self, x):
         x = torch.relu(self.layer1(x))
-        x = torch.relu(self.layer2(x))
-        x = torch.relu(self.layer3(x))
-        x = torch.sigmoid(self.layer4(x))
+        x = torch.sigmoid(self.layer2(x))
         return x
 
     def save(self, file_name='model'):
