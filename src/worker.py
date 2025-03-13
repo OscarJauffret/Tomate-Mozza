@@ -29,7 +29,7 @@ class Worker(multiprocessing.Process):
                 self.choose_map_event.clear()
 
             if self.print_state_event.is_set():
-                self.client.print_state(self.iface)
+                print(self.client)
                 self.print_state_event.clear()
 
             if self.save_model_event.is_set():

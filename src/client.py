@@ -25,8 +25,12 @@ class HorizonClient(Client):
         self.reward = 0.0
         self.epsilon = Config.NN.EPSILON_START
         self.prev_position = None
+        self.state = None
         self.iterations = 0
         self.ready = False
+
+    def __str__(self) -> str:
+        return f"x position: {self.state[0].item():<8.2f} y position: {self.state[1].item():<8.2f} next turn: {self.state[2].item():<6} yaw: {self.state[3].item():<6.2f}"
 
     def on_registered(self, iface: TMInterface) -> None:
         print(f"Registered to {iface.server_name}")
@@ -39,18 +43,6 @@ class HorizonClient(Client):
             os.makedirs("models")
 
         torch.save(self.model.state_dict(), f"models/model_{datetime.now().strftime('%Y%m%d%H%M%S')}.pth")
-
-    def print_state(self, iface: TMInterface) -> None:
-        state = iface.get_simulation_state()
-        print(f"Position: {state.position}")
-        section_rel_pos, next_turn = self.map_layout.get_section_info(state.position[0], state.position[2])
-        print(f"Section relative position: {section_rel_pos}")
-        print(f"Next turn: {next_turn}")
-        print(f"Yaw: {state.yaw_pitch_roll[0]}")
-        print(f"Relative Yaw: {self.map_layout.get_car_orientation(state.yaw_pitch_roll[0], state.position[0], state.position[2])}")
-        print(f"Velocity: {state.velocity}")
-        print(f"Race time: {state.race_time}")
-        print(f"Input finish event: {state.input_finish_event}")
 
     def get_state(self, iface: TMInterface):
         state = iface.get_simulation_state()
@@ -140,12 +132,12 @@ class HorizonClient(Client):
         if _time >= 0 and _time % 100 == 0 and self.ready:
             state_old = self.get_state(iface)
             action = self.get_action(state_old)
-            #self.send_input(iface, action)
+            self.send_input(iface, action)
 
             state_new = self.get_state(iface)
+            self.state = state_new
             current_reward = self.get_reward(iface)
-            #done = self.determine_done(iface)
-            done = False
+            done = self.determine_done(iface)
 
             self.train_short_memory(state_old, action, current_reward, state_new, done)
             self.remember(state_old, action, current_reward, state_new, done)
