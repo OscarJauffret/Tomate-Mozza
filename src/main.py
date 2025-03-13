@@ -5,6 +5,7 @@ import multiprocessing
 from config import Config
 from tm_launcher import TMLauncher
 from time import sleep
+from hotkey_manager import HotkeyManager
 
 choose_map_event = multiprocessing.Event()
 print_state_event = multiprocessing.Event()
@@ -17,6 +18,8 @@ if __name__ == "__main__":
     launcher.focus_windows()
 
     servers = [i for i in range(Config.Game.NUMBER_OF_CLIENTS)]
+    hotkey_manager = HotkeyManager()
+
 
     # Create processes
     workers = []
@@ -25,17 +28,14 @@ if __name__ == "__main__":
         workers.append(worker)
         worker.start()
 
-    print("Workers started")
-    print("Press 'm' to choose map")
-    print("Press 'f' to focus windows")
-    print("Press 'p' to print state")
-    print("Press 's' to save the NN")
-    print("Press 'CTRL+C' to quit")
+    # Add hotkeys
+    hotkey_manager.add_hotkey('m', lambda: trigger_map_event(choose_map_event), "load the map")
+    hotkey_manager.add_hotkey('p', lambda: print_state_event.set(), "print the state")
+    hotkey_manager.add_hotkey('f', lambda: launcher.focus_windows(), "focus the windows")
+    hotkey_manager.add_hotkey('s', lambda: save_model_event.set(), "save the model")
+    hotkey_manager.add_hotkey('f7', lambda: hotkey_manager.toggle_hotkeys(), "toggle hotkeys")
 
-    keyboard.add_hotkey('m', lambda: trigger_map_event(choose_map_event))
-    keyboard.add_hotkey('p', lambda: print_state_event.set())
-    keyboard.add_hotkey('f', lambda: launcher.focus_windows())
-    keyboard.add_hotkey('s', lambda: save_model_event.set())
+    hotkey_manager.print_hotkeys()
 
     # Wait for all processes to finish
     try:
