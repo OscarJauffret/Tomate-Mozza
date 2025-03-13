@@ -187,6 +187,8 @@ class MapLayout:
         """
         direction_to_angle = {(0, -1): np.pi, (-1, 0): -np.pi / 2, (0, 1): 0, (1, 0): np.pi / 2}
         section = self._get_current_section_bounds(pos_x, pos_y)
+        if np.all(section == np.array([(-1, -1), (-1, -1)])):
+            return 0
         direction = self._get_direction_of_section(section)
         section_angle = direction_to_angle[direction]
         theta = (section_angle - yaw)
