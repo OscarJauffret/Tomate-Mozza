@@ -1,18 +1,18 @@
 # Devlog
 
-### 2-6 March 2025
+### 2-6 March 2025, 7h
 Launch multiple clients at the same time, logging in, launching the map and focussing the windows
 
 ---
-### 10 March 2025
+### 10 March 2025, 10h
 - Created the first map layout
 - Created the agent, using as inputs: the absolute position of the agent, the absolute yaw, the next turn's block position and its direction. The reward is simply the block index the car is on.
 ---
-### 11 March 2025
+### 11 March 2025, 5h
 - Better parsed the map to extract road sections and turns. A section is a portion of the road between two turns.
 - Positioned the agent relatively to the road section it is on. That means the state used the relative position of the car on the section instead of the absolute position. Additionally, we still use the next_turn as input and the absolute yaw.
 ---
-### 12 March 2025
+### 12 March 2025, 6h
 - Updated the reward. Now it is the distance that was traveled from the previous state to the current state.
 - Changed the evolution of epsilon to an exponential decay.
 
@@ -24,3 +24,4 @@ Launch multiple clients at the same time, logging in, launching the map and focu
 ### 13 March 2025
 - First run of the agent on the map.
 - Refactored the utils file into two classes: TMLoader and MapLayout.
+- Changed the yaw input to be relative to the road section. It is in [-1, 1] where 0 is the car facing the road, -0.5 is the car facing the left side of the road and 0.5 is the car facing the right side of the road.

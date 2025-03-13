@@ -144,3 +144,53 @@ class MapLayout:
             return (-1, -1), 0
         next_turn = self.turns[section_index]
         return pos_in_section, next_turn
+
+    @staticmethod
+    def _get_direction_of_section(section: np.ndarray[tuple[int, int]]) -> tuple[int, int]:
+        """
+        Get the direction of the current section
+        :param section: The section to get the direction of
+        :return: The direction of the current section as a tuple (x, y), normalized
+        """
+        [start_x, start_y], [end_x, end_y] = section
+        direction = (end_x - start_x, end_y - start_y)
+        direction_norm = [0, 0]
+        for i in range(2):
+            direction_norm[i] = 0 if direction[i] == 0 else int(direction[i] / abs(direction[i]))
+        return tuple(direction_norm)
+
+    def _get_current_section_bounds(self, pos_x: int, pos_y: int) -> np.ndarray[tuple[int, int]]:
+        """
+        Get the bounds of the current section
+        :param pos_x: The x position of the car (absolute)
+        :param pos_y: The y position of the car (absolute)
+        :return: The bounds of the current section as a numpy array [start, end] (in block coordinates)
+        """
+        block_x, block_y = self.get_current_block(pos_x, pos_y)
+        for section in self.sections:
+            if self._is_in_section(block_x, block_y, section):
+                return section
+        return np.array([(-1, -1), (-1, -1)])
+
+    def get_car_orientation(self, yaw: float, pos_x: int, pos_y: int) -> float:
+        """
+        Get the orientation of the car relative to the section it is in.
+        - If the car is facing the same direction as the section, the orientation is 0.
+        - If the car is facing the opposite direction as the section, the orientation is pi (or -pi).
+        - If the car is facing the right side of the section, the orientation is pi / 2.
+        - If the car is facing the left side of the section, the orientation is -pi / 2.
+        The angle is then normalized by pi to get values between -1 and 1.
+        :param yaw: The yaw of the car (in radians, absolute)
+        :param pos_x: The x position of the car (absolute)
+        :param pos_y: The y position of the car (absolute)
+        :return: The orientation of the car relative to the section it is in.
+        """
+        direction_to_angle = {(0, -1): np.pi, (-1, 0): -np.pi / 2, (0, 1): 0, (1, 0): np.pi / 2}
+        section = self._get_current_section_bounds(pos_x, pos_y)
+        direction = self._get_direction_of_section(section)
+        section_angle = direction_to_angle[direction]
+        theta = (section_angle - yaw)
+        return ((theta + np.pi) % (2 * np.pi) - np.pi) / np.pi
+
+
+

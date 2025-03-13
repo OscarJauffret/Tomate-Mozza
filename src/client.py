@@ -46,7 +46,8 @@ class HorizonClient(Client):
         section_rel_pos, next_turn = self.map_layout.get_section_info(state.position[0], state.position[2])
         print(f"Section relative position: {section_rel_pos}")
         print(f"Next turn: {next_turn}")
-        print(f"Yaw, pitch roll: {state.yaw_pitch_roll}")
+        print(f"Yaw: {state.yaw_pitch_roll[0]}")
+        print(f"Relative Yaw: {self.map_layout.get_car_orientation(state.yaw_pitch_roll[0], state.position[0], state.position[2])}")
         print(f"Velocity: {state.velocity}")
         print(f"Race time: {state.race_time}")
         print(f"Input finish event: {state.input_finish_event}")
@@ -55,12 +56,13 @@ class HorizonClient(Client):
         state = iface.get_simulation_state()
 
         section_rel_pos, next_turn = self.map_layout.get_section_info(state.position[0], state.position[2])
+        relative_yaw = self.map_layout.get_car_orientation(state.yaw_pitch_roll[0], state.position[0], state.position[2])
 
         current_state = torch.tensor([
             section_rel_pos[0],
             section_rel_pos[1],
             next_turn,
-            state.yaw_pitch_roll[0]
+            relative_yaw
         ], dtype=torch.float, device=self.device)
 
         return current_state
@@ -138,11 +140,12 @@ class HorizonClient(Client):
         if _time >= 0 and _time % 100 == 0 and self.ready:
             state_old = self.get_state(iface)
             action = self.get_action(state_old)
-            self.send_input(iface, action)
+            #self.send_input(iface, action)
 
             state_new = self.get_state(iface)
             current_reward = self.get_reward(iface)
-            done = self.determine_done(iface)
+            #done = self.determine_done(iface)
+            done = False
 
             self.train_short_memory(state_old, action, current_reward, state_new, done)
             self.remember(state_old, action, current_reward, state_new, done)
