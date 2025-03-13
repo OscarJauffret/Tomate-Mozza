@@ -3,6 +3,8 @@ from time import sleep
 import pygetwindow as gw
 import pywinauto
 from config import Config
+from ReadWriteMemory import ReadWriteMemory
+import psutil
 
 
 class TMLauncher:
@@ -59,3 +61,17 @@ class TMLauncher:
             x = (i % windows_horizontally) * w
             y = (i // windows_horizontally % windows_vertically) * h
             window.moveTo(x, y)
+
+
+    @staticmethod
+    def remove_fps_cap():
+        process = filter(lambda p: p.name() == Config.Game.PROCESS_NAME, psutil.process_iter())
+        rwm = ReadWriteMemory()
+        for p in process:
+            pid = int(p.pid)
+            process = rwm.get_process_by_id(pid)
+            process.open()
+            process.write(0x005292F1, 4294919657)
+            process.write(0x005292F1 + 4, 2425393407)
+            process.write(0x005292F1 + 8, 2425393296)
+            process.close()

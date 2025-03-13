@@ -7,6 +7,7 @@ class Config:
     class Game:
         NUMBER_OF_CLIENTS: int = 1
         WINDOW_NAME: str = "TrackMania Nations Forever (TMInterface 1.4.3)"
+        PROCESS_NAME: str = "TmForever.exe"
 
     class NN:
         INPUT_SIZE: int = 4

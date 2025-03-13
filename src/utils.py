@@ -14,4 +14,5 @@ def get_default_map() -> str:
 def trigger_map_event(event):
     event.set()
     sleep(2)
+    TMLauncher.remove_fps_cap()
     TMLauncher.focus_windows()
