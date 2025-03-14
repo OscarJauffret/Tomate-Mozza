@@ -39,3 +39,9 @@ Launch multiple clients at the same time, logging in, launching the map and focu
 - Refactored the utils file into two classes: TMLoader and MapLayout.
 - Changed the yaw input to be relative to the road section. It is in [-1, 1] where 0 is the car facing the road, -0.5 is the car facing the left side of the road and 0.5 is the car facing the right side of the road.
 - Removed fps cap
+
+---
+
+### 14 March 2025
+
+- Second run with updated yaw input, smaller NN and faster epsilon decay. The agent is not better than the first run after a similar amount of iterations. See the [model](models/2nd_run_14_03.pth).
