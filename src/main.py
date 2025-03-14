@@ -6,6 +6,7 @@ from .utils.utils import trigger_map_event
 from .horizon.worker import Worker
 from .utils.tm_launcher import TMLauncher
 from .utils.hotkey_manager import HotkeyManager
+from .utils.plot import Plot
 
 choose_map_event = multiprocessing.Event()
 print_state_event = multiprocessing.Event()
@@ -20,11 +21,13 @@ if __name__ == "__main__":
     servers = [i for i in range(Config.Game.NUMBER_OF_CLIENTS)]
     hotkey_manager = HotkeyManager()
 
+    queue = multiprocessing.Queue()
+    plot = Plot(plot_size=20000, title="Reward", xlabel="Iteration", ylabel="Reward")
 
     # Create processes
     workers = []
     for server in servers:
-        worker = Worker(server, choose_map_event, print_state_event, save_model_event)
+        worker = Worker(server, choose_map_event, print_state_event, save_model_event, queue)
         workers.append(worker)
         worker.start()
 
@@ -37,8 +40,15 @@ if __name__ == "__main__":
 
     hotkey_manager.print_hotkeys()
 
-    # Wait for all processes to finish
+
+    # Main loop
     try:
+        while all(worker.is_alive() for worker in workers):
+            if queue.empty():
+                sleep(0.1)
+            else:
+                reward = queue.get()
+                plot.add_point(reward)
         for worker in workers:
             worker.join()
     except KeyboardInterrupt:
