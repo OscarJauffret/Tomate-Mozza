@@ -1,7 +1,7 @@
 import ast
 import json
 
-from config import Config
+from ..config import Config
 
 
 def is_next_to(pos1, pos2):

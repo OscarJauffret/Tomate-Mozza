@@ -1,10 +1,12 @@
 import subprocess
-from time import sleep
 import pygetwindow as gw
 import pywinauto
-from config import Config
-from ReadWriteMemory import ReadWriteMemory
 import psutil
+
+from time import sleep
+from ReadWriteMemory import ReadWriteMemory
+
+from src.config import Config
 
 
 class TMLauncher:
@@ -26,7 +28,7 @@ class TMLauncher:
         Launch a single Trackmania client
         :return: None
         """
-        from utils import get_executable_path   #FIXME: Avoid circular import
+        from .utils import get_executable_path   #FIXME: Avoid circular import
 
         executable, path_to_executable = get_executable_path()
         subprocess.Popen([executable], cwd=path_to_executable, shell=True)
@@ -65,6 +67,10 @@ class TMLauncher:
 
     @staticmethod
     def remove_fps_cap():
+        """
+        Remove the FPS cap in Trackmania. It used reverse engineering to find the memory addresses of the FPS cap.
+        :return: None
+        """
         process = filter(lambda p: p.name() == Config.Game.PROCESS_NAME, psutil.process_iter())
         rwm = ReadWriteMemory()
         for p in process:

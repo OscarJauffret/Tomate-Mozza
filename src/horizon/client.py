@@ -1,14 +1,16 @@
+import torch
+import random
+import numpy as np
+
 from tminterface.client import Client
 from tminterface.interface import TMInterface
-from utils import *
-from model import Model, QTrainer
-from config import Config
-import torch
 from collections import deque
-import random
 from datetime import datetime
-from map_layout import MapLayout
-import numpy as np
+
+from ..map_interaction.map_layout import MapLayout
+from ..utils.utils import *
+from .model import Model, QTrainer
+from ..config import Config
 
 class HorizonClient(Client):
     def __init__(self, num) -> None:

@@ -1,8 +1,7 @@
+import os
 import torch
 import torch.nn as nn
-from config import Config
-import os
-import numpy as np
+from ..config import Config
 
 class Model(nn.Module):
     def __init__(self):

@@ -1,11 +1,11 @@
-import keyboard
-from utils import trigger_map_event
-from worker import Worker
 import multiprocessing
-from config import Config
-from tm_launcher import TMLauncher
 from time import sleep
-from hotkey_manager import HotkeyManager
+
+from .config import Config
+from .utils.utils import trigger_map_event
+from .horizon.worker import Worker
+from .utils.tm_launcher import TMLauncher
+from .utils.hotkey_manager import HotkeyManager
 
 choose_map_event = multiprocessing.Event()
 print_state_event = multiprocessing.Event()

@@ -1,8 +1,8 @@
 import multiprocessing
+import signal
 from time import sleep
 from tminterface.interface import TMInterface
-from client import HorizonClient
-import signal
+from .client import HorizonClient
 
 class Worker(multiprocessing.Process):
     def __init__(self, server_id, choose_map_event, print_state_event, save_model_event):

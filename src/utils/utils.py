@@ -1,7 +1,9 @@
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
 from time import sleep
-from tm_launcher import TMLauncher
+
+from .tm_launcher import TMLauncher
 
 load_dotenv()
 

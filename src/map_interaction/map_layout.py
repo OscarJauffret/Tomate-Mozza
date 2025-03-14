@@ -1,6 +1,6 @@
-from config import Config
 import json
 import numpy as np
+from ..config import Config
 
 class MapLayout:
 
