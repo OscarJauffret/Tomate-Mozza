@@ -46,3 +46,4 @@ Launch multiple clients at the same time, logging in, launching the map and focu
 
 - Second run with updated yaw input, smaller NN and faster epsilon decay. The agent is not better than the first run after a similar amount of iterations. See the [model](models/2nd_run_14_03.pth).
 - Reorganized the repository in packages. This means that to run the code, we now have to use the command `python -m src.main`.
+- Added the [TMLogger](src/utils/tm_logger.py) class to log the training process. It logs the hyperparameters, the reward and run time of all the runs, and the device used. It could be interesting to log the model's architecture like the number of layers, neurons and precise inputs (just give the names).

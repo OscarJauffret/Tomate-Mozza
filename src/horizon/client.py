@@ -5,12 +5,12 @@ import numpy as np
 from tminterface.client import Client
 from tminterface.interface import TMInterface
 from collections import deque
-from datetime import datetime
 
 from ..map_interaction.map_layout import MapLayout
 from ..utils.utils import *
 from .model import Model, QTrainer
 from ..config import Config
+from  ..utils.tm_logger import TMLogger
 
 class HorizonClient(Client):
     def __init__(self, num) -> None:
@@ -31,6 +31,8 @@ class HorizonClient(Client):
         self.iterations = 0
         self.ready = False
 
+        self.logger = TMLogger(get_device_info(self.device.type))
+
     def __str__(self) -> str:
         return f"x position: {self.state[0].item():<8.2f} y position: {self.state[1].item():<8.2f} next turn: {self.state[2].item():<6} yaw: {self.state[3].item():<6.2f}"
 
@@ -41,10 +43,12 @@ class HorizonClient(Client):
         iface.execute_command(f"map {get_default_map()}")
 
     def save_model(self) -> None:
-        if not os.path.isdir("models"):
-            os.makedirs("models")
+        self.logger.update_log_id()
+        directory = self.logger.dump()
 
-        torch.save(self.model.state_dict(), f"models/model_{datetime.now().strftime('%Y%m%d%H%M%S')}.pth")
+        model_path = os.path.join(directory, "model.pth")
+        torch.save(self.model.state_dict(), model_path)
+        print(f"Model saved to {model_path}")
 
     def get_state(self, iface: TMInterface):
         state = iface.get_simulation_state()
@@ -148,8 +152,11 @@ class HorizonClient(Client):
             self.prev_position = iface.get_simulation_state().position[0], iface.get_simulation_state().position[2]
             if done:
                 self.ready = False
+
                 self.iterations += 1
                 print(f"Iteration: {self.iterations}, reward: {self.reward:.2f}, epsilon: {self.epsilon:.2f}")
+                self.logger.add_run(self.iterations, _time, self.reward.item())
+
                 self.train_long_memory()
                 self.reward = 0.0
                 self.prev_position = None
