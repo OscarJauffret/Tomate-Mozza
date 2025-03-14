@@ -33,7 +33,7 @@ Launch multiple clients at the same time, logging in, launching the map and focu
 
 ---
 
-### 13 March 2025
+### 13 March 2025, 3h
 
 - First run of the agent on the map. Passed the first two turns and trained for 7h (22000 iterations) see the [model](models/1st_run_13_03.pth).
 - Refactored the utils file into two classes: TMLoader and MapLayout.
@@ -45,3 +45,4 @@ Launch multiple clients at the same time, logging in, launching the map and focu
 ### 14 March 2025
 
 - Second run with updated yaw input, smaller NN and faster epsilon decay. The agent is not better than the first run after a similar amount of iterations. See the [model](models/2nd_run_14_03.pth).
+- Reorganized the repository in packages. This means that to run the code, we now have to use the command `python -m src.main`.
