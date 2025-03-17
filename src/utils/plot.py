@@ -67,3 +67,6 @@ class Plot:
         """Close the plot window"""
         plt.close(self.fig)
 
+    def pause(self):
+        """Pause the plot"""
+        plt.pause(0.1)

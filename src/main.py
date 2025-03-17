@@ -45,7 +45,7 @@ if __name__ == "__main__":
     try:
         while all(worker.is_alive() for worker in workers):
             if queue.empty():
-                sleep(0.1)
+                plot.pause()
             else:
                 reward = queue.get()
                 plot.add_point(reward)

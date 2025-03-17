@@ -6,8 +6,8 @@ from ..config import Config
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
-        self.layer1 = nn.Linear(Config.NN.INPUT_SIZE, 128)
-        self.layer2 = nn.Linear(128, Config.NN.OUTPUT_SIZE)
+        self.layer1 = nn.Linear(Config.NN.Arch.INPUT_SIZE, Config.NN.Arch.LAYER_SIZES[0])
+        self.layer2 = nn.Linear(Config.NN.Arch.LAYER_SIZES[0], Config.NN.Arch.OUTPUT_SIZE)
 
     def forward(self, x):
         x = torch.relu(self.layer1(x))

@@ -15,8 +15,6 @@ class Config:
         BLOCK_SIZE: int = 32
 
     class NN:
-        INPUT_SIZE: int = 4
-        OUTPUT_SIZE: int = 6
         LEARNING_RATE: float = 0.001
         GAMMA: float = 0.9
         MAX_MEMORY: int = 100_000
@@ -28,8 +26,6 @@ class Config:
         @staticmethod
         def get_hyperparameters():
             return {
-                "input_size": Config.NN.INPUT_SIZE,
-                "output_size": Config.NN.OUTPUT_SIZE,
                 "learning_rate": Config.NN.LEARNING_RATE,
                 "gamma": Config.NN.GAMMA,
                 "max_memory": Config.NN.MAX_MEMORY,
@@ -38,3 +34,26 @@ class Config:
                 "epsilon_end": Config.NN.EPSILON_END,
                 "epsilon_decay": Config.NN.EPSILON_DECAY
             }
+
+        class Arch:
+            INPUTS_DESC: list[str] = ["section_rel_x", "section_rel_y", "next_turn", "relative_yaw"]
+            OUTPUTS_DESC: list[str] = ["forward", "right", "left", "forward_right", "forward_left", "release"]
+            REWARD_DESC: str = "total distance travelled"
+
+            INPUT_SIZE: int = len(INPUTS_DESC)
+            OUTPUT_SIZE: int = len(OUTPUTS_DESC)
+
+            LAYER_SIZES: list[int] = [128]
+            NUMBER_OF_HIDDEN_LAYERS: int = len(LAYER_SIZES)
+
+            @staticmethod
+            def get_architecture_description():
+                return {
+                    "inputs": Config.NN.Arch.INPUTS_DESC,
+                    "outputs": Config.NN.Arch.OUTPUTS_DESC,
+                    "input_size": Config.NN.Arch.INPUT_SIZE,
+                    "output_size": Config.NN.Arch.OUTPUT_SIZE,
+                    "layer_sizes": Config.NN.Arch.LAYER_SIZES,
+                    "number_of_hidden_layers": Config.NN.Arch.NUMBER_OF_HIDDEN_LAYERS,
+                    "reward_description": Config.NN.Arch.REWARD_DESC
+                }
