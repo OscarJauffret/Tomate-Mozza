@@ -48,3 +48,13 @@ Launch multiple clients at the same time, logging in, launching the map and focu
 - Reorganized the repository in packages. This means that to run the code, we now have to use the command `python -m src.main`.
 - Added the [TMLogger](src/utils/tm_logger.py) class to log the training process. It logs the hyperparameters, the reward and run time of all the runs, and the device used. It could be interesting to log the model's architecture like the number of layers, neurons and precise inputs (just give the names).
 - Added multiprocessing.Queue() to communicate between the client and the main process. Added live plotting of the reward.
+
+---
+
+### 17 March 2025, 4h
+
+- Refactored the _get_position_relative_to_section function of the [MapLayout](src/map_interaction/map_layout.py) class to be more readable.
+- Logger now logs much more information such as the model architecture, and statistics about the run.
+- Made a [notebook](src/utils/plot_stats.ipynb) to plot the information contained in the log file.
+- Allowed to load a model from a pth file and continue training from there.
+- Fixed a stupid error in the epsilon value. We had swapped the comparators, so the agent would not make much random moves early on and only random moves at the end.
