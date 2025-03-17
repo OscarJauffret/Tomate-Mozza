@@ -12,6 +12,8 @@ class Config:
         WINDOW_NAME: str = "TrackMania Nations Forever (TMInterface 1.4.3)"
         PROCESS_NAME: str = "TmForever.exe"
 
+        BLOCK_SIZE: int = 32
+
     class NN:
         INPUT_SIZE: int = 4
         OUTPUT_SIZE: int = 6

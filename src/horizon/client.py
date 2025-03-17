@@ -10,7 +10,7 @@ from ..map_interaction.map_layout import MapLayout
 from ..utils.utils import *
 from .model import Model, QTrainer
 from ..config import Config
-from  ..utils.tm_logger import TMLogger
+from ..utils.tm_logger import TMLogger
 
 class HorizonClient(Client):
     def __init__(self, num, queue) -> None:
@@ -35,7 +35,7 @@ class HorizonClient(Client):
         self.queue = queue
 
     def __str__(self) -> str:
-        return f"x position: {self.state[0].item():<8.2f} y position: {self.state[1].item():<8.2f} next turn: {self.state[2].item():<6} yaw: {self.state[3].item():<6.2f}"
+        return f"x position: {self.state[0].item():<8.2f} y position: {self.state[1].item():<8.2f} next turn: {self.state[2].item():<8} yaw: {self.state[3].item():<8.2f}"
 
     def on_registered(self, iface: TMInterface) -> None:
         print(f"Registered to {iface.server_name}")

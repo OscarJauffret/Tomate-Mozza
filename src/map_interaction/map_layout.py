@@ -8,6 +8,7 @@ class MapLayout:
         """
         Initialize the MapLayout object by loading the map layout from the json file
         """
+        self.rotation_angles_from_absolute_to_section_coordinates = {(1, 0): 0, (0, 1): np.pi / 2, (-1, 0): np.pi, (0, -1): 3 * np.pi / 2}
         with open(Config.Paths.MAP_LAYOUT_PATH, "r") as f:
             data = json.load(f)
             self.blocks: np.ndarray[np.ndarray[int]] = np.array(data["layout"])
@@ -48,18 +49,6 @@ class MapLayout:
         end_x, end_y = self.sections[section_index][1]
         return np.array([(abs(start_x - end_x) + abs(start_y - end_y)) * 32, 16])
 
-    def get_block_index(self, block_x: int, block_y: int) -> int:
-        """
-        Get the index of the block in the layout
-        :param block_x: The x coordinate of the block
-        :param block_y: The y coordinate of the block
-        :return: The index of the block in the layout
-        """
-        for i, block in enumerate(self.blocks):
-            if block[0] == block_x and block[1] == block_y:
-                return i
-        return -1
-
     def get_distance_reward(self, prev_pos: tuple[int, int], current_pos: tuple[int, int]) -> float:
         """
         Get the reward based on the distance between the previous and current position. The reward is greater if the
@@ -92,44 +81,40 @@ class MapLayout:
         Get the relative position of the car in the section and the index of the section
         :param pos_x: The x position of the car (absolute)
         :param pos_y: The y position of the car (absolute)
-        :return: A tuple containing the relative position of the car in the section and the index of the section
+        :return: A tuple containing the relative position of the car in the section and the index of the section. [-1, -1], -1 if the car is not in a section
         """
-        block_x, block_y = self.get_current_block(pos_x, pos_y)
-        for i, section in enumerate(self.sections):
-            if self._is_in_section(block_x, block_y, section):
-                start_x, start_y = section[0]
+        section, section_index = self._get_current_section(pos_x, pos_y)
+        if np.all(section == np.array([(-1, -1), (-1, -1)])):
+            return (-1, -1), -1
+        [start_x, start_y], [end_x, end_y] = section
+        # Scale the bounds to the absolute position, and add half a block to move the origin to the center of the block
+        start_x = start_x * Config.Game.BLOCK_SIZE + Config.Game.BLOCK_SIZE // 2
+        start_y = start_y * Config.Game.BLOCK_SIZE + Config.Game.BLOCK_SIZE // 2
+        end_x = end_x * Config.Game.BLOCK_SIZE + Config.Game.BLOCK_SIZE // 2
+        end_y = end_y * Config.Game.BLOCK_SIZE + Config.Game.BLOCK_SIZE // 2
 
-                half_block_size = 16
-                start_x = start_x * 32 + half_block_size  # 32 is the size of a block, 16 is the center of the block
-                start_y = start_y * 32 + half_block_size  # This will be the origin of our coordinate system
-                end_x, end_y = section[1]
-                end_x = end_x * 32 + half_block_size
-                end_y = end_y * 32 + half_block_size
+        # To change the coordinate system to the "section" coordinate system, we need to translate and rotate the absolute coordinate system
+        # Translate the position to the origin of the section
+        translated_x = pos_x - start_x
+        translated_y = pos_y - start_y
 
-                translated_x = pos_x - start_x
-                translated_y = pos_y - start_y
+        # Get the direction of the section
+        direction = self._get_direction_of_section(section, False)
+        normalized_direction = self._get_direction_of_section(section, True)
 
-                direction = (end_x - start_x, end_y - start_y)
-                # Normalize the direction
-                direction_norm = [0, 0]
-                for j in range(2):
-                    direction_norm[j] = 0 if direction[j] == 0 else int(direction[j] / abs(direction[j]))
+        # Get the angle by which we need to rotate the coordinate system
+        angle = self.rotation_angles_from_absolute_to_section_coordinates[normalized_direction]
 
-                angles = {(1, 0): 0, (0, 1): np.pi / 2, (-1, 0): np.pi, (0, -1): 3 * np.pi / 2}
-                direction_norm_tuple = tuple(direction_norm)
-                angle = angles[direction_norm_tuple]
+        # Rotate the coordinate system
+        rotated_x = translated_x * np.cos(-angle) - translated_y * np.sin(-angle)
+        rotated_y = translated_x * np.sin(-angle) + translated_y * np.cos(-angle)
 
-                rotated_x = translated_x * np.cos(-angle) - translated_y * np.sin(-angle)
-                rotated_y = translated_x * np.sin(-angle) + translated_y * np.cos(-angle)
-
-                length_of_section = np.linalg.norm(direction)
-                size = length_of_section, half_block_size
-                normalized_x = rotated_x / size[0]
-                normalized_y = rotated_y / size[1]
-
-                return (normalized_x, normalized_y), i
-
-        return (-1, -1), -1
+        # Get the normalized position
+        size = np.linalg.norm(np.array(direction)), Config.Game.BLOCK_SIZE // 2
+        normalized_x = rotated_x / size[0]
+        normalized_y = rotated_y / size[1]
+        
+        return (normalized_x, normalized_y), section_index
 
     def get_section_info(self, pos_x, pos_y):
         """
@@ -146,31 +131,34 @@ class MapLayout:
         return pos_in_section, next_turn
 
     @staticmethod
-    def _get_direction_of_section(section: np.ndarray[tuple[int, int]]) -> tuple[int, int]:
+    def _get_direction_of_section(section: np.ndarray[tuple[int, int]], normalized) -> tuple[int, int]:
         """
         Get the direction of the current section
         :param section: The section to get the direction of
-        :return: The direction of the current section as a tuple (x, y), normalized
+        :param normalized: Whether to normalize the direction. If not normalized, the direction is returned in absolute coordinates (multiples of 32)
+        :return: The direction of the current section as a tuple (x, y), normalized if specified
         """
         [start_x, start_y], [end_x, end_y] = section
-        direction = (end_x - start_x, end_y - start_y)
-        direction_norm = [0, 0]
-        for i in range(2):
-            direction_norm[i] = 0 if direction[i] == 0 else int(direction[i] / abs(direction[i]))
-        return tuple(direction_norm)
+        direction = ((end_x - start_x) * Config.Game.BLOCK_SIZE, (end_y - start_y) * Config.Game.BLOCK_SIZE)
+        if normalized:
+            direction_norm = [0, 0]
+            for i in range(2):
+                direction_norm[i] = 0 if direction[i] == 0 else int(direction[i] / abs(direction[i]))
+            return tuple(direction_norm)
+        return direction
 
-    def _get_current_section_bounds(self, pos_x: int, pos_y: int) -> np.ndarray[tuple[int, int]]:
+    def _get_current_section(self, pos_x: int, pos_y: int) -> tuple[np.ndarray[tuple[int, int]], int]:
         """
         Get the bounds of the current section
         :param pos_x: The x position of the car (absolute)
         :param pos_y: The y position of the car (absolute)
-        :return: The bounds of the current section as a numpy array [start, end] (in block coordinates)
+        :return: The bounds of the current section as a numpy array [start, end] (in block coordinates) and the index of the section
         """
         block_x, block_y = self.get_current_block(pos_x, pos_y)
-        for section in self.sections:
+        for i, section in enumerate(self.sections):
             if self._is_in_section(block_x, block_y, section):
-                return section
-        return np.array([(-1, -1), (-1, -1)])
+                return section, i
+        return np.array([(-1, -1), (-1, -1)]), -1
 
     def get_car_orientation(self, yaw: float, pos_x: int, pos_y: int) -> float:
         """
@@ -186,10 +174,10 @@ class MapLayout:
         :return: The orientation of the car relative to the section it is in.
         """
         direction_to_angle = {(0, -1): np.pi, (-1, 0): -np.pi / 2, (0, 1): 0, (1, 0): np.pi / 2}
-        section = self._get_current_section_bounds(pos_x, pos_y)
+        section, _ = self._get_current_section(pos_x, pos_y)
         if np.all(section == np.array([(-1, -1), (-1, -1)])):
             return 0
-        direction = self._get_direction_of_section(section)
+        direction = self._get_direction_of_section(section, True)
         section_angle = direction_to_angle[direction]
         theta = (section_angle - yaw)
         return ((theta + np.pi) % (2 * np.pi) - np.pi) / np.pi
