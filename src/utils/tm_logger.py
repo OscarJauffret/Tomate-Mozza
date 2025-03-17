@@ -39,16 +39,18 @@ class TMLogger:
         :return: A dictionary containing the statistics
         """
         total_num_runs = len(self.run_stats)
+        training_time_hours = self._get_training_time('h')
+        training_time_minutes = self._get_training_time('ms')
         average_reward = self._compute_average_reward()
         best_reward = self._compute_best_reward()
         recent_average_reward_percentage = 0.1
         recent_average_reward = self._compute_recent_average_reward(recent_average_reward_percentage)
         lowest_rewards_percentage = 0.1
         lowest_rewards_average = self._average_low_rewards(recent_average_reward_percentage, lowest_rewards_percentage)
-        training_time_hours = self._get_training_time('h')
-        training_time_minutes = self._get_training_time('ms')
+        recent_quantiles_reward = self._compute_recent_quantiles_reward(recent_average_reward_percentage)
         return {
             "total number of runs": total_num_runs,
+            "training time": {"hours": training_time_hours, "milliseconds": training_time_minutes},
             "average reward": average_reward,
             "best reward": best_reward,
             "recent average reward": {"percentage of runs considered": recent_average_reward_percentage,
@@ -58,9 +60,31 @@ class TMLogger:
                                        "percentage of low runs considered among the recent ones": lowest_rewards_percentage,
                                        "number of runs considered": int(np.ceil(total_num_runs * recent_average_reward_percentage * lowest_rewards_percentage)),
                                        "average reward": lowest_rewards_average},
-            "training time": {"hours": training_time_hours, "milliseconds": training_time_minutes}
+            "recent quantiles reward": {"percentage of runs considered": recent_average_reward_percentage,
+                                        "number of runs considered": int(np.ceil(total_num_runs * recent_average_reward_percentage)),
+                                        "first quantile": recent_quantiles_reward[0],
+                                        "second quantile": recent_quantiles_reward[1],
+                                        "third quantile": recent_quantiles_reward[2]}
+
 
         }
+
+    def _get_training_time(self, scale):
+        """
+        Get the total training time
+        :param scale: The scale of the time. 'h' for hours, 'm' for minutes, 's' for seconds, 'ms' for milliseconds
+        :return: The total training time
+        """
+        total_time = sum([run.run_time for run in self.run_stats])
+        if scale == 'h':
+            return total_time / (3600 * 1000)
+        if scale == 'm':
+            return total_time / (60 * 1000)
+        if scale == 's':
+            return total_time / 1000
+        if scale == 'ms':
+            return total_time
+        return total_time
 
     def _compute_average_reward(self):
         """
@@ -76,6 +100,8 @@ class TMLogger:
         Compute the best reward of all the runs
         :return: The best reward
         """
+        if len(self.run_stats) == 0:
+            return 0
         return max([run.reward for run in self.run_stats])
 
     def _compute_recent_average_reward(self, percentage):
@@ -99,22 +125,15 @@ class TMLogger:
         low_runs = sorted([run.reward for run in self.run_stats[-num_runs:]])[:num_low_runs]
         return sum(low_runs) / num_low_runs
 
-    def _get_training_time(self, scale):
+    def _compute_recent_quantiles_reward(self, percentage):
         """
-        Get the total training time
-        :param scale: The scale of the time. 'h' for hours, 'm' for minutes, 's' for seconds, 'ms' for milliseconds
-        :return: The total training time
+        Compute the three quantiles of the most recent runs
+        :param percentage: The percentage of runs to consider
+        :return: The quantiles of the most recent runs
         """
-        total_time = sum([run.run_time for run in self.run_stats])
-        if scale == 'h':
-            return total_time / (3600 * 1000)
-        if scale == 'm':
-            return total_time / (60 * 1000)
-        if scale == 's':
-            return total_time / 1000
-        if scale == 'ms':
-            return total_time
-        return total_time
+        num_runs = int(np.ceil(len(self.run_stats) * percentage))
+        recent_runs = sorted([run.reward for run in self.run_stats[-num_runs:]])
+        return np.quantile(recent_runs, [0.25, 0.5, 0.75])
 
     def dump(self):
         """
