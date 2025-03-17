@@ -12,7 +12,7 @@ from ..config import Config
 from ..utils.tm_logger import TMLogger
 
 class HorizonClient(Client):
-    def __init__(self, num, queue) -> None:
+    def __init__(self, num, queue, model_path=None) -> None:
         super(HorizonClient, self).__init__()
         self.num = num
         self.map_layout = MapLayout()
@@ -31,7 +31,11 @@ class HorizonClient(Client):
         self.ready = False
 
         self.logger = TMLogger(get_device_info(self.device.type))
-        self.queue = queue
+        self.rewards_queue = queue
+
+        if model_path is not None:
+            self.model.load_state_dict(torch.load(model_path, map_location=self.device))
+            print(f"Model loaded from {model_path}")
 
     def __str__(self) -> str:
         return f"x position: {self.state[0].item():<8.2f} y position: {self.state[1].item():<8.2f} next turn: {self.state[2].item():<8} yaw: {self.state[3].item():<8.2f}"
@@ -155,7 +159,7 @@ class HorizonClient(Client):
 
                 self.iterations += 1
                 print(f"Iteration: {self.iterations}, reward: {self.reward:.2f}, epsilon: {self.epsilon:.2f}")
-                self.queue.put(self.reward.item())
+                self.rewards_queue.put(self.reward.item())
                 self.logger.add_run(self.iterations, _time, self.reward.item())
 
                 self.train_long_memory()

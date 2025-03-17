@@ -1,4 +1,3 @@
-import os
 import torch
 import torch.nn as nn
 from ..config import Config
@@ -14,15 +13,6 @@ class Model(nn.Module):
         x = torch.sigmoid(self.layer2(x))
         return x
 
-    def save(self, file_name='model'):
-        file_name = f"{file_name}.pth"
-        model_folder_path = './model'
-        if not os.path.exists(model_folder_path):
-            os.makedirs(model_folder_path)
-        file_name = os.path.join(model_folder_path, file_name)
-        torch.save(self.state_dict(), file_name)
-
-
 class QTrainer:
     def __init__(self, model, device, lr, gamma):
         self.lr = lr
@@ -33,11 +23,6 @@ class QTrainer:
         self.criterion = nn.MSELoss()
 
     def train_step(self, state, action, reward, next_state, done):
-        # state = np.array(state)
-        # next_state = np.array(next_state)
-        # action = np.array(action)
-        # reward = np.array(reward)
-
         state = state.clone().detach().to(self.device)
         next_state = next_state.clone().detach().to(self.device)
         action = action.clone().detach().to(self.device)

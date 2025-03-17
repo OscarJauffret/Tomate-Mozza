@@ -12,6 +12,8 @@ choose_map_event = multiprocessing.Event()
 print_state_event = multiprocessing.Event()
 save_model_event = multiprocessing.Event()
 
+model_path = None
+
 if __name__ == "__main__":
     launcher = TMLauncher(Config.Game.NUMBER_OF_CLIENTS)
     launcher.launch_games()
@@ -27,7 +29,7 @@ if __name__ == "__main__":
     # Create processes
     workers = []
     for server in servers:
-        worker = Worker(server, choose_map_event, print_state_event, save_model_event, queue)
+        worker = Worker(server, choose_map_event, print_state_event, save_model_event, queue, model_path)
         workers.append(worker)
         worker.start()
 
