@@ -60,11 +60,11 @@ class TMLogger:
                                        "percentage of low runs considered among the recent ones": lowest_rewards_percentage,
                                        "number of runs considered": int(np.ceil(total_num_runs * recent_average_reward_percentage * lowest_rewards_percentage)),
                                        "average reward": lowest_rewards_average},
-            "recent quantiles reward": {"percentage of runs considered": recent_average_reward_percentage,
+            "recent quartiles reward": {"percentage of runs considered": recent_average_reward_percentage,
                                         "number of runs considered": int(np.ceil(total_num_runs * recent_average_reward_percentage)),
-                                        "first quantile": recent_quantiles_reward[0],
-                                        "second quantile": recent_quantiles_reward[1],
-                                        "third quantile": recent_quantiles_reward[2]}
+                                        "first quartile": recent_quantiles_reward[0],
+                                        "second quartile": recent_quantiles_reward[1],
+                                        "third quartile": recent_quantiles_reward[2]}
 
 
         }
