@@ -72,7 +72,7 @@ class HorizonClient(Client):
     def get_action(self, state):
         self.epsilon = Config.NN.EPSILON_END + (Config.NN.EPSILON_START - Config.NN.EPSILON_END) * np.exp(-1. * self.iterations / Config.NN.EPSILON_DECAY)
         move = [0] * Config.NN.Arch.OUTPUT_SIZE
-        if np.random.random() > self.epsilon:
+        if np.random.random() < self.epsilon:
             final_move = np.random.randint(0, Config.NN.Arch.OUTPUT_SIZE)
             move[final_move] = 1
         else:
