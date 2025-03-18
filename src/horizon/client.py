@@ -26,7 +26,8 @@ class HorizonClient(Client):
         self.reward = 0.0
         self.epsilon = Config.NN.EPSILON_START
         self.prev_position = None
-        self.state = None
+        self.current_state = None
+        self.old_game_state: StateAction = None
         self.iterations = 0
         self.ready = False
 
@@ -38,7 +39,7 @@ class HorizonClient(Client):
             print(f"Model loaded from {model_path}")
 
     def __str__(self) -> str:
-        return f"x position: {self.state[0].item():<8.2f} y position: {self.state[1].item():<8.2f} next turn: {self.state[2].item():<8} yaw: {self.state[3].item():<8.2f}"
+        return f"x position: {self.current_state[0].item():<8.2f} y position: {self.current_state[1].item():<8.2f} next turn: {self.current_state[2].item():<8} yaw: {self.current_state[3].item():<8.2f}"
 
     def on_registered(self, iface: TMInterface) -> None:
         print(f"Registered to {iface.server_name}")
@@ -140,30 +141,37 @@ class HorizonClient(Client):
             self.ready = True
 
         if _time >= 0 and _time % Config.Game.INTERVAL_BETWEEN_ACTIONS == 0 and self.ready:
-            state_old = self.get_state(iface)
-            action = self.get_action(state_old)
-            self.send_input(iface, action)
-
-            state_new = self.get_state(iface)
-            self.state = state_new
-            current_reward = self.get_reward(iface)
+            self.current_state = self.get_state(iface)  # Get the current state
             done = self.determine_done(iface)
 
-            self.train_short_memory(state_old, action, current_reward, state_new, done)
-            self.remember(state_old, action, current_reward, state_new, done)
+            if self.old_game_state is not None:         # If this is not the first state, train the model
+                current_reward = self.get_reward(iface)
+                self.remember(self.old_game_state.state, self.old_game_state.action, current_reward, self.current_state, done)
+                self.train_short_memory(self.old_game_state.state, self.old_game_state.action, current_reward, self.current_state, done)
+                self.reward += current_reward.item()
 
-            self.reward += current_reward
-            self.prev_position = iface.get_simulation_state().position[0], iface.get_simulation_state().position[2]
+            action = self.get_action(self.current_state)                                    # Get the action
+            self.old_game_state = StateAction(self.current_state, action)       # Save the current state and action for the next iteration
+            self.prev_position = iface.get_simulation_state().position[0], iface.get_simulation_state().position[2] # Save the previous position for the reward's calculation
+
+            self.send_input(iface, action)                # Send the action to the game
+
             if done:
                 self.ready = False
-
                 self.iterations += 1
                 print(f"Iteration: {self.iterations}, reward: {self.reward:.2f}, epsilon: {self.epsilon:.2f}")
-                self.rewards_queue.put(self.reward.item())
-                self.logger.add_run(self.iterations, _time, self.reward.item())
+                self.rewards_queue.put(self.reward)
+                self.logger.add_run(self.iterations, _time, self.reward)
 
                 self.train_long_memory()
                 self.reward = 0.0
                 self.prev_position = None
+                self.old_game_state = None
                 iface.horn()
                 iface.respawn()
+
+
+class StateAction:
+    def __init__(self, state, action):
+        self.state = state
+        self.action = action

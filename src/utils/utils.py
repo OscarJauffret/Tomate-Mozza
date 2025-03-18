@@ -1,5 +1,7 @@
 import os
 import torch
+import time
+import functools
 
 from dotenv import load_dotenv
 from time import sleep
@@ -44,3 +46,13 @@ def get_device_info(device: str):
                             device_name = line.split(':')[1].strip()
                             break
     return device_name
+
+def profile_time(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        print(f"{func.__name__} took {(end_time - start_time) * 1000:.2f}ms to execute")
+        return result
+    return wrapper

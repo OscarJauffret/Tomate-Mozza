@@ -58,3 +58,12 @@ Launch multiple clients at the same time, logging in, launching the map and focu
 - Made a [notebook](src/utils/plot_stats.ipynb) to plot the information contained in the log file.
 - Allowed to load a model from a pth file and continue training from there.
 - Fixed a stupid error in the epsilon value. We had swapped the comparators, so the agent would not make much random moves early on and only random moves at the end.
+
+---
+
+### 18 March 2025, 3h
+
+- Did some profiling but didn't find anything interesting.
+- Fixed a bug we had with the old and current states. They were the same, so the agent was confused. Now surely the agent will be very smart.
+
+---

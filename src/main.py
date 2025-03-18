@@ -42,7 +42,6 @@ if __name__ == "__main__":
 
     hotkey_manager.print_hotkeys()
 
-
     # Main loop
     try:
         while all(worker.is_alive() for worker in workers):
