@@ -139,7 +139,7 @@ class HorizonClient(Client):
         if _time == 0:
             self.ready = True
 
-        if _time >= 0 and _time % 100 == 0 and self.ready:
+        if _time >= 0 and _time % Config.Game.INTERVAL_BETWEEN_ACTIONS == 0 and self.ready:
             state_old = self.get_state(iface)
             action = self.get_action(state_old)
             self.send_input(iface, action)

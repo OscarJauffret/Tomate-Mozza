@@ -14,6 +14,9 @@ class Config:
 
         BLOCK_SIZE: int = 32
 
+        NUMBER_OF_ACTIONS_PER_SECOND: int = 10
+        INTERVAL_BETWEEN_ACTIONS: int = 1000 // NUMBER_OF_ACTIONS_PER_SECOND
+
     class NN:
         LEARNING_RATE: float = 0.001
         GAMMA: float = 0.9
