@@ -24,6 +24,7 @@ class HorizonClient(Client):
 
         self.memory = deque(maxlen=Config.NN.MAX_MEMORY)
         self.reward = 0.0
+        self.penalty = 1
         self.epsilon = Config.NN.EPSILON_START
         self.prev_position = None
         self.current_state = None
@@ -64,7 +65,7 @@ class HorizonClient(Client):
         current_state = torch.tensor([
             section_rel_pos[0],
             section_rel_pos[1],
-            next_turn,
+            state.display_speed / 999,
             relative_yaw
         ], dtype=torch.float, device=self.device)
 
@@ -72,17 +73,17 @@ class HorizonClient(Client):
 
     def get_action(self, state):
         self.epsilon = Config.NN.EPSILON_END + (Config.NN.EPSILON_START - Config.NN.EPSILON_END) * np.exp(-1. * self.iterations / Config.NN.EPSILON_DECAY)
-        move = [0] * Config.NN.Arch.OUTPUT_SIZE
-        if np.random.random() < self.epsilon:
-            final_move = np.random.randint(0, Config.NN.Arch.OUTPUT_SIZE)
-            move[final_move] = 1
-        else:
-            state0 = state.clone().detach().to(self.device)
-            final_move = self.model(state0)
-            final_move = torch.argmax(final_move).item()
-            move[final_move] = 1
 
-        return torch.tensor(move, device=self.device)
+        move = torch.zeros(Config.NN.Arch.OUTPUT_SIZE, device=self.device)
+
+        if random.random() < self.epsilon:
+            final_move = random.randint(0, Config.NN.Arch.OUTPUT_SIZE - 1)
+        else:
+            with torch.no_grad():
+                final_move = torch.argmax(self.model(state.to(self.device))).item()
+
+        move[final_move] = 1
+        return move
 
     def send_input(self, iface: TMInterface, move) -> None:
         if move[1] == 1:
@@ -103,17 +104,26 @@ class HorizonClient(Client):
             return torch.tensor(0, device=self.device)
         current_position = iface.get_simulation_state().position[0], iface.get_simulation_state().position[2]
         current_reward = self.map_layout.get_distance_reward(self.prev_position, current_position)
+        in_game_speed = iface.get_simulation_state().display_speed
+        current_reward *= in_game_speed
         return torch.tensor(current_reward, device=self.device)
 
     def determine_done(self, iface: TMInterface):
         state = iface.get_simulation_state()
 
         if state.position[1] < 23: # If the car is below the track
+            self.penalty = 1/5
             return True
         if not state.player_info.finish_not_passed:
+            self.penalty = 10
             return True
         if state.display_speed < 5 and state.race_time > 2000:
+            self.penalty = 1/5
             return True
+        if state.display_speed < 50 and state.race_time > 2000:
+            self.penalty = 1/3
+            return False
+        self.penalty = 1
         return False
 
     def remember(self, state, action, reward, next_state, done):
@@ -141,11 +151,12 @@ class HorizonClient(Client):
             self.ready = True
 
         if _time >= 0 and _time % Config.Game.INTERVAL_BETWEEN_ACTIONS == 0 and self.ready:
+            start_time = time.time()
             self.current_state = self.get_state(iface)  # Get the current state
             done = self.determine_done(iface)
 
             if self.old_game_state is not None:         # If this is not the first state, train the model
-                current_reward = self.get_reward(iface)
+                current_reward = self.get_reward(iface) * self.penalty
                 self.remember(self.old_game_state.state, self.old_game_state.action, current_reward, self.current_state, done)
                 self.train_short_memory(self.old_game_state.state, self.old_game_state.action, current_reward, self.current_state, done)
                 self.reward += current_reward.item()
@@ -155,6 +166,11 @@ class HorizonClient(Client):
             self.prev_position = iface.get_simulation_state().position[0], iface.get_simulation_state().position[2] # Save the previous position for the reward's calculation
 
             self.send_input(iface, action)                # Send the action to the game
+
+            end_time = time.time()
+            total_time = end_time - start_time
+            if total_time * 1000 > Config.Game.INTERVAL_BETWEEN_ACTIONS / Config.Game.GAME_SPEED:
+                print(f"Warning: the action took {total_time * 1000:.2f}ms to execute, it should've taken less than {Config.Game.INTERVAL_BETWEEN_ACTIONS / Config.Game.GAME_SPEED:.2f}ms")
 
             if done:
                 self.ready = False
@@ -169,6 +185,7 @@ class HorizonClient(Client):
                 self.old_game_state = None
                 iface.horn()
                 iface.respawn()
+
 
 
 class StateAction:

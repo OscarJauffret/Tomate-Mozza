@@ -174,9 +174,6 @@ def get_sections_and_turns(blocks):
 
     return sections, turns
 
-
-
-
 def write_map_layout(blocks, sections, turns):
     """
     Write the map layout to a file

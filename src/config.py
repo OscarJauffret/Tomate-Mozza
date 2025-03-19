@@ -3,8 +3,8 @@ class Config:
     DATETIME_FORMAT: str = '%m-%d_%H-%M'
 
     class Paths:
-        MAP_LAYOUT_PATH: str = "maps/ordered_blocks.json"
-        MAP_GBX_OUTPUT_PATH: str = "maps/horizon_layout.txt"
+        MAP_LAYOUT_PATH: str = "maps/ez_ordered_blocks.json"
+        MAP_GBX_OUTPUT_PATH: str = "maps/Easy_pizzy.txt"
         MODELS_PATH: str = "models/"
 
     class Game:
@@ -16,15 +16,16 @@ class Config:
 
         NUMBER_OF_ACTIONS_PER_SECOND: int = 10
         INTERVAL_BETWEEN_ACTIONS: int = 1000 // NUMBER_OF_ACTIONS_PER_SECOND
+        GAME_SPEED: int = 12
 
     class NN:
-        LEARNING_RATE: float = 0.001
+        LEARNING_RATE: float = 0.005
         GAMMA: float = 0.9
         MAX_MEMORY: int = 100_000
         BATCH_SIZE: int = 128
         EPSILON_START: float = 0.9
         EPSILON_END: float = 0.05
-        EPSILON_DECAY: int = 10000
+        EPSILON_DECAY: int = 2000
 
         @staticmethod
         def get_hyperparameters():
@@ -39,14 +40,14 @@ class Config:
             }
 
         class Arch:
-            INPUTS_DESC: list[str] = ["section_rel_x", "section_rel_y", "next_turn", "relative_yaw"]
+            INPUTS_DESC: list[str] = ["section_rel_x", "section_rel_y", "in_game_velocity", "relative_yaw"]
             OUTPUTS_DESC: list[str] = ["forward", "right", "left", "forward_right", "forward_left", "release"]
-            REWARD_DESC: str = "total distance travelled"
+            REWARD_DESC: str = "total distance travelled multiplied by speed and a penalty factor"
 
             INPUT_SIZE: int = len(INPUTS_DESC)
             OUTPUT_SIZE: int = len(OUTPUTS_DESC)
 
-            LAYER_SIZES: list[int] = [128]
+            LAYER_SIZES: list[int] = [128, 128]
             NUMBER_OF_HIDDEN_LAYERS: int = len(LAYER_SIZES)
 
             @staticmethod

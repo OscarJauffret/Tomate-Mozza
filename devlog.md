@@ -67,3 +67,20 @@ Launch multiple clients at the same time, logging in, launching the map and focu
 - Fixed a bug we had with the old and current states. They were the same, so the agent was confused. Now surely the agent will be very smart.
 
 ---
+
+### 19 March 2025, 3h
+
+- Profiled the time it took for an execution of the on_run_step function to determine a good game speed.
+- Created a simpler track for the agent to train in. It is a straight line.
+- Optimized the train_step function to run faster, now avoiding moving from GPU to CPU and back.
+
+#### Tried
+
+- Modified the reward to be multiplied by the in game speed. This way, the agent will be rewarded for going faster.
+- Added a multiplicative penalty to the reward. If the agent collides with the wall, its reward will be divided by 5, and if it finishes the track, it will be multiplied by 10.
+- Changed the next_turn input to the in game speed because there are no turns in the new track.
+- Increased the learning rate to 0.005 from 0.001 to try to speed up the learning
+- Increased the number of layers to 2 layers of 128 neurons each.
+- As the epsilon decreases, the agent's score is becoming worse and worse. It looks like it is not learning anything.
+
+---
