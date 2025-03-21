@@ -68,10 +68,11 @@ class MapLayout:
 
         if prev_section_index == current_section_index:
             mul = -1 if current_pos_in_section[0] < prev_pos_in_section[0] else 1
-            dist = np.linalg.norm(np.array(prev_pos_in_section) * prev_section_dimension - np.array(
-                current_pos_in_section) * current_section_dimension)
+            # Just consider the x distance (we want to reward the car for progressing on the track, we don't care that it's doing zigzags)
+            dist = np.abs(current_pos_in_section[0] - prev_pos_in_section[0]) * current_section_dimension[0]
             return mul * dist
 
+        # TODO: modify this to only consider the x distance (don't care for now since there is only one section on the new track)
         mul = -1 if current_section_index < prev_section_index else 1
         dist = np.linalg.norm(np.array(prev_pos) - np.array(current_pos))
         return mul * dist

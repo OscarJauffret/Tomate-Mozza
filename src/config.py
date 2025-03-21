@@ -16,11 +16,11 @@ class Config:
 
         NUMBER_OF_ACTIONS_PER_SECOND: int = 10
         INTERVAL_BETWEEN_ACTIONS: int = 1000 // NUMBER_OF_ACTIONS_PER_SECOND
-        GAME_SPEED: int = 12
+        GAME_SPEED: int = 10
 
     class NN:
         LEARNING_RATE: float = 0.005
-        GAMMA: float = 0.9
+        GAMMA: float = 0.99
         MAX_MEMORY: int = 100_000
         BATCH_SIZE: int = 128
         EPSILON_START: float = 0.9
@@ -42,7 +42,7 @@ class Config:
         class Arch:
             INPUTS_DESC: list[str] = ["section_rel_x", "section_rel_y", "in_game_velocity", "relative_yaw"]
             OUTPUTS_DESC: list[str] = ["forward", "right", "left", "forward_right", "forward_left", "release"]
-            REWARD_DESC: str = "total distance travelled multiplied by speed and a penalty factor"
+            REWARD_DESC: str = "distance travelled projected on the section's x axis (progression on the track)"
 
             INPUT_SIZE: int = len(INPUTS_DESC)
             OUTPUT_SIZE: int = len(OUTPUTS_DESC)

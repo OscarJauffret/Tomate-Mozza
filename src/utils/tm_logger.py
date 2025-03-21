@@ -140,6 +140,9 @@ class TMLogger:
         Dump the log to the log file
         :return: The directory where the log file is saved
         """
+        if not self.run_stats:
+            return None
+
         directory = os.path.join(Config.Paths().MODELS_PATH, self.log_id)
 
         if not os.path.exists(directory):
