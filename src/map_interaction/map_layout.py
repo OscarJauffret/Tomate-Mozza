@@ -72,13 +72,12 @@ class MapLayout:
             dist = np.abs(current_pos_in_section[0] - prev_pos_in_section[0]) * current_section_dimension[0]
             return mul * dist
 
-        # TODO: modify this to only consider the x distance (don't care for now since there is only one section on the new track)
         mul = -1 if current_section_index < prev_section_index else 1
         if prev_pos_in_section[0] <= 1:
             remaining_previous_section_distance = np.abs(1 - prev_pos_in_section[0]) * prev_section_dimension[0]
         else:
             remaining_previous_section_distance = 0
-        y_section_distance = 16
+        y_section_distance = Config.Game.BLOCK_SIZE // 2
         current_section_distance = np.abs(current_pos_in_section[0]) * current_section_dimension[0]
         dist = remaining_previous_section_distance + y_section_distance + current_section_distance
 

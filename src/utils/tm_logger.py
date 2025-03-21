@@ -12,6 +12,7 @@ class TMLogger:
         :param device: The device used for training
         """
         self.log_id: str = datetime.now().strftime(Config.DATETIME_FORMAT)
+        self.map_info: dict = Config.Paths.get_map()
         self.hyperparameters: dict = Config.NN().get_hyperparameters()
         self.architecture: dict = Config.NN.Arch().get_architecture_description()
         self.training_device: str = device
@@ -148,10 +149,11 @@ class TMLogger:
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        file_path = os.path.join(directory, f"{self.log_id}.json")
+        file_path = os.path.join(directory, f"stats.json")
 
         with open(file_path, "w") as f:
             log ={
+                "map_info": self.map_info,
                 "hyperparameters": self.hyperparameters,
                 "device": self.training_device,
                 "architecture": self.architecture,

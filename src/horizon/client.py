@@ -49,6 +49,7 @@ class HorizonClient(Client):
 
     def launch_map(self, iface: TMInterface) -> None:
         iface.execute_command(f"map {get_default_map()}")
+        iface.set_speed(Config.Game.GAME_SPEED)
 
     def save_model(self) -> None:
         self.logger.update_log_id()
@@ -71,6 +72,7 @@ class HorizonClient(Client):
         current_state = torch.tensor([
             section_rel_pos[0],
             section_rel_pos[1],
+            next_turn,
             state.display_speed / 999,
             relative_yaw
         ], dtype=torch.float, device=self.device)
@@ -109,7 +111,6 @@ class HorizonClient(Client):
             return torch.tensor(0, device=self.device)
         current_position = iface.get_simulation_state().position[0], iface.get_simulation_state().position[2]
         current_reward = self.map_layout.get_distance_reward(self.prev_position, current_position)
-        print(f"Reward: {current_reward:.2f}")
         return torch.tensor(current_reward, device=self.device)
 
     def determine_done(self, iface: TMInterface):
@@ -166,7 +167,7 @@ class HorizonClient(Client):
             self.prev_position = iface.get_simulation_state().position[0], iface.get_simulation_state().position[2] # Save the previous position for the reward's calculation
             self.prev_positions.append(self.prev_position)
 
-            # self.send_input(iface, action)                # Send the action to the game
+            self.send_input(iface, action)                # Send the action to the game
 
             end_time = time.time()
             total_time = end_time - start_time
