@@ -84,3 +84,9 @@ Launch multiple clients at the same time, logging in, launching the map and focu
 - As the epsilon decreases, the agent's score is becoming worse and worse. It looks like it is not learning anything.
 
 ---
+
+### 21 March 2025
+
+- It works on the straight map!
+- The problem was that we had a Sigmoid activation function in the output layer. We changed it to a Linear activation function and now it works. This is because with a Sigmoid, there was always a loss that was detected between the prediction and the target
+- The agent is now able to finish the track, and get the author time (press forward map)

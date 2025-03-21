@@ -80,7 +80,6 @@ class HorizonClient(Client):
 
     def get_action(self, state):
         self.epsilon = Config.NN.EPSILON_END + (Config.NN.EPSILON_START - Config.NN.EPSILON_END) * np.exp(-1. * self.iterations / Config.NN.EPSILON_DECAY)
-
         move = torch.zeros(Config.NN.Arch.OUTPUT_SIZE, device=self.device)
 
         if random.random() < self.epsilon:
@@ -192,8 +191,6 @@ class HorizonClient(Client):
                 self.prev_game_state = None
                 iface.horn()
                 iface.respawn()
-
-
 
 class StateAction:
     def __init__(self, state, action):
