@@ -41,12 +41,11 @@ class QTrainer:
 
         # Predicted Q values
         pred = self.model(state)        # Predicted Q values**
-        action_indexes = torch.argmax(action, dim=1)    # Indexes of the actions taken (it is plural because we might have a batch of actions)
         target = pred.clone()
 
         with torch.no_grad():
             next_q_value = self.model(next_state).max(dim=1).values  # This gives us the maximum reward we can get in the next state as a 1D tensor (ex: if batch of size 1, tensor([0.5]), if batch of size 2, tensor([0.5, 0.6]))
-        target[range(len(action_indexes)), action_indexes] = (reward + self.gamma * next_q_value * (1 - done)).type(torch.float)
+        target[range(len(action)), action] = (reward + self.gamma * next_q_value * (1 - done)).type(torch.float)
 
         self.optimizer.zero_grad(set_to_none=True)
         loss = self.criterion(pred, target)

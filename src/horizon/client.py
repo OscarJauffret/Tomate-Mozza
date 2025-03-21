@@ -79,32 +79,32 @@ class HorizonClient(Client):
 
         return current_state
 
-    def get_action(self, state):
+    def get_action(self, state) -> torch.Tensor:
         self.epsilon = Config.NN.EPSILON_END + (Config.NN.EPSILON_START - Config.NN.EPSILON_END) * np.exp(-1. * self.iterations / Config.NN.EPSILON_DECAY)
-        move = torch.zeros(Config.NN.Arch.OUTPUT_SIZE, device=self.device)
 
         if random.random() < self.epsilon:
-            final_move = random.randint(0, Config.NN.Arch.OUTPUT_SIZE - 1)
+            return torch.randint(0, Config.NN.Arch.OUTPUT_SIZE, (), device=self.device)
         else:
             with torch.no_grad():
-                final_move = torch.argmax(self.model(state.to(self.device))).item()
+                return torch.argmax(self.model(state.to(self.device)))
 
-        move[final_move] = 1
-        return move
 
     def send_input(self, iface: TMInterface, move) -> None:
-        if move[1] == 1:
-            iface.set_input_state(accelerate=True, left=False, right=False)
-        elif move[2] == 1:
-            iface.set_input_state(accelerate=False, left=False, right=True)
-        elif move[3] == 1:
-            iface.set_input_state(accelerate=False, left=True, right=False)
-        elif move[4] == 1:
-            iface.set_input_state(accelerate=True, left=False, right=True)
-        elif move[5] == 1:
-            iface.set_input_state(accelerate=True, left=True, right=False)
-        else: # Do nothing
-            iface.set_input_state(accelerate=False, left=False, right=False)
+        match move: 
+            case 0:
+                iface.set_input_state(accelerate=False, left=False, right=False)
+            case 1:
+                iface.set_input_state(accelerate=True, left=False, right=False)
+            case 2:
+                iface.set_input_state(accelerate=False, left=False, right=True)
+            case 3:
+                iface.set_input_state(accelerate=False, left=True, right=False)
+            case 4:
+                iface.set_input_state(accelerate=True, left=False, right=True)
+            case 5:
+                iface.set_input_state(accelerate=True, left=True, right=False)
+            case _:
+                iface.set_input_state(accelerate=False, left=False, right=False)
 
     def get_reward(self, iface: TMInterface):
         if self.prev_position is None:
