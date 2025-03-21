@@ -8,6 +8,7 @@ from .horizon.worker import Worker
 from .utils.tm_launcher import TMLauncher
 from .utils.hotkey_manager import HotkeyManager
 from .utils.plot import Plot
+from .app.interface import Interface
 
 choose_map_event = multiprocessing.Event()
 print_state_event = multiprocessing.Event()
@@ -26,7 +27,8 @@ if __name__ == "__main__":
     hotkey_manager = HotkeyManager()
 
     queue = multiprocessing.Queue()
-    plot = Plot(plot_size=20000, title="Reward", xlabel="Iteration", ylabel="Reward")
+    #plot = Plot(plot_size=20000, title="Reward", xlabel="Iteration", ylabel="Reward")
+    app = Interface()
 
     # Create processes
     workers = []
@@ -46,12 +48,8 @@ if __name__ == "__main__":
 
     # Main loop
     try:
-        while all(worker.is_alive() for worker in workers):
-            if queue.empty():
-                plot.pause()
-            else:
-                reward = queue.get()
-                plot.add_point(reward)
+        app.update_graph(queue)
+        app.run()
         for worker in workers:
             worker.join()
     except KeyboardInterrupt:

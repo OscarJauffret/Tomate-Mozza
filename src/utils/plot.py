@@ -1,10 +1,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 matplotlib.use('TkAgg')
 
 class Plot:
-    def __init__(self, plot_size=100, title="Real-time Plot", xlabel="Time", ylabel="Value"):
+    def __init__(self, parent, plot_size=100, title="Real-time Plot", xlabel="Time", ylabel="Value"):
+        self.parent = parent # Parent window
         self.plot_size = plot_size
         self.title = title
         self.xlabel = xlabel
@@ -15,7 +17,6 @@ class Plot:
         self.y_data = np.array([])
         
         # Setup the figure and axis
-        plt.ion()  # Turn on interactive mode
         self.fig, self.ax = plt.subplots()
         self.line, = self.ax.plot([], [], 'b-')
         
@@ -26,8 +27,8 @@ class Plot:
         self.ax.grid(True)
         
         # Display the plot
-        self.fig.canvas.draw()
-        self.fig.canvas.flush_events()
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self.parent)
+        self.canvas.get_tk_widget().pack(fill="both", expand=True)
 
         # Iterations
         self.iterations = 0
@@ -52,16 +53,14 @@ class Plot:
         self.ax.autoscale_view()
         
         # Redraw the plot
-        self.fig.canvas.draw()
-        self.fig.canvas.flush_events()
+        self.canvas.draw()
     
     def clear(self):
         """Clear all data points"""
         self.x_data = np.array([])
         self.y_data = np.array([])
         self.line.set_data([], [])
-        self.fig.canvas.draw()
-        self.fig.canvas.flush_events()
+        self.canvas.draw()
     
     def close(self):
         """Close the plot window"""
