@@ -21,12 +21,15 @@ class Interface:
         self.save_model_event = save_model_event
         self.quit_event = quit_event
 
+        self.epsilon_scale = None
+
         self.game_geometry = (640, 480)
         self.graph_geometry = (640, 480)
 
         self.create_game_frame()
         self.create_graph_frame()
         self.create_button_frame()
+        self.create_epsilon_scale()
 
         self.root.bind("<F11>", self.toggle_fullscreen)
 
@@ -64,7 +67,7 @@ class Interface:
     def create_button_frame(self):
         """Create the button frame"""
         self.button_frame = ttk.Frame(self.root)
-        self.button_frame.grid(row=1, column=0, padx=10)
+        self.button_frame.grid(row=2, column=0, padx=10)
         self.load_map_button = ttk.Button(self.button_frame, text="Load the map", command=lambda: trigger_map_event(self.choose_map_event))
         self.load_map_button.grid(row=0, column=0, padx=5, sticky="nsew")
     
@@ -77,8 +80,24 @@ class Interface:
         self.quit_button = ttk.Button(self.button_frame, text="Quit", command=self.close_window)
         self.quit_button.grid(row=0, column=3, padx=5, sticky="nsew")
 
+        self.toggle_epsilon_scale = tk.Checkbutton(self.button_frame, text="Disable Manual Epsilon", command=self.toggle_epsilon)
+        self.toggle_epsilon_scale.grid(row=0, column=4, padx=5, sticky="nsew")
+
         self.root.grid_columnconfigure(0, weight=1)
         self.root.grid_rowconfigure(0, weight=1)  
+
+    def create_epsilon_scale(self):
+        """Create the scale"""
+        self.epsilon_scale = tk.Scale(self.root, from_=0, to=1, orient="horizontal",  
+                                    tickinterval=0.1, length=400, label="Epsilon", 
+                                    resolution=0.01 )
+        self.epsilon_scale.grid(row=1, column=0, padx=5, sticky="nsew")
+    
+    def toggle_epsilon(self):
+        """Toggle the epsilon value"""
+        self.epsilon_scale["state"] = "normal" if self.epsilon_scale["state"] == "disabled" else "disabled"
+    
+
 
     def update_graph(self, queue):
             if not queue.empty():
