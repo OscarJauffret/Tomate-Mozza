@@ -21,7 +21,7 @@ class Config:
 
         NUMBER_OF_ACTIONS_PER_SECOND: int = 10
         INTERVAL_BETWEEN_ACTIONS: int = 1000 // NUMBER_OF_ACTIONS_PER_SECOND
-        GAME_SPEED: int = 10
+        GAME_SPEED: int = 8
 
     class NN:
         LEARNING_RATE: float = 0.005
@@ -30,7 +30,7 @@ class Config:
         BATCH_SIZE: int = 128
         EPSILON_START: float = 0.9
         EPSILON_END: float = 0.05
-        EPSILON_DECAY: int = 2000
+        EPSILON_DECAY: int = 10000
 
         @staticmethod
         def get_hyperparameters():

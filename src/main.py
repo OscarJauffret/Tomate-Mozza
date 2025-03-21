@@ -12,7 +12,7 @@ choose_map_event = multiprocessing.Event()
 print_state_event = multiprocessing.Event()
 save_model_event = multiprocessing.Event()
 
-model_path = None #"models/03-21_10-41/model.pth"
+model_path = "models/03-21_17-51/model.pth"
 init_iterations = 0 #455       # TODO: Read from the log file
 
 if __name__ == "__main__":
