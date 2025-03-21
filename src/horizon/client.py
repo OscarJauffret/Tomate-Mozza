@@ -24,7 +24,6 @@ class HorizonClient(Client):
 
         self.memory = deque(maxlen=Config.NN.MAX_MEMORY)
         self.reward = 0.0
-        self.bonus_reward = 0.0
         self.epsilon = Config.NN.EPSILON_START
         self.prev_position = None
         self.prev_positions = deque(maxlen=5 * Config.Game.NUMBER_OF_ACTIONS_PER_SECOND)        # 5-second long memory
@@ -110,24 +109,21 @@ class HorizonClient(Client):
             return torch.tensor(0, device=self.device)
         current_position = iface.get_simulation_state().position[0], iface.get_simulation_state().position[2]
         current_reward = self.map_layout.get_distance_reward(self.prev_position, current_position)
+        print(f"Reward: {current_reward:.2f}")
         return torch.tensor(current_reward, device=self.device)
 
     def determine_done(self, iface: TMInterface):
         state = iface.get_simulation_state()
 
-        self.bonus_reward = 0
-        if self.current_state[0] > 0.95: # If the car is close to the finish line
-            self.bonus_reward = 100
-            return torch.tensor(True, device=self.device)
         if state.position[1] < 23: # If the car is below the track
-            return torch.tensor(True, device=self.device)
+            return torch.tensor(1.0, device=self.device, dtype=torch.float)
         if not state.player_info.finish_not_passed:
-            return torch.tensor(True, device=self.device)
+            return torch.tensor(1.0, device=self.device, dtype=torch.float)
         if self.prev_positions and len(self.prev_positions) == 50 and np.linalg.norm(np.array(self.prev_positions[0]) - np.array(self.prev_positions[-1])) < 5:    # If less than 5 meters were travelled in the last 5 seconds
-            return torch.tensor(True, device=self.device)
+            return torch.tensor(1.0, device=self.device, dtype=torch.float)
         #if state.display_speed < 5 and state.race_time > 2000:
         #    return torch.tensor(True, device=self.device)
-        return torch.tensor(False, device=self.device)
+        return torch.tensor(0.0, device=self.device, dtype=torch.float)
 
     def remember(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
@@ -160,7 +156,7 @@ class HorizonClient(Client):
             done = self.determine_done(iface)
 
             if self.prev_game_state is not None:         # If this is not the first state, train the model
-                current_reward = self.get_reward(iface) + torch.tensor(self.bonus_reward, device=self.device)
+                current_reward = self.get_reward(iface)
                 self.remember(self.prev_game_state.state, self.prev_game_state.action, current_reward, self.current_state, done)
                 self.train_short_memory(self.prev_game_state.state, self.prev_game_state.action, current_reward, self.current_state, done)
                 self.reward += current_reward.item()
@@ -170,7 +166,7 @@ class HorizonClient(Client):
             self.prev_position = iface.get_simulation_state().position[0], iface.get_simulation_state().position[2] # Save the previous position for the reward's calculation
             self.prev_positions.append(self.prev_position)
 
-            self.send_input(iface, action)                # Send the action to the game
+            # self.send_input(iface, action)                # Send the action to the game
 
             end_time = time.time()
             total_time = end_time - start_time

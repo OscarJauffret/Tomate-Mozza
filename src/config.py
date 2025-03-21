@@ -3,8 +3,8 @@ class Config:
     DATETIME_FORMAT: str = '%m-%d_%H-%M'
 
     class Paths:
-        MAP_LAYOUT_PATH: str = "maps/ez_ordered_blocks.json"
-        MAP_GBX_OUTPUT_PATH: str = "maps/Easy_pizzy.txt"
+        MAP_LAYOUT_PATH: str = "maps/ordered_blocks.json"
+        MAP_GBX_OUTPUT_PATH: str = "maps/horizon_layout.txt"
         MODELS_PATH: str = "models/"
 
     class Game:

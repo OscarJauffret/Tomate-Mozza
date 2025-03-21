@@ -32,8 +32,6 @@ class QTrainer:
         reward = reward.to(self.device) if reward.device != self.device else reward
         done = done.to(self.device) if done.device != self.device else done
 
-        done = done.type(torch.float)       # FIXME: maybe use float from the beginning
-
         if state.dim() == 1:
             state = state.unsqueeze(0)
             next_state = next_state.unsqueeze(0)
