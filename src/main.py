@@ -6,13 +6,13 @@ from .config import Config
 from .utils.utils import trigger_map_event
 from .horizon.worker import Worker
 from .utils.tm_launcher import TMLauncher
-from .utils.hotkey_manager import HotkeyManager
 from .utils.plot import Plot
 from .app.interface import Interface
 
 choose_map_event = multiprocessing.Event()
 print_state_event = multiprocessing.Event()
 save_model_event = multiprocessing.Event()
+quit_event = multiprocessing.Event()
 
 model_path = os.path.join(Config.Paths().LATEST_MODEL_PATH, "model.pth")
 init_iterations = 0 #455       # TODO: Read from the log file
@@ -24,36 +24,24 @@ if __name__ == "__main__":
     launcher.focus_windows()
 
     servers = [i for i in range(Config.Game.NUMBER_OF_CLIENTS)]
-    hotkey_manager = HotkeyManager()
 
     queue = multiprocessing.Queue()
-    #plot = Plot(plot_size=20000, title="Reward", xlabel="Iteration", ylabel="Reward")
-    app = Interface()
+    app = Interface(choose_map_event, print_state_event, save_model_event, quit_event)
 
     # Create processes
     workers = []
     for server in servers:
-        worker = Worker(server, choose_map_event, print_state_event, save_model_event, queue, model_path, init_iterations)
+        worker = Worker(server, choose_map_event, print_state_event, save_model_event, quit_event, queue, model_path, init_iterations)
         workers.append(worker)
         worker.start()
-
-    # Add hotkeys
-    hotkey_manager.add_hotkey('m', lambda: trigger_map_event(choose_map_event), "load the map")
-    hotkey_manager.add_hotkey('p', lambda: print_state_event.set(), "print the state")
-    hotkey_manager.add_hotkey('f', lambda: launcher.focus_windows(), "focus the windows")
-    hotkey_manager.add_hotkey('s', lambda: save_model_event.set(), "save the model")
-    hotkey_manager.add_hotkey('f7', lambda: hotkey_manager.toggle_hotkeys(), "toggle hotkeys")
-
-    hotkey_manager.print_hotkeys()
 
     # Main loop
     try:
         app.update_graph(queue)
         app.run()
-        for worker in workers:
-            worker.join()
     except KeyboardInterrupt:
-        print("Caught KeyboardInterrupt, terminating workers")
+        print("KeyboardInterrupt")
+    finally:
         for worker in workers:
             if worker.is_alive():
                 worker.terminate()
