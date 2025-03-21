@@ -1,0 +1,75 @@
+{
+    "map_info": {
+        "ordered_blocks": "maps/horizon/ordered_blocks.json",
+        "list_of_blocks": "maps/horizon/horizon_layout.txt"
+    },
+    "hyperparameters": {
+        "learning_rate": 0.005,
+        "gamma": 0.99,
+        "max_memory": 100000,
+        "batch_size": 128,
+        "epsilon_start": 0.9,
+        "epsilon_end": 0.05,
+        "epsilon_decay": 10000
+    },
+    "device": "NVIDIA GeForce RTX 2060 SUPER",
+    "architecture": {
+        "inputs": [
+            "section_rel_x",
+            "section_rel_y",
+            "next_turn",
+            "in_game_velocity",
+            "relative_yaw"
+        ],
+        "outputs": [
+            "forward",
+            "right",
+            "left",
+            "forward_right",
+            "forward_left",
+            "release"
+        ],
+        "input_size": 5,
+        "output_size": 6,
+        "layer_sizes": [
+            128,
+            128
+        ],
+        "number_of_hidden_layers": 2,
+        "reward_description": "distance travelled projected on the section's x axis (progression on the track)"
+    },
+    "statistics": {
+        "total number of runs": 1,
+        "training time": {
+            "hours": 0.0039722222222222225,
+            "milliseconds": 14300
+        },
+        "average reward": 148.26068115234375,
+        "best reward": 148.26068115234375,
+        "recent average reward": {
+            "percentage of runs considered": 0.1,
+            "number of runs considered": 1,
+            "average reward": 148.26068115234375
+        },
+        "lowest rewards average": {
+            "percentage of runs considered": 0.1,
+            "percentage of low runs considered among the recent ones": 0.1,
+            "number of runs considered": 1,
+            "average reward": 148.26068115234375
+        },
+        "recent quartiles reward": {
+            "percentage of runs considered": 0.1,
+            "number of runs considered": 1,
+            "first quartile": 148.26068115234375,
+            "second quartile": 148.26068115234375,
+            "third quartile": 148.26068115234375
+        }
+    },
+    "runs": [
+        {
+            "iteration": 1,
+            "run_time": 14300,
+            "reward": 148.26068115234375
+        }
+    ]
+}

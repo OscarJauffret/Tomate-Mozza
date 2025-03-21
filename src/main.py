@@ -1,5 +1,6 @@
 import multiprocessing
 from time import sleep
+import os
 
 from .config import Config
 from .utils.utils import trigger_map_event
@@ -12,7 +13,7 @@ choose_map_event = multiprocessing.Event()
 print_state_event = multiprocessing.Event()
 save_model_event = multiprocessing.Event()
 
-model_path = "models/03-21_17-51/model.pth"
+model_path = os.path.join(Config.Paths().LATEST_MODEL_PATH, "model.pth")
 init_iterations = 0 #455       # TODO: Read from the log file
 
 if __name__ == "__main__":

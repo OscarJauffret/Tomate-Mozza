@@ -1,3 +1,4 @@
+import os
 
 class Config:
     DATETIME_FORMAT: str = '%m-%d_%H-%M'
@@ -6,6 +7,7 @@ class Config:
         MAP_LAYOUT_PATH: str = "maps/horizon/ordered_blocks.json"
         MAP_GBX_OUTPUT_PATH: str = "maps/horizon/horizon_layout.txt"
         MODELS_PATH: str = "models/"
+        LATEST_MODEL_PATH: str = os.path.join(MODELS_PATH, "latest")
 
         @staticmethod
         def get_map():

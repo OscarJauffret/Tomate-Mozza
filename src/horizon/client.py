@@ -4,6 +4,7 @@ import numpy as np
 from tminterface.client import Client
 from tminterface.interface import TMInterface
 from collections import deque
+import shutil
 
 from ..map_interaction.map_layout import MapLayout
 from ..utils.utils import *
@@ -61,7 +62,13 @@ class HorizonClient(Client):
 
         model_path = os.path.join(directory, "model.pth")
         torch.save(self.model.state_dict(), model_path)
-        print(f"Model saved to {model_path}")
+        
+        # Copy the model dir contents to the latest model dir
+        for file in os.listdir(directory):
+            shutil.copy(os.path.join(directory, file), Config.Paths.LATEST_MODEL_PATH)
+
+        print(f"Model saved to {model_path} and in the latest model directory")
+
 
     def get_state(self, iface: TMInterface):
         state = iface.get_simulation_state()
