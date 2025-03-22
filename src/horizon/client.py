@@ -93,6 +93,7 @@ class HorizonClient(Client):
             self.epsilon = self.epsilon_dict["value"]
         else:
             self.epsilon = Config.NN.EPSILON_END + (Config.NN.EPSILON_START - Config.NN.EPSILON_END) * np.exp(-1. * self.iterations / Config.NN.EPSILON_DECAY) 
+            self.epsilon_dict["value"] = self.epsilon
 
     def get_action(self, state) -> torch.Tensor:
         self.update_epsilon()

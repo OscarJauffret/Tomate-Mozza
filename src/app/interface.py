@@ -81,7 +81,7 @@ class Interface:
         self.quit_button = ttk.Button(self.button_frame, text="Quit", command=self.close_window)
         self.quit_button.grid(row=0, column=3, padx=5, sticky="nsew")
 
-        self.toggle_epsilon_scale = tk.Checkbutton(self.button_frame, text="Manual Epsilon", command=self.toggle_epsilon, 
+        self.toggle_epsilon_scale = tk.Checkbutton(self.button_frame, text="Manual Epsilon", command=self.send_manual_epsilon, 
                                                    variable=self.epsilon_toggle)
         self.toggle_epsilon_scale.grid(row=0, column=4, padx=5, sticky="nsew")
 
@@ -94,17 +94,6 @@ class Interface:
                                     tickinterval=0.1, length=400, label="Epsilon", 
                                     resolution=0.01, command=self.send_manual_epsilon)
         self.epsilon_scale.grid(row=1, column=0, padx=5, sticky="nsew")
-        self.epsilon_scale.set(1)
-
-        self.epsilon_scale["state"] = "disabled"   # Initially disabled
-    
-    def toggle_epsilon(self):
-        """Toggle the epsilon value"""
-        if self.epsilon_toggle.get() == 1:
-            self.epsilon_scale["state"] = "normal"
-        else:
-            self.epsilon_scale["state"] = "disabled"
-        self.send_manual_epsilon()
     
     def send_manual_epsilon(self, new_epsilon_value=None):
         """Send the manual epsilon value to the client"""
@@ -115,12 +104,16 @@ class Interface:
             self.shared_dict["epsilon"]["manual"] = False
 
 
-    def update_graph(self):
-            if not self.shared_dict["reward"].empty():
-                reward = self.shared_dict["reward"].get()
-                self.graph.add_point(reward)
+    def update_interface(self):
+        if not self.shared_dict["reward"].empty():
+            reward = self.shared_dict["reward"].get()
+            self.graph.add_point(reward)
 
-            self.after_id = self.root.after(100, self.update_graph)
+        if not self.shared_dict["epsilon"]["manual"]:
+            self.epsilon_scale.set(self.shared_dict["epsilon"]["value"])
+        self.after_id = self.root.after(100, self.update_interface)
+
+
 
     def on_close(self):
         if self.after_id:

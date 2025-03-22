@@ -27,7 +27,7 @@ if __name__ == "__main__":
 
     manager = multiprocessing.Manager()
     shared_dict = manager.dict({
-                                "epsilon":manager.dict({"value": 0.0, "manual": False}), 
+                                "epsilon":manager.dict({"value": Config.NN.EPSILON_START, "manual": False}), 
                                 "reward": manager.Queue()
             })
     app = Interface(choose_map_event, print_state_event, save_model_event, quit_event, shared_dict)
@@ -42,7 +42,7 @@ if __name__ == "__main__":
 
     # Main loop
     try:
-        app.update_graph()
+        app.update_interface()
         app.run()
     except KeyboardInterrupt:
         print("KeyboardInterrupt")
