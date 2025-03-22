@@ -13,7 +13,7 @@ from ..config import Config
 from ..utils.tm_logger import TMLogger
 
 class HorizonClient(Client):
-    def __init__(self, num, queue, model_path=None, init_iterations=0) -> None:
+    def __init__(self, num, queue, epsilon_queue, model_path=None, init_iterations=0) -> None:
         super(HorizonClient, self).__init__()
         self.num = num
         self.map_layout = MapLayout()
@@ -35,6 +35,10 @@ class HorizonClient(Client):
 
         self.logger = TMLogger(get_device_info(self.device.type))
         self.rewards_queue = queue
+
+        self.epsilon_queue = epsilon_queue
+        self.manual_epsilon = None
+        self.manual_start_iteration = None
 
         if model_path is not None:
             self.model.load_state_dict(torch.load(model_path, map_location=self.device))
@@ -85,9 +89,25 @@ class HorizonClient(Client):
         ], dtype=torch.float, device=self.device)
 
         return current_state
+    
+    def update_epsilon(self):
+        if not self.epsilon_queue.empty():
+            epsilon_state = self.epsilon_queue.get()
+            if epsilon_state[0] == "Enabled":
+                self.manual_epsilon = epsilon_state[1]
+                self.manual_start_iteration = self.iterations
+            elif epsilon_state[0] == "Disabled":
+                self.manual_epsilon = None
 
     def get_action(self, state) -> torch.Tensor:
-        self.epsilon = Config.NN.EPSILON_END + (Config.NN.EPSILON_START - Config.NN.EPSILON_END) * np.exp(-1. * self.iterations / Config.NN.EPSILON_DECAY)
+        self.update_epsilon()
+
+        if self.manual_epsilon is not None:
+            self.epsilon = self.manual_epsilon
+        else:
+            self.iterations = self.iterations if self.manual_start_iteration is None else self.manual_start_iteration
+            self.epsilon = Config.NN.EPSILON_END + (Config.NN.EPSILON_START - Config.NN.EPSILON_END) * np.exp(-1. * self.iterations / Config.NN.EPSILON_DECAY)
+
 
         if random.random() < self.epsilon:
             return torch.randint(0, Config.NN.Arch.OUTPUT_SIZE, (), device=self.device)

@@ -5,10 +5,11 @@ from tminterface.interface import TMInterface
 from .client import HorizonClient
 
 class Worker(multiprocessing.Process):
-    def __init__(self, server_id, choose_map_event, print_state_event, save_model_event, quit_event, queue, model_path=None, init_iterations=0):
+    def __init__(self, server_id, choose_map_event, print_state_event, save_model_event, quit_event, 
+                queue, epsilon_queue, model_path=None, init_iterations=0):
         super().__init__()
         self.server_id = server_id
-        self.client = HorizonClient(self.server_id, queue, model_path, init_iterations)
+        self.client = HorizonClient(self.server_id, queue, epsilon_queue, model_path, init_iterations)
         self.iface = TMInterface(f"TMInterface{self.server_id}")
         self.choose_map_event = choose_map_event
         self.print_state_event = print_state_event

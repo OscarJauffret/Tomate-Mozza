@@ -26,12 +26,14 @@ if __name__ == "__main__":
     servers = [i for i in range(Config.Game.NUMBER_OF_CLIENTS)]
 
     queue = multiprocessing.Queue()
-    app = Interface(choose_map_event, print_state_event, save_model_event, quit_event)
+    epsilon_queue = multiprocessing.Queue()
+    app = Interface(choose_map_event, print_state_event, save_model_event, quit_event, epsilon_queue)
 
     # Create processes
     workers = []
     for server in servers:
-        worker = Worker(server, choose_map_event, print_state_event, save_model_event, quit_event, queue, model_path, init_iterations)
+        worker = Worker(server, choose_map_event, print_state_event, save_model_event, quit_event, 
+                        queue, epsilon_queue, model_path, init_iterations)
         workers.append(worker)
         worker.start()
 
