@@ -26,10 +26,12 @@ if __name__ == "__main__":
     servers = [i for i in range(Config.Game.NUMBER_OF_CLIENTS)]
 
     manager = multiprocessing.Manager()
+    outputs = Config.NN.Arch.OUTPUTS_DESC
     shared_dict = manager.dict({
-                                "epsilon":manager.dict({"value": Config.NN.EPSILON_START, "manual": False}), 
-                                "reward": manager.Queue()
-            })
+                                "epsilon": manager.dict({"value": Config.NN.EPSILON_START, "manual": False}),
+                                "reward": manager.Queue(),
+                                "q_values": manager.dict({outputs[0]: 0, outputs[1]: 0, outputs[2]: 0, outputs[3]: 0, outputs[4]: 0, outputs[5]: 0, "is_random": False}),
+                                })
     app = Interface(choose_map_event, print_state_event, save_model_event, quit_event, shared_dict)
 
     # Create processes

@@ -1,5 +1,6 @@
 import random
 import numpy as np
+import torch
 
 from tminterface.client import Client
 from tminterface.interface import TMInterface
@@ -36,6 +37,7 @@ class HorizonClient(Client):
         self.logger = TMLogger(get_device_info(self.device.type))
         self.rewards_queue = shared_dict["reward"]
         self.epsilon_dict = shared_dict["epsilon"]
+        self.q_values_dict = shared_dict["q_values"]
         self.manual_epsilon = None
 
         if model_path is not None:
@@ -99,10 +101,19 @@ class HorizonClient(Client):
         self.update_epsilon()
 
         if random.random() < self.epsilon:
-            return torch.randint(0, Config.NN.Arch.OUTPUT_SIZE, (), device=self.device)
+            move = torch.randint(0, Config.NN.Arch.OUTPUT_SIZE, (), device=self.device)
+            for i, action in enumerate(Config.NN.Arch.OUTPUTS_DESC):
+                self.q_values_dict[action] = 0.0
+            self.q_values_dict[Config.NN.Arch.OUTPUTS_DESC[move]] = 1.0
+            self.q_values_dict["is_random"] = True
+            return move
         else:
             with torch.no_grad():
-                return torch.argmax(self.model(state.to(self.device)))
+                prediction = self.model(state.to(self.device))
+                for i, action in enumerate(Config.NN.Arch.OUTPUTS_DESC):
+                    self.q_values_dict[action] = prediction[i].item()
+                self.q_values_dict["is_random"] = False
+                return torch.argmax(prediction)
 
 
     def send_input(self, iface: TMInterface, move) -> None:

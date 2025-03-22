@@ -48,7 +48,8 @@ class Config:
 
         class Arch:
             INPUTS_DESC: list[str] = ["section_rel_x", "section_rel_y", "next_turn" ,"in_game_velocity", "relative_yaw"]
-            OUTPUTS_DESC: list[str] = ["forward", "right", "left", "forward_right", "forward_left", "release"]
+            OUTPUTS_DESC: list[str] = ["release", "forward", "right", "left", "forward_right", "forward_left"]
+            ACTIVATED_KEYS_PER_OUTPUT: list[tuple[int]] = [(1, 1, 1, 1), (1, 0, 0, 0), (0, 0, 0, 1), (0, 1, 0, 0), (1, 0, 0, 1), (1, 1, 0, 0)]
             REWARD_DESC: str = "distance travelled projected on the section's x axis (progression on the track)"
 
             INPUT_SIZE: int = len(INPUTS_DESC)

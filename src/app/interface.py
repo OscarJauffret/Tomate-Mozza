@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+
 from ..utils.plot import Plot
 import pygetwindow as gw
 import win32gui
@@ -7,15 +8,19 @@ import win32con
 from src.config import Config
 from ..utils.utils import trigger_map_event
 from time import sleep
+from .action_keys import ActionKeys
 
 class Interface:
     def __init__(self, choose_map_event, print_state_event, save_model_event, quit_event, shared_dict) -> None:        
         self.root = tk.Tk()
         self.root.title("Tomate Mozza")
         self.full_screen = False
+
         self.game_frame = None
         self.graph_frame = None
         self.button_frame = None
+        self.action_keys: ActionKeys = None
+
         self.choose_map_event = choose_map_event
         self.print_state_event = print_state_event
         self.save_model_event = save_model_event
@@ -33,6 +38,7 @@ class Interface:
         self.create_graph_frame()
         self.create_button_frame()
         self.create_epsilon_scale()
+        self.create_actions_squares()
 
         self.root.bind("<F11>", self.toggle_fullscreen)
 
@@ -64,11 +70,10 @@ class Interface:
         self.graph_frame = ttk.Frame(self.root, width=self.graph_geometry[0], height=self.graph_geometry[1])
         self.graph_frame.grid(row=0, column=1, padx=10, pady=10)
 
-
     def create_button_frame(self):
         """Create the button frame"""
         self.button_frame = ttk.Frame(self.root)
-        self.button_frame.grid(row=2, column=0, padx=10)
+        self.button_frame.grid(row=2, column=0, padx=10, sticky="n")
         self.load_map_button = ttk.Button(self.button_frame, text="Load the map", command=lambda: trigger_map_event(self.choose_map_event))
         self.load_map_button.grid(row=0, column=0, padx=5, sticky="nsew")
     
@@ -94,7 +99,10 @@ class Interface:
                                     tickinterval=0.1, length=400, label="Epsilon", 
                                     resolution=0.01, command=self.send_manual_epsilon)
         self.epsilon_scale.grid(row=1, column=0, padx=5, sticky="nsew")
-    
+
+    def create_actions_squares(self):
+        self.action_keys = ActionKeys(self.root, 2, 1, key_size=40, padding=3, margin=10)
+
     def send_manual_epsilon(self, new_epsilon_value=None):
         """Send the manual epsilon value to the client"""
         if self.epsilon_toggle.get() == 1:  
@@ -102,7 +110,6 @@ class Interface:
             self.shared_dict["epsilon"]["manual"] = True
         else:
             self.shared_dict["epsilon"]["manual"] = False
-
 
     def update_interface(self):
         if not self.shared_dict["reward"].empty():
@@ -112,9 +119,9 @@ class Interface:
 
         if not self.shared_dict["epsilon"]["manual"]:
             self.epsilon_scale.set(self.shared_dict["epsilon"]["value"])
+
+        self.action_keys.update_keys(self.shared_dict["q_values"])
         self.after_id = self.root.after(100, self.update_interface)
-
-
 
     def on_close(self):
         if self.after_id:

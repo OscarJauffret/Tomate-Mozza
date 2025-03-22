@@ -94,3 +94,10 @@ Launch multiple clients at the same time, logging in, launching the map and focu
 - Added back the next_turn input but kept the in game speed as an input. We now have 5 inputs: the relative position of the car on the road section, the relative yaw, the in game speed, the next turn.
 - Removed the bonus for finishing the track, we still need to detect that we are close to the input for that.
 - Started creating an interface to have a better visualization of the training process. Right now, we have the game, the plot of the reward. Some buttons to replace the hotkeys and a slider to change the epsilon value.
+
+---
+
+### 22 March 2025, 4h
+
+- Manual control of epsilon is now possible with the slider. The value is updated in real time.
+- Added visualization of the actions taken by the agent. We can see the reward that the agent expects to get from the action.
