@@ -9,7 +9,7 @@ from ..utils.utils import trigger_map_event
 from time import sleep
 
 class Interface:
-    def __init__(self, choose_map_event, print_state_event, save_model_event, quit_event, epsilon_queue) -> None:        
+    def __init__(self, choose_map_event, print_state_event, save_model_event, quit_event, shared_dict) -> None:        
         self.root = tk.Tk()
         self.root.title("Tomate Mozza")
         self.full_screen = False
@@ -20,10 +20,11 @@ class Interface:
         self.print_state_event = print_state_event
         self.save_model_event = save_model_event
         self.quit_event = quit_event
+        self.shared_dict = shared_dict
 
         self.epsilon_scale = None
-        self.epsilon_queue = epsilon_queue
-        self.epsilon_toggle = tk.IntVar(value=1)
+    
+        self.epsilon_toggle = tk.IntVar(value=0)
 
         self.game_geometry = (640, 480)
         self.graph_geometry = (640, 480)
@@ -40,7 +41,6 @@ class Interface:
         self.embed_trackmania(self.game_frame)
 
         self.after_id = None
-        self.after_epsilon_id = None
 
         self.root.protocol("WM_DELETE_WINDOW", lambda: self.close_window)
 
@@ -81,7 +81,7 @@ class Interface:
         self.quit_button = ttk.Button(self.button_frame, text="Quit", command=self.close_window)
         self.quit_button.grid(row=0, column=3, padx=5, sticky="nsew")
 
-        self.toggle_epsilon_scale = tk.Checkbutton(self.button_frame, text="Disable Manual Epsilon", command=self.toggle_epsilon, 
+        self.toggle_epsilon_scale = tk.Checkbutton(self.button_frame, text="Manual Epsilon", command=self.toggle_epsilon, 
                                                    variable=self.epsilon_toggle)
         self.toggle_epsilon_scale.grid(row=0, column=4, padx=5, sticky="nsew")
 
@@ -100,7 +100,7 @@ class Interface:
     
     def toggle_epsilon(self):
         """Toggle the epsilon value"""
-        if self.epsilon_toggle.get() == 0:
+        if self.epsilon_toggle.get() == 1:
             self.epsilon_scale["state"] = "normal"
         else:
             self.epsilon_scale["state"] = "disabled"
@@ -108,25 +108,24 @@ class Interface:
     
     def send_manual_epsilon(self, new_epsilon_value=None):
         """Send the manual epsilon value to the client"""
-        if self.epsilon_toggle.get() == 0:
-            self.epsilon_queue.put(("Enabled", self.epsilon_scale.get()))
+        if self.epsilon_toggle.get() == 1:  
+            self.shared_dict["epsilon"]["value"] = self.epsilon_scale.get()
+            self.shared_dict["epsilon"]["manual"] = True
         else:
-            self.epsilon_queue.put(("Disabled", None))
+            self.shared_dict["epsilon"]["manual"] = False
 
-    def update_graph(self, queue):
-            if not queue.empty():
-                reward = queue.get()
+
+    def update_graph(self):
+            if not self.shared_dict["reward"].empty():
+                reward = self.shared_dict["reward"].get()
                 self.graph.add_point(reward)
 
-            self.after_id = self.root.after(100, self.update_graph, queue)
+            self.after_id = self.root.after(100, self.update_graph)
 
     def on_close(self):
         if self.after_id:
             self.root.after_cancel(self.after_id)
         
-        #if self.after_epsilon_id:
-            #self.root.after_cancel(self.after_epsilon_id)
-
         self.root.quit()
         self.root.destroy()
 

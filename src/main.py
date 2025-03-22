@@ -25,21 +25,24 @@ if __name__ == "__main__":
 
     servers = [i for i in range(Config.Game.NUMBER_OF_CLIENTS)]
 
-    queue = multiprocessing.Queue()
-    epsilon_queue = multiprocessing.Queue()
-    app = Interface(choose_map_event, print_state_event, save_model_event, quit_event, epsilon_queue)
+    manager = multiprocessing.Manager()
+    shared_dict = manager.dict({
+                                "epsilon":manager.dict({"value": 0.0, "manual": False}), 
+                                "reward": manager.Queue()
+            })
+    app = Interface(choose_map_event, print_state_event, save_model_event, quit_event, shared_dict)
 
     # Create processes
     workers = []
     for server in servers:
         worker = Worker(server, choose_map_event, print_state_event, save_model_event, quit_event, 
-                        queue, epsilon_queue, model_path, init_iterations)
+                        shared_dict, model_path, init_iterations)
         workers.append(worker)
         worker.start()
 
     # Main loop
     try:
-        app.update_graph(queue)
+        app.update_graph()
         app.run()
     except KeyboardInterrupt:
         print("KeyboardInterrupt")

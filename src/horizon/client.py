@@ -13,7 +13,7 @@ from ..config import Config
 from ..utils.tm_logger import TMLogger
 
 class HorizonClient(Client):
-    def __init__(self, num, queue, epsilon_queue, model_path=None, init_iterations=0) -> None:
+    def __init__(self, num, shared_dict, model_path=None, init_iterations=0) -> None:
         super(HorizonClient, self).__init__()
         self.num = num
         self.map_layout = MapLayout()
@@ -34,9 +34,8 @@ class HorizonClient(Client):
         self.ready = False
 
         self.logger = TMLogger(get_device_info(self.device.type))
-        self.rewards_queue = queue
-
-        self.epsilon_queue = epsilon_queue
+        self.rewards_queue = shared_dict["reward"]
+        self.epsilon_dict = shared_dict["epsilon"]
         self.manual_epsilon = None
 
         if model_path is not None:
@@ -90,16 +89,8 @@ class HorizonClient(Client):
         return current_state
     
     def update_epsilon(self):
-        if not self.epsilon_queue.empty():
-            epsilon_state = self.epsilon_queue.get()
-            if epsilon_state[0] == "Enabled":
-                self.manual_epsilon = epsilon_state[1]
-
-            elif epsilon_state[0] == "Disabled":
-                self.manual_epsilon = None
-
-        if self.manual_epsilon:
-            self.epsilon = self.manual_epsilon
+        if self.epsilon_dict["manual"]:
+            self.epsilon = self.epsilon_dict["value"]
         else:
             self.epsilon = Config.NN.EPSILON_END + (Config.NN.EPSILON_START - Config.NN.EPSILON_END) * np.exp(-1. * self.iterations / Config.NN.EPSILON_DECAY) 
 
@@ -200,7 +191,7 @@ class HorizonClient(Client):
 
             if done:
                 self.ready = False
-                if not self.manual_epsilon:
+                if not self.epsilon_dict["manual"]:
                     self.iterations += 1
                 print(f"Iteration: {self.iterations:<8} reward: {self.reward:<8.2f} epsilon: {self.epsilon:<8.3f}")
                 self.rewards_queue.put(self.reward)
