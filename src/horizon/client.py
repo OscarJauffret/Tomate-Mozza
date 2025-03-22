@@ -38,7 +38,6 @@ class HorizonClient(Client):
 
         self.epsilon_queue = epsilon_queue
         self.manual_epsilon = None
-        self.manual_start_iteration = None
 
         if model_path is not None:
             self.model.load_state_dict(torch.load(model_path, map_location=self.device))
@@ -95,19 +94,17 @@ class HorizonClient(Client):
             epsilon_state = self.epsilon_queue.get()
             if epsilon_state[0] == "Enabled":
                 self.manual_epsilon = epsilon_state[1]
-                self.manual_start_iteration = self.iterations
+
             elif epsilon_state[0] == "Disabled":
                 self.manual_epsilon = None
 
-    def get_action(self, state) -> torch.Tensor:
-        self.update_epsilon()
-
-        if self.manual_epsilon is not None:
+        if self.manual_epsilon:
             self.epsilon = self.manual_epsilon
         else:
-            self.iterations = self.iterations if self.manual_start_iteration is None else self.manual_start_iteration
-            self.epsilon = Config.NN.EPSILON_END + (Config.NN.EPSILON_START - Config.NN.EPSILON_END) * np.exp(-1. * self.iterations / Config.NN.EPSILON_DECAY)
+            self.epsilon = Config.NN.EPSILON_END + (Config.NN.EPSILON_START - Config.NN.EPSILON_END) * np.exp(-1. * self.iterations / Config.NN.EPSILON_DECAY) 
 
+    def get_action(self, state) -> torch.Tensor:
+        self.update_epsilon()
 
         if random.random() < self.epsilon:
             return torch.randint(0, Config.NN.Arch.OUTPUT_SIZE, (), device=self.device)
@@ -203,7 +200,8 @@ class HorizonClient(Client):
 
             if done:
                 self.ready = False
-                self.iterations += 1
+                if not self.manual_epsilon:
+                    self.iterations += 1
                 print(f"Iteration: {self.iterations:<8} reward: {self.reward:<8.2f} epsilon: {self.epsilon:<8.3f}")
                 self.rewards_queue.put(self.reward)
                 self.logger.add_run(self.iterations, _time, self.reward)

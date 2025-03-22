@@ -24,8 +24,6 @@ class Interface:
         self.epsilon_scale = None
         self.epsilon_queue = epsilon_queue
         self.epsilon_toggle = tk.IntVar(value=1)
-        self.previous_epsilon_value = None
-        self.previous_toggle_value = None
 
         self.game_geometry = (640, 480)
         self.graph_geometry = (640, 480)
@@ -94,7 +92,7 @@ class Interface:
         """Create the scale"""
         self.epsilon_scale = tk.Scale(self.root, from_=1, to=0, orient="horizontal",  
                                     tickinterval=0.1, length=400, label="Epsilon", 
-                                    resolution=0.01 )
+                                    resolution=0.01, command=self.send_manual_epsilon)
         self.epsilon_scale.grid(row=1, column=0, padx=5, sticky="nsew")
         self.epsilon_scale.set(1)
 
@@ -108,20 +106,12 @@ class Interface:
             self.epsilon_scale["state"] = "disabled"
         self.send_manual_epsilon()
     
-    def send_manual_epsilon(self):
+    def send_manual_epsilon(self, new_epsilon_value=None):
         """Send the manual epsilon value to the client"""
-        current_epsilon_value = self.epsilon_scale.get()
-        current_epsilon_toggle = self.epsilon_toggle.get()
         if self.epsilon_toggle.get() == 0:
-            if current_epsilon_value != self.previous_epsilon_value:
-                self.epsilon_queue.put(("Enabled", current_epsilon_value))
-                self.previous_epsilon_value = current_epsilon_value
+            self.epsilon_queue.put(("Enabled", self.epsilon_scale.get()))
         else:
-            if current_epsilon_toggle != self.previous_toggle_value:
-                self.epsilon_queue.put(("Disabled", None))
-                self.previous_toggle_value = current_epsilon_toggle
-        self.after_epsilon_id = self.root.after(50, self.send_manual_epsilon)
-    
+            self.epsilon_queue.put(("Disabled", None))
 
     def update_graph(self, queue):
             if not queue.empty():
@@ -134,8 +124,8 @@ class Interface:
         if self.after_id:
             self.root.after_cancel(self.after_id)
         
-        if self.after_epsilon_id:
-            self.root.after_cancel(self.after_epsilon_id)
+        #if self.after_epsilon_id:
+            #self.root.after_cancel(self.after_epsilon_id)
 
         self.root.quit()
         self.root.destroy()
