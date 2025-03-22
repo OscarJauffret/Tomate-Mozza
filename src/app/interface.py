@@ -107,7 +107,8 @@ class Interface:
     def update_interface(self):
         if not self.shared_dict["reward"].empty():
             reward = self.shared_dict["reward"].get()
-            self.graph.add_point(reward)
+            if not self.shared_dict["epsilon"]["manual"]:
+                self.graph.add_point(reward)
 
         if not self.shared_dict["epsilon"]["manual"]:
             self.epsilon_scale.set(self.shared_dict["epsilon"]["value"])

@@ -174,8 +174,9 @@ class HorizonClient(Client):
 
             if self.prev_game_state is not None:         # If this is not the first state, train the model
                 current_reward = self.get_reward(iface)
-                self.remember(self.prev_game_state.state, self.prev_game_state.action, current_reward, self.current_state, done)
-                self.train_short_memory(self.prev_game_state.state, self.prev_game_state.action, current_reward, self.current_state, done)
+                if not self.epsilon_dict["manual"]:
+                    self.remember(self.prev_game_state.state, self.prev_game_state.action, current_reward, self.current_state, done)
+                    self.train_short_memory(self.prev_game_state.state, self.prev_game_state.action, current_reward, self.current_state, done)
                 self.reward += current_reward.item()
 
             action = self.get_action(self.current_state)                                    # Get the action
@@ -194,11 +195,10 @@ class HorizonClient(Client):
                 self.ready = False
                 if not self.epsilon_dict["manual"]:
                     self.iterations += 1
-                print(f"Iteration: {self.iterations:<8} reward: {self.reward:<8.2f} epsilon: {self.epsilon:<8.3f}")
-                self.rewards_queue.put(self.reward)
-                self.logger.add_run(self.iterations, _time, self.reward)
-
-                self.train_long_memory()
+                    self.rewards_queue.put(self.reward)
+                    self.logger.add_run(self.iterations, _time, self.reward)
+                    self.train_long_memory()
+                print(f"Iteration: {self.iterations:<8} reward: {self.reward:<8.2f} epsilon: {self.epsilon:<8.3f}")    
                 self.reward = 0.0
                 self.prev_position = None
                 self.prev_positions.clear()
