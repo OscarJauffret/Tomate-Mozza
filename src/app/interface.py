@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+import os
 
 from ..utils.plot import Plot
 import pygetwindow as gw
@@ -11,7 +12,7 @@ from time import sleep
 from .action_keys import ActionKeys
 
 class Interface:
-    def __init__(self, choose_map_event, print_state_event, save_model_event, quit_event, shared_dict) -> None:        
+    def __init__(self, choose_map_event, print_state_event, load_model_event, save_model_event, quit_event, shared_dict) -> None:        
         self.root = tk.Tk()
         self.root.title("Tomate Mozza")
         self.full_screen = False
@@ -23,6 +24,7 @@ class Interface:
 
         self.choose_map_event = choose_map_event
         self.print_state_event = print_state_event
+        self.load_model_event = load_model_event
         self.save_model_event = save_model_event
         self.quit_event = quit_event
         self.shared_dict = shared_dict
@@ -74,21 +76,24 @@ class Interface:
         """Create the button frame"""
         self.button_frame = ttk.Frame(self.root)
         self.button_frame.grid(row=2, column=0, padx=10, sticky="n")
-        self.load_map_button = ttk.Button(self.button_frame, text="Load the map", command=lambda: trigger_map_event(self.choose_map_event))
+        self.load_map_button = ttk.Button(self.button_frame, text="Load the map", command=self.load_map)
         self.load_map_button.grid(row=0, column=0, padx=5, sticky="nsew")
     
         self.print_state_button = ttk.Button(self.button_frame, text="Print the state", command=lambda: self.print_state_event.set())
         self.print_state_button.grid(row=0, column=1, padx=5,sticky="nsew")
 
+        self.load_model_button = ttk.Button(self.button_frame, text="Load a model", command=self.load_model)
+        self.load_model_button.grid(row=0, column=2, padx=5, sticky="nsew")
+
         self.save_model_button = ttk.Button(self.button_frame, text="Save the model", command=lambda: self.save_model_event.set())
-        self.save_model_button.grid(row=0, column=2, padx=5, sticky="nsew")
+        self.save_model_button.grid(row=0, column=3, padx=5, sticky="nsew")
 
         self.quit_button = ttk.Button(self.button_frame, text="Quit", command=self.close_window)
-        self.quit_button.grid(row=0, column=3, padx=5, sticky="nsew")
+        self.quit_button.grid(row=0, column=4, padx=5, sticky="nsew")
 
         self.toggle_epsilon_scale = tk.Checkbutton(self.button_frame, text="Manual Epsilon", command=self.send_manual_epsilon, 
                                                    variable=self.epsilon_toggle)
-        self.toggle_epsilon_scale.grid(row=0, column=4, padx=5, sticky="nsew")
+        self.toggle_epsilon_scale.grid(row=0, column=5, padx=5, sticky="nsew")
 
         self.root.grid_columnconfigure(0, weight=1)
         self.root.grid_rowconfigure(0, weight=1)  
@@ -122,6 +127,51 @@ class Interface:
 
         self.action_keys.update_keys(self.shared_dict["q_values"])
         self.after_id = self.root.after(100, self.update_interface)
+
+    def load_map(self):
+        self.load_model_button["state"] = "disabled"
+        trigger_map_event(self.choose_map_event)
+
+    def load_model(self):
+        models = [model for model in os.listdir(Config.Paths.MODELS_PATH) if os.path.isdir(os.path.join(Config.Paths.MODELS_PATH, model))]
+
+        # Pop-up window
+        top = tk.Toplevel()
+        top.title("Load a model")
+        top.geometry("200x250")
+        top.resizable(False, False)
+        top.transient(self.root)
+        top.grab_set()
+
+        frame = ttk.Frame(top)
+        frame.pack(expand=True, fill="both")
+        frame.grid_columnconfigure(0, weight=1)
+        frame.grid_rowconfigure(0, weight=1)
+
+        label = ttk.Label(frame, text="Choose a model")
+        label.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
+
+        listbox = tk.Listbox(frame, selectmode="single")
+        for model in models:
+            listbox.insert(tk.END, model)
+        listbox.insert(tk.END, "New model")
+        listbox.grid(row=1, column=0, padx=5, pady=5, sticky="nsew")
+
+        # Validate button
+        button = tk.Button(frame, text="Load", command=lambda: self.load_model_from_listbox(listbox, top))
+        button.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
+
+        top.protocol("WM_DELETE_WINDOW", top.destroy)
+        self.root.wait_window(top)
+
+    def load_model_from_listbox(self, listbox, top):
+        selected_model = listbox.get(listbox.curselection())
+        if selected_model == "New model":
+            self.load_model_event.set()
+        else:
+            self.shared_dict["model_path"].put(os.path.join(Config.Paths.MODELS_PATH, selected_model))
+            self.load_model_event.set()
+        top.destroy()
 
     def on_close(self):
         if self.after_id:

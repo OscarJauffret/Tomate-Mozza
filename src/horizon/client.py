@@ -14,7 +14,7 @@ from ..config import Config
 from ..utils.tm_logger import TMLogger
 
 class HorizonClient(Client):
-    def __init__(self, num, shared_dict, model_path=None, init_iterations=0) -> None:
+    def __init__(self, num, shared_dict) -> None:
         super(HorizonClient, self).__init__()
         self.num = num
         self.map_layout = MapLayout()
@@ -31,23 +31,36 @@ class HorizonClient(Client):
         self.prev_positions = deque(maxlen=5 * Config.Game.NUMBER_OF_ACTIONS_PER_SECOND)        # 5-second long memory
         self.current_state = None
         self.prev_game_state: StateAction = None
-        self.iterations = init_iterations
+        self.iterations = 0
         self.ready = False
 
         self.logger = TMLogger(get_device_info(self.device.type))
         self.rewards_queue = shared_dict["reward"]
         self.epsilon_dict = shared_dict["epsilon"]
         self.q_values_dict = shared_dict["q_values"]
+        self.model_path = shared_dict["model_path"]
         self.manual_epsilon = None
-
-        if model_path is not None:
-            self.model.load_state_dict(torch.load(model_path, map_location=self.device))
-            print(f"Model loaded from {model_path}")
 
         self.model.train()
 
     def __str__(self) -> str:
         return f"x position: {self.current_state[0].item():<8.2f} y position: {self.current_state[1].item():<8.2f} next turn: {self.current_state[2].item():<8} yaw: {self.current_state[3].item():<8.2f}"
+
+    def load_model(self) -> None:
+        if self.model_path.qsize() > 0:
+            path = self.model_path.get()
+            model_pth = os.path.join(path, "model.pth")
+            if os.path.exists(model_pth):
+                self.model.load_state_dict(torch.load(model_pth, map_location=self.device))
+                print(f"Model loaded from {model_pth}")
+            else:
+                print(f"Model not found at {model_pth}")
+        else:
+            # Load fresh model with random weights
+            self.model = Model().to(self.device)
+            self.trainer = QTrainer(self.model, self.device, Config.NN.LEARNING_RATE, Config.NN.GAMMA)
+            print("Loaded a fresh model with random weights")
+
 
     def on_registered(self, iface: TMInterface) -> None:
         print(f"Registered to {iface.server_name}")

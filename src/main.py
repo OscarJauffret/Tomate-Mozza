@@ -11,11 +11,10 @@ from .app.interface import Interface
 
 choose_map_event = multiprocessing.Event()
 print_state_event = multiprocessing.Event()
+load_model_event = multiprocessing.Event()
 save_model_event = multiprocessing.Event()
 quit_event = multiprocessing.Event()
 
-model_path = os.path.join(Config.Paths().LATEST_MODEL_PATH, "model.pth")
-init_iterations = 0 #455       # TODO: Read from the log file
 
 if __name__ == "__main__":
     launcher = TMLauncher(Config.Game.NUMBER_OF_CLIENTS)
@@ -31,14 +30,15 @@ if __name__ == "__main__":
                                 "epsilon": manager.dict({"value": Config.NN.EPSILON_START, "manual": False}),
                                 "reward": manager.Queue(),
                                 "q_values": manager.dict({outputs[0]: 0, outputs[1]: 0, outputs[2]: 0, outputs[3]: 0, outputs[4]: 0, outputs[5]: 0, "is_random": False}),
+                                "model_path": manager.Queue(),
                                 })
-    app = Interface(choose_map_event, print_state_event, save_model_event, quit_event, shared_dict)
+    app = Interface(choose_map_event, print_state_event, load_model_event, save_model_event, quit_event, shared_dict)
 
     # Create processes
     workers = []
     for server in servers:
-        worker = Worker(server, choose_map_event, print_state_event, save_model_event, quit_event, 
-                        shared_dict, model_path, init_iterations)
+        worker = Worker(server, choose_map_event, print_state_event, load_model_event, save_model_event, quit_event, 
+                        shared_dict)
         workers.append(worker)
         worker.start()
 
