@@ -131,8 +131,9 @@ class Interface:
         self.root.destroy()
 
     def close_window(self):
-        self.save_model_event.set()
-        sleep(2)
+        if tk.messagebox.askyesno("Save model", "Do you want to save the model before quitting?"):
+            self.save_model_event.set()
+            sleep(2)
         self.quit_event.set()
         self.on_close()
 
