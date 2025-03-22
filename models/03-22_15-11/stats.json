@@ -39,30 +39,30 @@
         "reward_description": "distance travelled projected on the section's x axis (progression on the track)"
     },
     "statistics": {
-        "total number of runs": 22,
+        "total number of runs": 20,
         "training time": {
-            "hours": 0.049944444444444444,
-            "milliseconds": 179800
+            "hours": 0.04538888888888889,
+            "milliseconds": 163400
         },
-        "average reward": 51.71288230202415,
-        "best reward": 130.90689086914062,
+        "average reward": 79.48588256835937,
+        "best reward": 182.3101806640625,
         "recent average reward": {
             "percentage of runs considered": 0.1,
-            "number of runs considered": 3,
-            "average reward": 55.676127115885414
+            "number of runs considered": 2,
+            "average reward": 68.47344970703125
         },
         "lowest rewards average": {
             "percentage of runs considered": 0.1,
             "percentage of low runs considered among the recent ones": 0.1,
             "number of runs considered": 1,
-            "average reward": 30.404479980468746
+            "average reward": 60.655517578125
         },
         "recent quartiles reward": {
             "percentage of runs considered": 0.1,
-            "number of runs considered": 3,
-            "first quartile": 46.499237060546875,
-            "second quartile": 62.593994140625,
-            "third quartile": 68.31195068359375
+            "number of runs considered": 2,
+            "first quartile": 64.56448364257812,
+            "second quartile": 68.47344970703125,
+            "third quartile": 72.38241577148438
         }
     },
     "runs": [
@@ -83,98 +83,88 @@
         },
         {
             "iteration": 4,
-            "run_time": 10500,
-            "reward": 57.87274169921875
+            "run_time": 5000,
+            "reward": 6.103515625e-05
         },
         {
             "iteration": 5,
-            "run_time": 9100,
-            "reward": 25.429992675781246
+            "run_time": 7200,
+            "reward": 82.49566650390625
         },
         {
             "iteration": 6,
-            "run_time": 9900,
-            "reward": 66.29681396484375
+            "run_time": 11400,
+            "reward": 148.13375854492188
         },
         {
             "iteration": 7,
-            "run_time": 7700,
-            "reward": 82.22906494140625
+            "run_time": 13500,
+            "reward": 99.61502075195312
         },
         {
             "iteration": 8,
-            "run_time": 9100,
-            "reward": 107.11654663085938
-        },
-        {
-            "iteration": 8,
-            "run_time": 10800,
-            "reward": 104.86248779296875
-        },
-        {
-            "iteration": 8,
-            "run_time": 9700,
-            "reward": 130.90689086914062
-        },
-        {
-            "iteration": 8,
-            "run_time": 7600,
-            "reward": 73.23406982421875
-        },
-        {
-            "iteration": 8,
-            "run_time": 9700,
-            "reward": 19.59661865234375
-        },
-        {
-            "iteration": 8,
-            "run_time": 7600,
-            "reward": 14.92987060546875
-        },
-        {
-            "iteration": 8,
-            "run_time": 9700,
-            "reward": 8.517333984375
-        },
-        {
-            "iteration": 8,
-            "run_time": 5000,
-            "reward": 4.50885009765625
+            "run_time": 8200,
+            "reward": 98.52734375
         },
         {
             "iteration": 9,
-            "run_time": 7100,
-            "reward": 80.0489501953125
+            "run_time": 7600,
+            "reward": 57.4342041015625
         },
         {
             "iteration": 10,
-            "run_time": 10000,
-            "reward": 81.16156005859375
+            "run_time": 6000,
+            "reward": 95.7818603515625
         },
         {
             "iteration": 11,
-            "run_time": 7100,
-            "reward": 65.25543212890625
+            "run_time": 7000,
+            "reward": 66.6541748046875
         },
         {
             "iteration": 12,
-            "run_time": 9100,
-            "reward": 48.6876220703125
+            "run_time": 10400,
+            "reward": 146.67425537109375
         },
         {
             "iteration": 13,
-            "run_time": 6600,
-            "reward": 62.593994140625
+            "run_time": 10100,
+            "reward": 63.886474609375
         },
         {
             "iteration": 14,
-            "run_time": 8600,
-            "reward": 30.404479980468746
+            "run_time": 9800,
+            "reward": 128.74127197265625
         },
         {
             "iteration": 15,
-            "run_time": 9900,
-            "reward": 74.0299072265625
+            "run_time": 11000,
+            "reward": 147.21649169921875
+        },
+        {
+            "iteration": 16,
+            "run_time": 6100,
+            "reward": 67.77301025390625
+        },
+        {
+            "iteration": 17,
+            "run_time": 8300,
+            "reward": 67.52679443359375
+        },
+        {
+            "iteration": 18,
+            "run_time": 10700,
+            "reward": 182.3101806640625
+        },
+        {
+            "iteration": 19,
+            "run_time": 9100,
+            "reward": 76.2913818359375
+        },
+        {
+            "iteration": 20,
+            "run_time": 7000,
+            "reward": 60.655517578125
         }
     ]
 }
