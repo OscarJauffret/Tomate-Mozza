@@ -107,4 +107,5 @@ Launch multiple clients at the same time, logging in, launching the map and focu
 
 ### 23 March 2025, 1h
 
-- When loading a model, the hyperparameters are now loaded too. The model can be trained from where it was left off.
+- When loading a model, the hyperparameters are now loaded too. The model can be trained from where it was left off. Also, all the previous iterations are copied to the new log file.
+- Added a boolean to allow the agent to randomly spawn on the map using states, and made a script to create these states. For now, we will not use it because it should be possible for the agent to still learn something without it which is not really the case now.
