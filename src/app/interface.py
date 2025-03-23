@@ -44,7 +44,7 @@ class Interface:
 
         self.root.bind("<F11>", self.toggle_fullscreen)
 
-        self.graph = Plot(parent=self.graph_frame, plot_size=20000, title="Reward", xlabel="Iteration", ylabel="Reward")
+        self.graph = Plot(parent=self.graph_frame, plot_size=200, title="Reward", xlabel="Iteration", ylabel="Reward")
 
         self.embed_trackmania(self.game_frame)
 
