@@ -58,6 +58,7 @@ class HorizonClient(Client):
                 self.hyperparameters = self.load_hyperparameters(path)
                 self.model.load_state_dict(torch.load(model_pth, map_location=self.device))
                 self.trainer = QTrainer(self.model, self.device, self.hyperparameters["learning_rate"], self.hyperparameters["gamma"])
+                self.logger.load(os.path.join(path, "stats.json"))
                 print(f"Model loaded from {model_pth}")
             else:
                 print(f"Model not found at {model_pth}")

@@ -164,6 +164,20 @@ class TMLogger:
 
         return directory
 
+    def load(self, log_path: str) -> None:
+        """
+        Load the log from a log file
+        :param log_path: The path to the log file
+        :return: None
+        """
+        with open(log_path, "r") as f:
+            log = json.load(f)
+            self.map_info = log["map_info"]
+            self.hyperparameters = log["hyperparameters"]
+            self.training_device = log["device"]
+            self.architecture = log["architecture"]
+            self.run_stats = [_RunStats(run["iteration"], run["run_time"], run["reward"]) for run in log["runs"]]
+
 
 class _RunStats:
     def __init__(self, iteration, run_time, reward):
