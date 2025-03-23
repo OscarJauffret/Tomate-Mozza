@@ -53,11 +53,12 @@ class HorizonClient(Client):
     def load_model(self) -> None:
         if self.model_path.qsize() > 0:
             path = self.model_path.get()
-            model_pth = os.path.join(path, "model.pth")
+            model_pth = os.path.join(path, Config.Paths.MODEL_FILE_NAME)
             if os.path.exists(model_pth):
                 self.hyperparameters = self.load_hyperparameters(path)
                 self.model.load_state_dict(torch.load(model_pth, map_location=self.device))
                 self.trainer = QTrainer(self.model, self.device, self.hyperparameters["learning_rate"], self.hyperparameters["gamma"])
+                self.logger.load(os.path.join(path, Config.Paths.STAT_FILE_NAME))
                 print(f"Model loaded from {model_pth}")
             else:
                 print(f"Model not found at {model_pth}")
@@ -70,7 +71,7 @@ class HorizonClient(Client):
 
     def load_hyperparameters(self, path: str) -> dict:
         hyperparameters = {}
-        hyperparameters_path = os.path.join(path, "stats.json")
+        hyperparameters_path = os.path.join(path, Config.Paths.STAT_FILE_NAME)
         if os.path.exists(hyperparameters_path):
             with open(hyperparameters_path, "r") as f:
                 stats = json.load(f)
@@ -94,7 +95,7 @@ class HorizonClient(Client):
             print("Failed to save the model")
             return
 
-        model_path = os.path.join(directory, "model.pth")
+        model_path = os.path.join(directory, Config.Paths.MODEL_FILE_NAME)
         torch.save(self.model.state_dict(), model_path)
         
         # Copy the model dir contents to the latest model dir

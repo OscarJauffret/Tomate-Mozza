@@ -9,6 +9,8 @@ class Config:
         MAP_GBX_OUTPUT_PATH: str = os.path.join(MAP, "layout.txt")
         MODELS_PATH: str = "models/"
         LATEST_MODEL_PATH: str = os.path.join(MODELS_PATH, "latest")
+        STAT_FILE_NAME: str = "stats.json"
+        MODEL_FILE_NAME: str = "model.pth"
 
         @staticmethod
         def get_map():

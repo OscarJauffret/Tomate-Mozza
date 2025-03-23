@@ -149,7 +149,7 @@ class TMLogger:
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        file_path = os.path.join(directory, f"stats.json")
+        file_path = os.path.join(directory, Config.Paths.STAT_FILE_NAME)
 
         with open(file_path, "w") as f:
             log ={
@@ -163,6 +163,20 @@ class TMLogger:
             json.dump(log, f, indent=4)
 
         return directory
+
+    def load(self, log_path: str) -> None:
+        """
+        Load the log from a log file
+        :param log_path: The path to the log file
+        :return: None
+        """
+        with open(log_path, "r") as f:
+            log = json.load(f)
+            self.map_info = log["map_info"]
+            self.hyperparameters = log["hyperparameters"]
+            self.training_device = log["device"]
+            self.architecture = log["architecture"]
+            self.run_stats = [_RunStats(run["iteration"], run["run_time"], run["reward"]) for run in log["runs"]]
 
 
 class _RunStats:
