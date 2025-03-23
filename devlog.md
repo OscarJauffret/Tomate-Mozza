@@ -92,12 +92,13 @@ Launch multiple clients at the same time, logging in, launching the map and focu
 - The agent is now able to finish the track, and get the author time (press forward map)
 - Moving back to the first map to see if the agent can now improve on it
 - Added back the next_turn input but kept the in game speed as an input. We now have 5 inputs: the relative position of the car on the road section, the relative yaw, the in game speed, the next turn.
-- Removed the bonus for finishing the track, we still need to detect that we are close to the input for that.
+- Removed the bonus for finishing the track, we still need to detect that we are close to the finish for that.
 - Started creating an interface to have a better visualization of the training process. Right now, we have the game, the plot of the reward. Some buttons to replace the hotkeys and a slider to change the epsilon value.
 
 ---
 
-### 22 March 2025, 4h
+### 22 March 2025, 7h
 
 - Manual control of epsilon is now possible with the slider. The value is updated in real time.
 - Added visualization of the actions taken by the agent. We can see the reward that the agent expects to get from the action.
+- Added a button to load a model from a directory. Still need to load the hyperparameters of the model.
