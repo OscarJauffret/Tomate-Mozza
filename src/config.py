@@ -4,7 +4,7 @@ class Config:
     DATETIME_FORMAT: str = '%m-%d_%H-%M'
 
     class Paths:
-        MAP: str = "maps/2_turns"
+        MAP: str = "maps/horizon"
         MAP_LAYOUT_PATH: str = os.path.join(MAP, "ordered_blocks.json")
         MAP_GBX_OUTPUT_PATH: str = os.path.join(MAP, "layout.txt")
         MODELS_PATH: str = "models/"
@@ -59,7 +59,7 @@ class Config:
             INPUT_SIZE: int = len(INPUTS_DESC)
             OUTPUT_SIZE: int = len(OUTPUTS_DESC)
 
-            LAYER_SIZES: list[int] = [128, 128]
+            LAYER_SIZES: list[int] = [256, 128]
             NUMBER_OF_HIDDEN_LAYERS: int = len(LAYER_SIZES)
 
             @staticmethod
