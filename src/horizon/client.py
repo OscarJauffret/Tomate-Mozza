@@ -239,7 +239,6 @@ class HorizonClient(Client):
                 print(f"Warning: the action took {total_time * 1000:.2f}ms to execute, it should've taken less than {Config.Game.INTERVAL_BETWEEN_ACTIONS / Config.Game.GAME_SPEED:.2f}ms")
 
             if done:
-                print("Done")
                 self.ready = False
                 if not self.epsilon_dict["manual"]:
                     self.iterations += 1
