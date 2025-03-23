@@ -42,27 +42,22 @@ class Plot:
             self.x_data = self.x_data[-self.plot_size:]
             self.y_data = self.y_data[-self.plot_size:]
 
-        if self.bars is None:
-            # Create bar chart once
-            self.bars = self.ax.bar(self.x_data, self.y_data, width=1.0, align='center', color='#37504b')
-        else:
-            # If number of bars changed, recreate
-            if len(self.bars) != len(self.y_data):
-                self.ax.clear()
-                self.ax.set_title(self.title)
-                self.ax.set_xlabel(self.xlabel)
-                self.ax.set_ylabel(self.ylabel)
-                self.ax.grid(True)
-                self.ax.set_axisbelow(True)
-                self.bars = self.ax.bar(self.x_data, self.y_data, width=1.0, align='center', color='#37504b')
-            else:
-                # Update bar heights
-                for rect, new_height in zip(self.bars, self.y_data):
-                    rect.set_height(new_height)
+        # Always clear and redraw bars (ensures proper positioning)
+        self.ax.clear()
+        self.ax.set_title(self.title)
+        self.ax.set_xlabel(self.xlabel)
+        self.ax.set_ylabel(self.ylabel)
+        self.ax.grid(True)
+        self.ax.set_axisbelow(True)
 
-        # Adjust axes
+        self.bars = self.ax.bar(self.x_data, self.y_data, width=1.0, align='center', color='#37504b')
+
+        # Set x-limits to follow data range
+        self.ax.set_xlim(self.x_data[0] - 0.5, self.x_data[-1] + 0.5)
+
+        # Adjust y-axis automatically
         self.ax.relim()
-        self.ax.autoscale_view()
+        self.ax.autoscale_view(scalex=False)
 
         self.canvas.draw()
 
