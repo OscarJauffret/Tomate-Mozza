@@ -12,7 +12,7 @@ from time import sleep
 from .action_keys import ActionKeys
 
 class Interface:
-    def __init__(self, choose_map_event, print_state_event, load_model_event, save_model_event, quit_event, shared_dict) -> None:        
+    def __init__(self, choose_map_event, print_state_event, load_model_event, save_model_event, quit_event, shared_dict) -> None:
         self.root = tk.Tk()
         self.root.title("Tomate Mozza")
         self.full_screen = False
@@ -79,13 +79,13 @@ class Interface:
         self.load_map_button = ttk.Button(self.button_frame, text="Load the map", command=self.load_map)
         self.load_map_button.grid(row=0, column=0, padx=5, sticky="nsew")
     
-        self.print_state_button = ttk.Button(self.button_frame, text="Print the state", command=lambda: self.print_state_event.set())
+        self.print_state_button = ttk.Button(self.button_frame, text="Print the state", command=self.print_state_event.set)
         self.print_state_button.grid(row=0, column=1, padx=5,sticky="nsew")
 
         self.load_model_button = ttk.Button(self.button_frame, text="Load a model", command=self.load_model)
         self.load_model_button.grid(row=0, column=2, padx=5, sticky="nsew")
 
-        self.save_model_button = ttk.Button(self.button_frame, text="Save the model", command=lambda: self.save_model_event.set())
+        self.save_model_button = ttk.Button(self.button_frame, text="Save the model", command=self.save_model_event.set)
         self.save_model_button.grid(row=0, column=3, padx=5, sticky="nsew")
 
         self.quit_button = ttk.Button(self.button_frame, text="Quit", command=self.close_window)
@@ -96,12 +96,12 @@ class Interface:
         self.toggle_epsilon_scale.grid(row=0, column=5, padx=5, sticky="nsew")
 
         self.root.grid_columnconfigure(0, weight=1)
-        self.root.grid_rowconfigure(0, weight=1)  
+        self.root.grid_rowconfigure(0, weight=1)
 
     def create_epsilon_scale(self):
         """Create the scale"""
-        self.epsilon_scale = tk.Scale(self.root, from_=1, to=0, orient="horizontal",  
-                                    tickinterval=0.1, length=400, label="Epsilon", 
+        self.epsilon_scale = tk.Scale(self.root, from_=1, to=0, orient="horizontal",
+                                    tickinterval=0.1, length=400, label="Epsilon",
                                     resolution=0.01, command=self.send_manual_epsilon)
         self.epsilon_scale.grid(row=1, column=0, padx=5, sticky="nsew")
 
@@ -201,12 +201,7 @@ class Interface:
             win32gui.SetWindowLong(hwnd, win32con.GWL_STYLE, win32con.WS_VISIBLE)
             win32gui.MoveWindow(hwnd, 0, 0, width, height, True)
             if width != self.game_geometry[0] or height != self.game_geometry[1]:
-                    win32gui.MoveWindow(hwnd, 0, 0, self.game_geometry[0], self.game_geometry[1], True)
+                win32gui.MoveWindow(hwnd, 0, 0, self.game_geometry[0], self.game_geometry[1], True)
             win32gui.SetForegroundWindow(hwnd)
         else:
             print(f"Aucune fenêtre trouvée avec le titre: {Config.Game.WINDOW_NAME}")
-
-# Run the interface
-if __name__ == "__main__":
-    app = Interface()
-    app.run()

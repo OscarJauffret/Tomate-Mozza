@@ -102,3 +102,9 @@ Launch multiple clients at the same time, logging in, launching the map and focu
 - Manual control of epsilon is now possible with the slider. The value is updated in real time.
 - Added visualization of the actions taken by the agent. We can see the reward that the agent expects to get from the action.
 - Added a button to load a model from a directory. Still need to load the hyperparameters of the model.
+
+---
+
+### 23 March 2025, 1h
+
+- When loading a model, the hyperparameters are now loaded too. The model can be trained from where it was left off.

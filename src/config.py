@@ -25,6 +25,7 @@ class Config:
         INTERVAL_BETWEEN_ACTIONS: int = 1000 // NUMBER_OF_ACTIONS_PER_SECOND
         GAME_SPEED: int = 8
 
+
     class NN:
         LEARNING_RATE: float = 0.005
         GAMMA: float = 0.99

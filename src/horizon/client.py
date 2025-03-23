@@ -1,6 +1,7 @@
 import random
 import numpy as np
 import torch
+import json, os
 
 from tminterface.client import Client
 from tminterface.interface import TMInterface
@@ -21,12 +22,14 @@ class HorizonClient(Client):
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print(f"Using device: {self.device}")
-        self.model = Model().to(self.device)
-        self.trainer = QTrainer(self.model, self.device, Config.NN.LEARNING_RATE, Config.NN.GAMMA)
 
-        self.memory = deque(maxlen=Config.NN.MAX_MEMORY)
+        self.hyperparameters = Config.NN.get_hyperparameters()
+        self.model = Model().to(self.device)
+        self.trainer = QTrainer(self.model, self.device, self.hyperparameters["learning_rate"], self.hyperparameters["gamma"])
+
+        self.memory = deque(maxlen=self.hyperparameters["max_memory"])
         self.reward = 0.0
-        self.epsilon = Config.NN.EPSILON_START
+        self.epsilon = self.hyperparameters["epsilon_start"]
         self.prev_position = None
         self.prev_positions = deque(maxlen=5 * Config.Game.NUMBER_OF_ACTIONS_PER_SECOND)        # 5-second long memory
         self.current_state = None
@@ -41,6 +44,7 @@ class HorizonClient(Client):
         self.model_path = shared_dict["model_path"]
         self.manual_epsilon = None
 
+
         self.model.train()
 
     def __str__(self) -> str:
@@ -51,15 +55,28 @@ class HorizonClient(Client):
             path = self.model_path.get()
             model_pth = os.path.join(path, "model.pth")
             if os.path.exists(model_pth):
+                self.hyperparameters = self.load_hyperparameters(path)
                 self.model.load_state_dict(torch.load(model_pth, map_location=self.device))
+                self.trainer = QTrainer(self.model, self.device, self.hyperparameters["learning_rate"], self.hyperparameters["gamma"])
                 print(f"Model loaded from {model_pth}")
             else:
                 print(f"Model not found at {model_pth}")
         else:
             # Load fresh model with random weights
+            self.hyperparameters = Config.NN.get_hyperparameters()
             self.model = Model().to(self.device)
-            self.trainer = QTrainer(self.model, self.device, Config.NN.LEARNING_RATE, Config.NN.GAMMA)
+            self.trainer = QTrainer(self.model, self.device, self.hyperparameters["learning_rate"], self.hyperparameters["gamma"])
             print("Loaded a fresh model with random weights")
+
+    def load_hyperparameters(self, path: str) -> dict:
+        hyperparameters = {}
+        hyperparameters_path = os.path.join(path, "stats.json")
+        if os.path.exists(hyperparameters_path):
+            with open(hyperparameters_path, "r") as f:
+                stats = json.load(f)
+                hyperparameters = stats["hyperparameters"]
+                self.iterations = stats["statistics"]["total number of runs"]
+        return hyperparameters
 
 
     def on_registered(self, iface: TMInterface) -> None:
@@ -107,7 +124,9 @@ class HorizonClient(Client):
         if self.epsilon_dict["manual"]:
             self.epsilon = self.epsilon_dict["value"]
         else:
-            self.epsilon = Config.NN.EPSILON_END + (Config.NN.EPSILON_START - Config.NN.EPSILON_END) * np.exp(-1. * self.iterations / Config.NN.EPSILON_DECAY) 
+            self.epsilon = self.hyperparameters["epsilon_end"] + \
+                (self.hyperparameters["epsilon_start"] - self.hyperparameters["epsilon_end"]) \
+                      * np.exp(-1. * self.iterations / self.hyperparameters["epsilon_decay"])
             self.epsilon_dict["value"] = self.epsilon
 
     def get_action(self, state) -> torch.Tensor:
@@ -173,8 +192,8 @@ class HorizonClient(Client):
         self.trainer.train_step(state, action, reward, next_state, done)
 
     def train_long_memory(self):
-        if len(self.memory) > Config.NN.BATCH_SIZE:
-            mini_sample = random.sample(self.memory, Config.NN.BATCH_SIZE)        # List of tuples
+        if len(self.memory) > self.hyperparameters["batch_size"]:
+            mini_sample = random.sample(self.memory, self.hyperparameters["batch_size"])
         else:
             mini_sample = self.memory
 

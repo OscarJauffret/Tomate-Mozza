@@ -1,12 +1,9 @@
 import multiprocessing
 from time import sleep
-import os
 
 from .config import Config
-from .utils.utils import trigger_map_event
 from .horizon.worker import Worker
 from .utils.tm_launcher import TMLauncher
-from .utils.plot import Plot
 from .app.interface import Interface
 
 choose_map_event = multiprocessing.Event()
@@ -37,7 +34,7 @@ if __name__ == "__main__":
     # Create processes
     workers = []
     for server in servers:
-        worker = Worker(server, choose_map_event, print_state_event, load_model_event, save_model_event, quit_event, 
+        worker = Worker(server, choose_map_event, print_state_event, load_model_event, save_model_event, quit_event,
                         shared_dict)
         workers.append(worker)
         worker.start()
