@@ -149,7 +149,7 @@ class TMLogger:
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        file_path = os.path.join(directory, f"stats.json")
+        file_path = os.path.join(directory, Config.Paths.STAT_FILE_NAME)
 
         with open(file_path, "w") as f:
             log ={
