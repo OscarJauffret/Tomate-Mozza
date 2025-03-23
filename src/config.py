@@ -6,8 +6,8 @@ class Config:
     class Paths:
         MAP_PREFIX: str = "maps"
         MAP: str = "horizon"        # Verify that the map here is the same as the one in your .env file
-        MAP_LAYOUT_PATH: str = os.path.join(MAP_PREFIX, MAP, "ordered_blocks.json")
-        MAP_GBX_OUTPUT_PATH: str = os.path.join(MAP_PREFIX, MAP, "layout.txt")
+        MAP_BLOCKS_PATH: str = os.path.join(MAP_PREFIX, MAP, "ordered_blocks.json")
+        MAP_LAYOUT_PATH: str = os.path.join(MAP_PREFIX, MAP, "layout.txt")
 
         MODELS_PATH: str = "models/"
         LATEST_MODEL_PATH: str = os.path.join(MODELS_PATH, "latest")
@@ -16,8 +16,8 @@ class Config:
 
         @staticmethod
         def get_map():
-            return {"ordered_blocks": Config.Paths.MAP_LAYOUT_PATH,
-                    "list_of_blocks": Config.Paths.MAP_GBX_OUTPUT_PATH}
+            return {"ordered_blocks": Config.Paths.MAP_BLOCKS_PATH,
+                    "list_of_blocks": Config.Paths.MAP_LAYOUT_PATH}
 
     class Game:
         NUMBER_OF_CLIENTS: int = 1
@@ -39,7 +39,7 @@ class Config:
         BATCH_SIZE: int = 128
         EPSILON_START: float = 0.9
         EPSILON_END: float = 0.05
-        EPSILON_DECAY: int = 10000
+        EPSILON_DECAY: int = 1000
 
         @staticmethod
         def get_hyperparameters():

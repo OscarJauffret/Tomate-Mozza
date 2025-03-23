@@ -8,7 +8,7 @@ from tminterface.interface import TMInterface
 from collections import deque
 import shutil
 
-from ..map_interaction.map_layout import MapLayout
+from ..map_interaction.agent_position import AgentPosition
 from ..utils.utils import *
 from .model import Model, QTrainer
 from ..config import Config
@@ -18,7 +18,7 @@ class HorizonClient(Client):
     def __init__(self, num, shared_dict) -> None:
         super(HorizonClient, self).__init__()
         self.num = num
-        self.map_layout = MapLayout()
+        self.agent_position = AgentPosition()
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print(f"Using device: {self.device}")
@@ -30,10 +30,12 @@ class HorizonClient(Client):
         self.memory = deque(maxlen=self.hyperparameters["max_memory"])
         self.reward = 0.0
         self.epsilon = self.hyperparameters["epsilon_start"]
+
         self.prev_position = None
         self.prev_positions = deque(maxlen=5 * Config.Game.NUMBER_OF_ACTIONS_PER_SECOND)        # 5-second long memory
         self.current_state = None
         self.prev_game_state: StateAction = None
+
         self.iterations = 0
         self.ready = False
 
@@ -80,7 +82,6 @@ class HorizonClient(Client):
                 self.iterations = stats["statistics"]["total number of runs"]
         return hyperparameters
 
-
     def on_registered(self, iface: TMInterface) -> None:
         print(f"Registered to {iface.server_name}")
 
@@ -105,19 +106,18 @@ class HorizonClient(Client):
 
         print(f"Model saved to {model_path} and in the latest model directory")
 
-
     def get_state(self, iface: TMInterface):
         state = iface.get_simulation_state()
 
-        section_rel_pos, next_turn = self.map_layout.get_section_info(state.position[0], state.position[2])
-        relative_yaw = self.map_layout.get_car_orientation(state.yaw_pitch_roll[0], state.position[0], state.position[2])
+        closest_edge = self.agent_position.get_relative_position(np.array([state.position[0], state.position[2]]))
+        print(f"Closest edge: {closest_edge}")
 
         current_state = torch.tensor([
-            section_rel_pos[0],
-            section_rel_pos[1],
-            next_turn,
+            0.0,
+            0.0,
+            0.0,
             state.display_speed / 999,
-            relative_yaw
+            0.0
         ], dtype=torch.float, device=self.device)
 
         return current_state
@@ -171,7 +171,7 @@ class HorizonClient(Client):
         if self.prev_position is None:
             return torch.tensor(0, device=self.device)
         current_position = iface.get_simulation_state().position[0], iface.get_simulation_state().position[2]
-        current_reward = self.map_layout.get_distance_reward(self.prev_position, current_position)
+        current_reward = 0.0
         return torch.tensor(current_reward, device=self.device)
 
     def determine_done(self, iface: TMInterface):
@@ -231,7 +231,7 @@ class HorizonClient(Client):
             self.prev_position = iface.get_simulation_state().position[0], iface.get_simulation_state().position[2] # Save the previous position for the reward's calculation
             self.prev_positions.append(self.prev_position)
 
-            self.send_input(iface, action)                # Send the action to the game
+            # self.send_input(iface, action)                # Send the action to the game
 
             end_time = time.time()
             total_time = end_time - start_time

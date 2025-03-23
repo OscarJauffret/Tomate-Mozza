@@ -9,7 +9,7 @@ class MapLayout:
         Initialize the MapLayout object by loading the map layout from the json file
         """
         self.rotation_angles_from_absolute_to_section_coordinates = {(1, 0): 0, (0, 1): np.pi / 2, (-1, 0): np.pi, (0, -1): 3 * np.pi / 2}
-        with open(Config.Paths.MAP_LAYOUT_PATH, "r") as f:
+        with open(Config.Paths.MAP_BLOCKS_PATH, "r") as f:
             data = json.load(f)
             self.blocks: np.ndarray[np.ndarray[int]] = np.array(data["layout"])
             self.sections: np.ndarray[np.ndarray[tuple[int, int]]] = np.array(data["sections"])
@@ -78,7 +78,7 @@ class MapLayout:
         else:
             remaining_previous_section_distance = 0
         y_section_distance = Config.Game.BLOCK_SIZE // 2
-        current_section_distance = np.abs(current_pos_in_section[0]) * current_section_dimension[0]
+        current_section_distance = 16 - (np.abs(current_pos_in_section[0]) * current_section_dimension[0])
         dist = remaining_previous_section_distance + y_section_distance + current_section_distance
 
         return mul * dist
