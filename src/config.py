@@ -4,8 +4,9 @@ class Config:
     DATETIME_FORMAT: str = '%m-%d_%H-%M'
 
     class Paths:
-        MAP_LAYOUT_PATH: str = "maps/horizon/ordered_blocks.json"
-        MAP_GBX_OUTPUT_PATH: str = "maps/horizon/horizon_layout.txt"
+        MAP: str = "maps/2_turns"
+        MAP_LAYOUT_PATH: str = os.path.join(MAP, "ordered_blocks.json")
+        MAP_GBX_OUTPUT_PATH: str = os.path.join(MAP, "layout.txt")
         MODELS_PATH: str = "models/"
         LATEST_MODEL_PATH: str = os.path.join(MODELS_PATH, "latest")
         STAT_FILE_NAME: str = "stats.json"
