@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 import os
 
-from ..utils.plot import Plot
+from src.app.plot import Plot
 import pygetwindow as gw
 import win32gui
 import win32con
