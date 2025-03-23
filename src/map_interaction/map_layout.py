@@ -134,7 +134,7 @@ class MapLayout:
         pos_in_section, section_index = self._get_position_relative_to_section(pos_x, pos_y)
         if pos_in_section == (-1, -1):
             return (-1, -1), 0
-        if self.turns:
+        if self.turns and section_index < len(self.turns):
             next_turn = self.turns[section_index]
         else:
             next_turn = 0

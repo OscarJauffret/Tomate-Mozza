@@ -16,6 +16,9 @@ def get_executable_path() -> tuple[str, str]:
 def get_default_map() -> str:
     return os.path.join(os.getenv("DEFAULT_MAP_PATH"), os.getenv("DEFAULT_MAP_NAME"))
 
+def get_states_path() -> str:
+    return os.getenv("STATES_PATH")
+
 def trigger_map_event(event):
     event.set()
     sleep(2)

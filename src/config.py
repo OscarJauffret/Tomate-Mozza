@@ -4,9 +4,11 @@ class Config:
     DATETIME_FORMAT: str = '%m-%d_%H-%M'
 
     class Paths:
-        MAP: str = "maps/horizon"
-        MAP_LAYOUT_PATH: str = os.path.join(MAP, "ordered_blocks.json")
-        MAP_GBX_OUTPUT_PATH: str = os.path.join(MAP, "layout.txt")
+        MAP_PREFIX: str = "maps"
+        MAP: str = "horizon"        # Verify that the map here is the same as the one in your .env file
+        MAP_LAYOUT_PATH: str = os.path.join(MAP_PREFIX, MAP, "ordered_blocks.json")
+        MAP_GBX_OUTPUT_PATH: str = os.path.join(MAP_PREFIX, MAP, "layout.txt")
+
         MODELS_PATH: str = "models/"
         LATEST_MODEL_PATH: str = os.path.join(MODELS_PATH, "latest")
         STAT_FILE_NAME: str = "stats.json"
@@ -28,6 +30,7 @@ class Config:
         INTERVAL_BETWEEN_ACTIONS: int = 1000 // NUMBER_OF_ACTIONS_PER_SECOND
         GAME_SPEED: int = 8
 
+        RANDOM_SPAWN: bool = False
 
     class NN:
         LEARNING_RATE: float = 0.005

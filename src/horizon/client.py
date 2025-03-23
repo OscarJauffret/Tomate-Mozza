@@ -44,6 +44,7 @@ class HorizonClient(Client):
         self.model_path = shared_dict["model_path"]
         self.manual_epsilon = None
 
+        self.random_states = [os.path.join(Config.Paths.MAP, state) for state in os.listdir(os.path.join(get_states_path(), Config.Paths.MAP)) if state.endswith(".bin")]
 
         self.model.train()
 
@@ -209,6 +210,8 @@ class HorizonClient(Client):
 
     def on_run_step(self, iface: TMInterface, _time: int) -> None:
         if _time == 0:
+            if Config.Game.RANDOM_SPAWN:
+                iface.execute_command(f"load_state {random.choice(self.random_states)}")
             self.ready = True
 
         if _time >= 0 and _time % Config.Game.INTERVAL_BETWEEN_ACTIONS == 0 and self.ready:
@@ -236,6 +239,7 @@ class HorizonClient(Client):
                 print(f"Warning: the action took {total_time * 1000:.2f}ms to execute, it should've taken less than {Config.Game.INTERVAL_BETWEEN_ACTIONS / Config.Game.GAME_SPEED:.2f}ms")
 
             if done:
+                print("Done")
                 self.ready = False
                 if not self.epsilon_dict["manual"]:
                     self.iterations += 1
