@@ -66,7 +66,7 @@ class AgentPosition:
     
 
 
-    def get_relative_position(self, agent_absolute_position: list[float]) -> list[float]:
+    def _get_relative_position(self, agent_block_position: list[float], closest_edge: list[list[int]]) -> list[float]:
         """
         Get the relative position of the agent on the track
         :param agent_absolute_position: the absolute position of the agent
@@ -74,8 +74,6 @@ class AgentPosition:
                  x: position along the edge (0 = start, 1 = end)
                  y: perpendicular distance from the edge (-1 = left, 0 = center, 1 = right)
         """
-        agent_block_position = self._absolute_position_to_block_position(agent_absolute_position)
-        closest_edge = self._get_closest_edge(agent_block_position)
 
         if closest_edge is None:
             return None
@@ -117,9 +115,56 @@ class AgentPosition:
         
         return [x_relative, y_relative]
 
+    
+    def get_distance_reward(self, previous_absolute_pos: list[int], current_absolute_pos: list[int]) -> float:
+        """
+        Calculate the distance reward between two positions
+        If the agent is on the same edge, the reward is the distance between the two relative positions
+        If the agent is on different edges, the reward is the distance from the previous agent position 
+            to the corner node in the relative coordinates of the previous edge + the distance from 
+            the corner node to the current position of the agent in the relative coordinates of the current edge.
+        :param previous_absolute_pos: the previous absolute position of the agent
+        :param current_absolute_pos: the current absolute position of the agent
+        :return: the distance reward
+        """
+
+        prev_agent_block_position, cur_agent_block_position  = self._absolute_position_to_block_position(previous_absolute_pos), self._absolute_position_to_block_position(current_absolute_pos)
+        prev_closest_edge, cur_closest_edge = self._get_closest_edge(prev_agent_block_position), self._get_closest_edge(cur_agent_block_position)
+        prev_relative_pos, cur_relative_pos = self._get_relative_position(prev_agent_block_position, prev_closest_edge), self._get_relative_position(cur_agent_block_position, cur_closest_edge)
+
+        if prev_relative_pos is None or cur_relative_pos is None:
+            return 0
+
+        prev_x, _= prev_relative_pos
+        cur_x, _ = cur_relative_pos
+
+        # Calculate the distance reward
+        if prev_closest_edge == cur_closest_edge: # Same edge
+            return cur_x - prev_x
+
+        else:
+            # Different edge
+            if prev_closest_edge[1] == cur_closest_edge[0]: # We are on a corner
+                # node rel pos [edge1] - prev rel pos + cur rel pos - node rel pos [edge2]
+                edge_1_second_node_rel_pos = self._get_relative_position(prev_closest_edge[1], prev_closest_edge)
+                edge_2_first_node_rel_pos = self._get_relative_position(cur_closest_edge[0], cur_closest_edge)
+                return edge_1_second_node_rel_pos[0] - prev_x + cur_x - edge_2_first_node_rel_pos[0]
+
+            elif prev_closest_edge[0] == cur_closest_edge[1]: # We are on a corner but in the wrong direction
+                # node rel pos [edge1] - prev rel pos + cur rel pos - node rel pos [edge2]
+                edge_1_first_node_rel_pos = self._get_relative_position(prev_closest_edge[0], prev_closest_edge)
+                edge_2_second_node_rel_pos = self._get_relative_position(cur_closest_edge[1], cur_closest_edge)
+                return edge_1_first_node_rel_pos[0] - prev_x + cur_x - edge_2_second_node_rel_pos[0]
+
+            else:
+                # Different edges -> no corner -> should not happen -> return 0
+                return 0
+
+
 
 if __name__ == "__main__":
     agent_position = AgentPosition()
-    pos = [18.2, 16]
-    print(agent_position.get_relative_position([pos[0] * Config.Game.BLOCK_SIZE, pos[1] * Config.Game.BLOCK_SIZE]))
+    prev = [17.9* 32, 14.2 * 32]
+    cur = [17.9 * 32, 14 * 32]
+    print(agent_position.get_distance_reward(prev, cur))
     

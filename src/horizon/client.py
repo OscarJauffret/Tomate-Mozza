@@ -170,8 +170,9 @@ class HorizonClient(Client):
     def get_reward(self, iface: TMInterface):
         if self.prev_position is None:
             return torch.tensor(0, device=self.device)
+        prev_position = self.prev_position
         current_position = iface.get_simulation_state().position[0], iface.get_simulation_state().position[2]
-        current_reward = 0.0
+        current_reward = self.agent_position.get_distance_reward(prev_position, current_position)
         return torch.tensor(current_reward, device=self.device)
 
     def determine_done(self, iface: TMInterface):
