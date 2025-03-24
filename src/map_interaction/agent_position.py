@@ -1,7 +1,4 @@
-from math import sqrt
 import json
-import numpy as np
-
 from ..config import Config
 
 class AgentPosition:
@@ -68,21 +65,6 @@ class AgentPosition:
         return [agent_absolute_position[0] / Config.Game.BLOCK_SIZE, agent_absolute_position[1] / Config.Game.BLOCK_SIZE]
     
 
-    @staticmethod
-    def calculate_direction(block1: list[int], block2: list[int]) -> list[int]:
-        """
-        Calculate the direction between two blocks, it will be normalized
-        :param block1: the first block
-        :param block2: the second block
-        :return: the direction between the two blocks
-        """
-        direction = (block2[0] - block1[0], block2[1] - block1[1])
-        if direction[0] != 0:
-            direction = (direction[0] // abs(direction[0]), 0)
-        elif direction[1] != 0:
-            direction = (0, direction[1] // abs(direction[1]))
-        return direction
-
 
     def get_relative_position(self, agent_absolute_position: list[float]) -> list[float]:
         """
@@ -138,6 +120,6 @@ class AgentPosition:
 
 if __name__ == "__main__":
     agent_position = AgentPosition()
-    pos = [18, 16]
+    pos = [18.2, 16]
     print(agent_position.get_relative_position([pos[0] * Config.Game.BLOCK_SIZE, pos[1] * Config.Game.BLOCK_SIZE]))
     
