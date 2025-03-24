@@ -11,7 +11,7 @@ class AgentPosition:
         with open(Config.Paths.MAP_BLOCKS_PATH, "r") as f:
             data = json.load(f)
             # Convert lists to tuples for nodes and turns
-            self.nodes: List[Tuple[int, int]] = [tuple(node) for node in data["nodes"]]
+            self.nodes: List[Tuple[int, int]] = [(node[0] + 0.5, node[1] + 0.5) for node in data["nodes"]]
             self.turns: List[int] = data["turns"]
 
 
@@ -49,10 +49,18 @@ class AgentPosition:
             # Distance between the agent and the closest point
             dist_sq = (u - closest_x) ** 2 + (v - closest_y) ** 2
 
+            if dist_sq == min_dist_sq:
+                # If the distance is the same, compare the unclamped t values
+                dist_first = abs(u - x1)
+                dist_second = abs(v - y1)
+                if dist_first < dist_second:
+                    closest_edge = (self.nodes[i], self.nodes[i + 1])
+
             # Update the closest edge
             if dist_sq < min_dist_sq:
                 min_dist_sq = dist_sq
                 closest_edge = (self.nodes[i], self.nodes[i + 1])
+
 
         return closest_edge
 
@@ -136,8 +144,12 @@ class AgentPosition:
         prev_closest_edge = self._get_closest_edge(prev_agent_block_position)
         cur_closest_edge = self._get_closest_edge(cur_agent_block_position)
         
+        print(f"Current closest edge: {cur_closest_edge}")
+        
         prev_relative_pos = self._get_relative_position(prev_agent_block_position, prev_closest_edge)
         cur_relative_pos = self._get_relative_position(cur_agent_block_position, cur_closest_edge)
+
+        # print(f"Current relative position: {cur_relative_pos}")
 
         if prev_relative_pos == (-1, -1) or cur_relative_pos == (-1, -1):
             return 0

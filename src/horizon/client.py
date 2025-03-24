@@ -109,9 +109,6 @@ class HorizonClient(Client):
     def get_state(self, iface: TMInterface):
         state = iface.get_simulation_state()
 
-        closest_edge = self.agent_position.get_relative_position([state.position[0], state.position[2]])
-        print(f"Closest edge: {closest_edge}")
-
         current_state = torch.tensor([
             0.0,
             0.0,
@@ -173,6 +170,7 @@ class HorizonClient(Client):
         prev_position = self.prev_position
         current_position = iface.get_simulation_state().position[0], iface.get_simulation_state().position[2]
         current_reward = self.agent_position.get_distance_reward(prev_position, current_position)
+        # print(f"Reward: {current_reward}")
         return torch.tensor(current_reward, device=self.device)
 
     def determine_done(self, iface: TMInterface):
@@ -182,8 +180,8 @@ class HorizonClient(Client):
             return torch.tensor(1.0, device=self.device, dtype=torch.float)
         if not state.player_info.finish_not_passed:
             return torch.tensor(1.0, device=self.device, dtype=torch.float)
-        if self.prev_positions and len(self.prev_positions) == 50 and np.linalg.norm(np.array(self.prev_positions[0]) - np.array(self.prev_positions[-1])) < 5:    # If less than 5 meters were travelled in the last 5 seconds
-            return torch.tensor(1.0, device=self.device, dtype=torch.float)
+        # if self.prev_positions and len(self.prev_positions) == 50 and np.linalg.norm(np.array(self.prev_positions[0]) - np.array(self.prev_positions[-1])) < 5:    # If less than 5 meters were travelled in the last 5 seconds
+        #     return torch.tensor(1.0, device=self.device, dtype=torch.float)
         #if state.display_speed < 5 and state.race_time > 2000:
         #    return torch.tensor(True, device=self.device)
         return torch.tensor(0.0, device=self.device, dtype=torch.float)
