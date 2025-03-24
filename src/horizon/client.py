@@ -109,7 +109,7 @@ class HorizonClient(Client):
     def get_state(self, iface: TMInterface):
         state = iface.get_simulation_state()
 
-        closest_edge = self.agent_position.get_relative_position(np.array([state.position[0], state.position[2]]))
+        closest_edge = self.agent_position.get_relative_position([state.position[0], state.position[2]])
         print(f"Closest edge: {closest_edge}")
 
         current_state = torch.tensor([
