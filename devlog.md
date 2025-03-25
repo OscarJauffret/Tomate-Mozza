@@ -53,7 +53,7 @@ Launch multiple clients at the same time, logging in, launching the map and focu
 
 ### 17 March 2025, 4h
 
-- Refactored the _get_position_relative_to_section function of the [MapLayout](src/map_interaction/map_layout.py) class to be more readable.
+- Refactored the _get_position_relative_to_section function of the ~~[MapLayout]()~~ class to be more readable.
 - Logger now logs much more information such as the model architecture, and statistics about the run.
 - Made a [notebook](src/utils/plot_stats.ipynb) to plot the information contained in the log file.
 - Allowed to load a model from a pth file and continue training from there.

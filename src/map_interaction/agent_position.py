@@ -1,6 +1,7 @@
 import json
 from ..config import Config
 from typing import Tuple, List
+import numpy as np
 
 class AgentPosition:
 
@@ -81,8 +82,9 @@ class AgentPosition:
                 agent_absolute_position[1] / Config.Game.BLOCK_SIZE)
     
 
-    def _get_relative_position(self, agent_block_position: Tuple[float, float], 
-                              closest_edge: Tuple[Tuple[int, int], Tuple[int, int]]) -> Tuple[float, float]:
+    @staticmethod
+    def _block_to_relative_position(agent_block_position: Tuple[float, float],
+                                    closest_edge: Tuple[Tuple[int, int], Tuple[int, int]]) -> Tuple[float, float]:
         """
         Get the relative position of the agent on the track
         :param agent_block_position: the block position of the agent
@@ -130,6 +132,49 @@ class AgentPosition:
         
         return (x_relative, y_relative)
 
+    def get_relative_position_and_next_turn(self, agent_absolute_position: Tuple[float, float]) -> Tuple[Tuple[float, float], int]:
+        """
+        Get the relative position of the agent on the track and the next turn
+        :param agent_absolute_position: the absolute position of the agent
+        :return: the relative position of the agent and the next turn where:
+                the relative position is a tuple (x, y) where:
+                    x: position along the edge (0 = start, 1 = end)
+                    y: perpendicular distance from the edge (-1 = left, 0 = center, 1 = right)
+                the next turn is an integer representing the next turn (-1 = left, 1 = right, 0 = no turn)
+        """
+        agent_block_position = self._absolute_position_to_block_position(agent_absolute_position)
+        closest_edge = self._get_closest_edge(agent_block_position)
+        section_relative_position = self._block_to_relative_position(agent_block_position, closest_edge)
+
+        if section_relative_position == (-1, -1):
+            return (-1, -1), 0
+
+        # Get the next turn
+        try:
+            turn = self.turns[self.nodes.index(closest_edge[1]) - 1]
+        except ValueError:
+            print("Error: No turn found")
+            turn = 0  # No turn found
+
+        return section_relative_position, turn
+
+
+
+    @staticmethod
+    def _get_edge_length(edge: Tuple[Tuple[int, int], Tuple[int, int]]) -> int:
+        """
+        Get the length of the edge
+        :param edge: the edge to get the length of
+        :return: the length of the edge
+        """
+        start_node, end_node = edge
+        start_x, start_y = start_node
+        end_x, end_y = end_node
+
+        length = abs(end_x - start_x) if end_y == start_y else abs(end_y - start_y)
+
+        return length * Config.Game.BLOCK_SIZE
+
     
     def get_distance_reward(self, previous_absolute_pos: Tuple[float, float], 
                            current_absolute_pos: Tuple[float, float]) -> float:
@@ -149,9 +194,11 @@ class AgentPosition:
         prev_closest_edge = self._get_closest_edge(prev_agent_block_position)
         cur_closest_edge = self._get_closest_edge(cur_agent_block_position)
         
-        prev_relative_pos = self._get_relative_position(prev_agent_block_position, prev_closest_edge)
-        cur_relative_pos = self._get_relative_position(cur_agent_block_position, cur_closest_edge)
+        prev_relative_pos = self._block_to_relative_position(prev_agent_block_position, prev_closest_edge)
+        cur_relative_pos = self._block_to_relative_position(cur_agent_block_position, cur_closest_edge)
 
+        prev_edge_length = self._get_edge_length(prev_closest_edge)
+        cur_edge_length = self._get_edge_length(cur_closest_edge)
 
         if prev_relative_pos == (-1, -1) or cur_relative_pos == (-1, -1):
             return 0
@@ -161,24 +208,59 @@ class AgentPosition:
 
         # Calculate the distance reward
         if prev_closest_edge == cur_closest_edge:  # Same edge
-            return cur_x - prev_x
+            return (cur_x - prev_x) * prev_edge_length
         else:
             # Different edge - handle corner cases
             if prev_closest_edge[1] == cur_closest_edge[0]:  # Normal corner transition
-                edge_1_second_node_rel_pos = self._get_relative_position(prev_closest_edge[1], prev_closest_edge)
-                edge_2_first_node_rel_pos = self._get_relative_position(cur_closest_edge[0], cur_closest_edge)
-                return edge_1_second_node_rel_pos[0] - prev_x + cur_x - edge_2_first_node_rel_pos[0]
+                edge_1_second_node_rel_pos = self._block_to_relative_position(prev_closest_edge[1], prev_closest_edge)
+                edge_2_first_node_rel_pos = self._block_to_relative_position(cur_closest_edge[0], cur_closest_edge)
+                return ((edge_1_second_node_rel_pos[0] - prev_x) * prev_edge_length) + ((cur_x - edge_2_first_node_rel_pos[0]) * cur_edge_length)
+
             elif prev_closest_edge[0] == cur_closest_edge[1]:  # Backward corner transition
-                edge_1_first_node_rel_pos = self._get_relative_position(prev_closest_edge[0], prev_closest_edge)
-                edge_2_second_node_rel_pos = self._get_relative_position(cur_closest_edge[1], cur_closest_edge)
-                return edge_1_first_node_rel_pos[0] - prev_x + cur_x - edge_2_second_node_rel_pos[0]
+                edge_1_first_node_rel_pos = self._block_to_relative_position(prev_closest_edge[0], prev_closest_edge)
+                edge_2_second_node_rel_pos = self._block_to_relative_position(cur_closest_edge[1], cur_closest_edge)
+                return ((edge_1_first_node_rel_pos[0] - prev_x) * prev_edge_length) + ((cur_x - edge_2_second_node_rel_pos[0]) * cur_edge_length)
+
             else:
                 # Different edges with no connection
                 return 0
 
+    def _get_edge_direction(self, edge: Tuple[Tuple[int, int], Tuple[int, int]]) -> Tuple[int, int]:
+        """
+        Get the direction of the edge
+        :param edge: the edge to get the direction of
+        :return: the direction of the edge as a tuple of two integers, normalized to 1
+        """
+        start_node, end_node = edge
+        start_x, start_y = start_node
+        end_x, end_y = end_node
 
-if __name__ == "__main__":
-    agent_position = AgentPosition()
-    prev = (17.9 * 32, 14.2 * 32)  # Tuple instead of list
-    cur = (17.9 * 32, 14 * 32)     # Tuple instead of list
-    print(agent_position.get_distance_reward(prev, cur))
+        direction = (end_x - start_x, end_y - start_y)
+        direction = (direction[0] // abs(direction[0]) if direction[0] != 0 else 0,
+                     direction[1] // abs(direction[1]) if direction[1] != 0 else 0)
+
+        return direction
+
+    def get_car_orientation(self, yaw: float, agent_absolute_position: Tuple[float, float]) -> float:
+        """
+        Get the orientation of the car relative to the section it is in.
+        - If the car is facing the same direction as the section, the orientation is 0.
+        - If the car is facing the opposite direction as the section, the orientation is pi (or -pi).
+        - If the car is facing the right side of the section, the orientation is pi / 2.
+        - If the car is facing the left side of the section, the orientation is -pi / 2.
+        The angle is then normalized by pi to get values between -1 and 1.
+        :param yaw: The yaw of the car (in radians, absolute)
+        :param agent_absolute_position: The absolute position of the car.
+        :return: The orientation of the car relative to the section it is in.
+        """
+        direction_to_angle = {(0, -1): np.pi, (-1, 0): -np.pi / 2, (0, 1): 0, (1, 0): np.pi / 2}
+        agent_block_position = self._absolute_position_to_block_position(agent_absolute_position)
+        closest_edge = self._get_closest_edge(agent_block_position)
+
+        if closest_edge == ((-1, -1), (-1, -1)):
+            return 0
+
+        direction = self._get_edge_direction(closest_edge)
+        section_angle = direction_to_angle[direction]
+        theta = (section_angle - yaw)
+        return ((theta + np.pi) % (2 * np.pi) - np.pi) / np.pi
