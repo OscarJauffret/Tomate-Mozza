@@ -113,3 +113,9 @@ Launch multiple clients at the same time, logging in, launching the map and focu
 - Tried to tweak the learning rate.
 - Fixed a bug in the reward calculation. One term was too large.
 - Started to change the way the agent views the map. Now we will use a graph where the turns are the nodes. The agent's position will be based on the edge it is closest to.
+
+---
+
+### 24 March 2025, 6h
+
+- Work in the graph branch. We can now properly get the relative position of the agent on the road section and calculate the reward based on the distance traveled.
