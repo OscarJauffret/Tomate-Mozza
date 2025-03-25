@@ -121,3 +121,4 @@ Launch multiple clients at the same time, logging in, launching the map and focu
 - Work in the graph branch. We can now properly get the relative position of the agent on the road section and calculate the reward based on the distance traveled.
 - Rescaled the reward to meters. The agent now gets a reward of 1 for every meter in the track's direction traveled.
 - Added next turn and relative yaw to the new [AgentPosition](src/map_interaction/agent_position.py) file
+- Added a curve to the real time plot to visualize the average reward over the last 200 iterations.
