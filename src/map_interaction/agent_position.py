@@ -50,11 +50,16 @@ class AgentPosition:
             dist_sq = (u - closest_x) ** 2 + (v - closest_y) ** 2
 
             if dist_sq == min_dist_sq:
-                # If the distance is the same, compare the unclamped t values
-                dist_first = abs(u - x1)
-                dist_second = abs(v - y1)
-                if dist_first < dist_second:
+                if dx == 0:
+                    dist_first = abs(x1 - u)
+                    dist_second = abs(y1 - v)
+                else:
+                    dist_first = abs(y1 - v)
+                    dist_second = abs(x1 - u)
+                    
+                if dist_first > dist_second:
                     closest_edge = (self.nodes[i], self.nodes[i + 1])
+                
 
             # Update the closest edge
             if dist_sq < min_dist_sq:
@@ -144,12 +149,9 @@ class AgentPosition:
         prev_closest_edge = self._get_closest_edge(prev_agent_block_position)
         cur_closest_edge = self._get_closest_edge(cur_agent_block_position)
         
-        print(f"Current closest edge: {cur_closest_edge}")
-        
         prev_relative_pos = self._get_relative_position(prev_agent_block_position, prev_closest_edge)
         cur_relative_pos = self._get_relative_position(cur_agent_block_position, cur_closest_edge)
 
-        # print(f"Current relative position: {cur_relative_pos}")
 
         if prev_relative_pos == (-1, -1) or cur_relative_pos == (-1, -1):
             return 0
