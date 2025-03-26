@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import copy
 from ..config import Config
 
 class Model(nn.Module):
@@ -19,11 +20,14 @@ class QTrainer:
     def __init__(self, model, device, lr, gamma):
         self.lr = lr
         self.gamma = gamma
-        self.model = model
+        self.main_model = model
         self.device = device
         self.optimizer = torch.optim.Adam(model.parameters(), lr=self.lr)
 
         self.criterion = nn.SmoothL1Loss()  # Huber loss
+
+        self.target_model = copy.deepcopy(self.main_model).to(self.device)
+        self.target_model.eval()
 
     def train_step(self, state, action, reward, next_state, done):
         state = state.to(self.device) if state.device != self.device else state
@@ -40,15 +44,20 @@ class QTrainer:
             done = done.unsqueeze(0)
 
         # Predicted Q values
-        pred = self.model(state)        # Predicted Q values**
+        pred = self.main_model(state)        # Predicted Q values
         target = pred.clone()
 
         with torch.no_grad():
-            next_q_value = self.model(next_state).max(dim=1).values  # This gives us the maximum reward we can get in the next state as a 1D tensor (ex: if batch of size 1, tensor([0.5]), if batch of size 2, tensor([0.5, 0.6]))
-        target[range(len(action)), action] = (reward + self.gamma * next_q_value * (1 - done)).type(torch.float)
+            next_action = self.main_model(next_state).argmax(dim=1)  # This gives us the action that gives us the maximum reward in the next state as a 1D tensor (ex: if batch of size 1, tensor([0]), if batch of size 2, tensor([0, 1]))
+            next_q_target = self.target_model(next_state).gather(1, next_action.unsqueeze(1)).squeeze(1)
+        target[range(len(action)), action] = (reward + self.gamma * next_q_target * (1 - done)).type(torch.float)
 
         self.optimizer.zero_grad(set_to_none=True)
         loss = self.criterion(pred, target)
         loss.backward()
         self.optimizer.step()
+
         return loss.item()
+
+    def update_target(self):
+        self.target_model.load_state_dict(self.main_model.state_dict())

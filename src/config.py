@@ -39,7 +39,8 @@ class Config:
         BATCH_SIZE: int = 128
         EPSILON_START: float = 0.9
         EPSILON_END: float = 0.05
-        EPSILON_DECAY: int = 1000
+        EPSILON_DECAY: int = 10000
+        UPDATE_TARGET_EVERY: int = 5
 
         @staticmethod
         def get_hyperparameters():
@@ -50,7 +51,8 @@ class Config:
                 "batch_size": Config.NN.BATCH_SIZE,
                 "epsilon_start": Config.NN.EPSILON_START,
                 "epsilon_end": Config.NN.EPSILON_END,
-                "epsilon_decay": Config.NN.EPSILON_DECAY
+                "epsilon_decay": Config.NN.EPSILON_DECAY,
+                "update_target_every": Config.NN.UPDATE_TARGET_EVERY
             }
 
         class Arch:

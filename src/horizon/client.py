@@ -247,7 +247,9 @@ class HorizonClient(Client):
                     self.rewards_queue.put(self.reward)
                     self.logger.add_run(self.iterations, _time, self.reward)
                     self.train_long_memory()
-                print(f"Iteration: {self.iterations:<8} reward: {self.reward:<8.2f} epsilon: {self.epsilon:<8.3f}")    
+                    if self.iterations % Config.NN.UPDATE_TARGET_EVERY == 0:
+                        self.trainer.update_target()
+                print(f"Iteration: {self.iterations:<8} reward: {self.reward:<8.2f} epsilon: {self.epsilon:<8.3f}")
                 self.reward = 0.0
                 self.prev_position = None
                 self.prev_positions.clear()
