@@ -74,12 +74,16 @@ class ZQSDKeys:
 
         self.up = None
         self.keys = []
+        self.q_label = None
 
         self.create_keys()
 
     def create_keys(self):
         self.frame = tk.Frame(self.parent, width=3 * self.frame_size[0], height=2 * self.frame_size[1])
         self.frame.grid(row=self.row, column=self.col, padx=10, pady=10)
+
+        self.q_label = tk.Label(self.frame, text="Q: 0.00", font=("Arial", 10), fg="black", bg="white")
+        self.q_label.grid(row=0, column=0, pady=(0, 5)) 
 
         for i, (r, c) in enumerate([(0, 1), (1, 0), (1, 1), (1, 2)]):  # up, left, down, right
             base_color = self.key_colors[i]
@@ -101,3 +105,4 @@ class ZQSDKeys:
                 container.config(bg=bg_color)
                 gauge.place_configure(relheight=0)
 
+        self.q_label.config(text=f"Q: {q_value:.2f}")

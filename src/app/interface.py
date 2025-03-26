@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import messagebox
 import os
 
 from src.app.plot import Plot
@@ -192,9 +193,16 @@ class Interface:
         self.root.destroy()
 
     def close_window(self):
-        if tk.messagebox.askyesno("Save model", "Do you want to save the model before quitting?"):
+        """Close the window"""
+        response = messagebox.askyesnocancel("Save model", "Do you want to save the model before quitting?")
+    
+        if response is None:
+            return 
+    
+        if response:
             self.save_model_event.set()
             sleep(2)
+    
         self.quit_event.set()
         self.on_close()
 
