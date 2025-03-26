@@ -16,11 +16,13 @@ class Interface:
         self.root = tk.Tk()
         self.root.title("Tomate Mozza")
         self.full_screen = False
+        self.best_reward = 0
 
         self.game_frame = None
         self.graph_frame = None
         self.button_frame = None
         self.action_keys: ActionKeys = None
+        self.best_reward_label = None
 
         self.choose_map_event = choose_map_event
         self.print_state_event = print_state_event
@@ -41,6 +43,7 @@ class Interface:
         self.create_button_frame()
         self.create_epsilon_scale()
         self.create_actions_squares()
+        self.create_reward_label()
 
         self.root.bind("<F11>", self.toggle_fullscreen)
 
@@ -105,6 +108,11 @@ class Interface:
                                     resolution=0.01, command=self.send_manual_epsilon)
         self.epsilon_scale.grid(row=1, column=0, padx=5, sticky="nsew")
 
+    def create_reward_label(self):
+        """Create the reward label"""
+        self.best_reward_label = ttk.Label(self.root, text=f"Best Reward: {self.best_reward}", font=("Arial", 20))
+        self.best_reward_label.grid(row=1, column=1, padx=50, sticky="nsew")
+
     def create_actions_squares(self):
         self.action_keys = ActionKeys(self.root, 2, 1, key_size=40, padding=3, margin=10)
 
@@ -119,6 +127,9 @@ class Interface:
     def update_interface(self):
         if not self.shared_dict["reward"].empty():
             reward = self.shared_dict["reward"].get()
+            if reward > self.best_reward:
+                self.best_reward = reward
+                self.best_reward_label["text"] = f"Best Reward: {self.best_reward:.2f}"
             if not self.shared_dict["epsilon"]["manual"]:
                 self.graph.add_point(reward)
 
