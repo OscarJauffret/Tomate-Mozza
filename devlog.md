@@ -122,3 +122,10 @@ Launch multiple clients at the same time, logging in, launching the map and focu
 - Rescaled the reward to meters. The agent now gets a reward of 1 for every meter in the track's direction traveled.
 - Added next turn and relative yaw to the new [AgentPosition](src/map_interaction/agent_position.py) file
 - Added a curve to the real time plot to visualize the average reward over the last 200 iterations.
+
+---
+
+### 26 March 2025, 1h
+
+- Implemented a double DQN. We previously had an issue where the reward values would explode out of control. This is probably because we updated the same network that was used to calculate the target. Now we have two networks, one to calculate the target and one to update the weights. The target network is updated every 5 iterations (parameter in the config).
+- Added a label to display the largest reward to the real time plot.
