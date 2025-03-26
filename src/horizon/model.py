@@ -52,6 +52,9 @@ class QTrainer:
             next_q_target = self.target_model(next_state).gather(1, next_action.unsqueeze(1)).squeeze(1)
         target[range(len(action)), action] = (reward + self.gamma * next_q_target * (1 - done)).type(torch.float)
 
+        if torch.any(target > 1000):
+            print("Target values are too high")
+
         self.optimizer.zero_grad(set_to_none=True)
         loss = self.criterion(pred, target)
         loss.backward()
