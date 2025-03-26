@@ -65,8 +65,7 @@ class Plot:
             self.ax.plot(self.avg_x_data, self.avg_y_data, 'r--', label="Mean Reward (last %d)" % self.avg_plot_size)
 
             y_start = self.avg_y_data[0]
-            y_end = self.avg_y_data[-1]
-            baseline = np.linspace(y_start, y_end, len(self.avg_x_data))
+            baseline = np.linspace(y_start, y_start, len(self.avg_x_data))
 
             self.ax.fill_between(self.avg_x_data, self.avg_y_data, baseline, color='red', alpha=0.15)
 
