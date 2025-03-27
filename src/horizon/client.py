@@ -35,6 +35,7 @@ class HorizonClient(Client):
         self.prev_positions = deque(maxlen=5 * Config.Game.NUMBER_OF_ACTIONS_PER_SECOND)        # 5-second long memory
         self.current_state = None
         self.prev_game_state: StateAction = None
+        self.prev_velocity = None
 
         self.iterations = 0
         self.ready = False
@@ -108,6 +109,17 @@ class HorizonClient(Client):
 
     def get_state(self, iface: TMInterface):
         state = iface.get_simulation_state()
+        current_velocity = np.array(state.velocity)
+
+        acceleration_scalar = 0
+        velocity_norm = 0
+        if self.prev_velocity is not None:
+            delta_v = current_velocity - self.prev_velocity
+            velocity_norm = np.linalg.norm(current_velocity)
+            if velocity_norm > 1e-5:
+                direction = current_velocity / velocity_norm
+                acceleration_scalar = np.dot(delta_v, direction) / (Config.Game.INTERVAL_BETWEEN_ACTIONS / 1000)
+        self.prev_velocity = current_velocity
 
         agent_absolute_position = (state.position[0], state.position[2])
         section_relative_position, next_turn = self.agent_position.get_relative_position_and_next_turn(agent_absolute_position)
@@ -117,7 +129,8 @@ class HorizonClient(Client):
             section_relative_position[0],
             section_relative_position[1],
             next_turn,
-            state.display_speed / 999,
+            velocity_norm / 50,
+            acceleration_scalar / 15,
             relative_yaw
         ], dtype=torch.float, device=self.device)
 
@@ -185,8 +198,7 @@ class HorizonClient(Client):
             return torch.tensor(1.0, device=self.device, dtype=torch.float)
         if self.prev_positions and len(self.prev_positions) == 50 and np.linalg.norm(np.array(self.prev_positions[0]) - np.array(self.prev_positions[-1])) < 5:    # If less than 5 meters were travelled in the last 5 seconds
             return torch.tensor(1.0, device=self.device, dtype=torch.float)
-        #if state.display_speed < 5 and state.race_time > 2000:
-        #    return torch.tensor(True, device=self.device)
+
         return torch.tensor(0.0, device=self.device, dtype=torch.float)
 
     def remember(self, state, action, reward, next_state, done):
@@ -225,7 +237,7 @@ class HorizonClient(Client):
                 current_reward = self.get_reward(iface)
                 if not self.epsilon_dict["manual"]:
                     self.remember(self.prev_game_state.state, self.prev_game_state.action, current_reward, self.current_state, done)
-                    self.train_short_memory(self.prev_game_state.state, self.prev_game_state.action, current_reward, self.current_state, done)
+                    # self.train_short_memory(self.prev_game_state.state, self.prev_game_state.action, current_reward, self.current_state, done)
                 self.reward += current_reward.item()
 
             action = self.get_action(self.current_state)                                    # Get the action
@@ -254,6 +266,7 @@ class HorizonClient(Client):
                 self.prev_position = None
                 self.prev_positions.clear()
                 self.prev_game_state = None
+                self.prev_velocity = None
                 iface.horn()
                 iface.respawn()
 

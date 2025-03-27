@@ -33,7 +33,7 @@ class Config:
         RANDOM_SPAWN: bool = False
 
     class NN:
-        LEARNING_RATE: float = 0.005
+        LEARNING_RATE: float = 0.001
         GAMMA: float = 0.99
         MAX_MEMORY: int = 100_000
         BATCH_SIZE: int = 128
@@ -56,7 +56,7 @@ class Config:
             }
 
         class Arch:
-            INPUTS_DESC: list[str] = ["section_rel_x", "section_rel_y", "next_turn" ,"in_game_velocity", "relative_yaw"]
+            INPUTS_DESC: list[str] = ["section_rel_x", "section_rel_y", "next_turn" ,"in_game_velocity", "acceleration", "relative_yaw"]
             OUTPUTS_DESC: list[str] = ["release", "forward", "right", "left", "forward_right", "forward_left"]
             ACTIVATED_KEYS_PER_OUTPUT: list[tuple[int]] = [(1, 1, 1, 1), (1, 0, 0, 0), (0, 0, 0, 1), (0, 1, 0, 0), (1, 0, 0, 1), (1, 1, 0, 0)]
             REWARD_DESC: str = "distance travelled projected on the section's x axis (progression on the track)"
