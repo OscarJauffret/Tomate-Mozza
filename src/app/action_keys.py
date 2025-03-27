@@ -13,7 +13,7 @@ class ActionKeys:
         self.margin = margin
         self.frame_size = (3 * self.key_size + 2 * self.padding, 2 * self.key_size + self.padding)
 
-        self.action_frame = ttk.Frame(self.parent, width=3 * self.frame_size[0] + 2 * margin, height=2 * self.frame_size[1] + margin)
+        self.action_frame = ttk.Frame(self.parent, width=3 * self.frame_size[0] + 2 * margin, height=3 * self.frame_size[1] + margin)
         self.action_frame.grid(row=row_pos, column=col_pos, padx=10, pady=10)
 
         self.zqsd_keys = []
@@ -40,6 +40,8 @@ class ActionKeys:
             on_color = "red"
             best_color = "green"
             # Normalize the q_values
+            for i, action in enumerate(self.zqsd_keys):
+                action.update_q_value_label(q_values[i])
             q_values = self.normalize_q_values(q_values)
             for i, action in enumerate(self.zqsd_keys):
                 if q_values[i] == 1:
@@ -79,13 +81,13 @@ class ZQSDKeys:
         self.create_keys()
 
     def create_keys(self):
-        self.frame = tk.Frame(self.parent, width=3 * self.frame_size[0], height=2 * self.frame_size[1])
+        self.frame = tk.Frame(self.parent, width=3 * self.frame_size[0], height=3 * self.frame_size[1])
         self.frame.grid(row=self.row, column=self.col, padx=10, pady=10)
 
-        self.q_label = tk.Label(self.frame, text="Q: 0.00", font=("Arial", 10), fg="black", bg="white")
-        self.q_label.grid(row=0, column=0, pady=(0, 5)) 
+        self.q_label = tk.Label(self.frame, text="Q: 0.00", font=("Arial", 10), fg="black")
+        self.q_label.grid(row=0, column=1)
 
-        for i, (r, c) in enumerate([(0, 1), (1, 0), (1, 1), (1, 2)]):  # up, left, down, right
+        for i, (r, c) in enumerate([(1, 1), (2, 0), (2, 1), (2, 2)]):  # up, left, down, right
             base_color = self.key_colors[i]
             container = tk.Frame(self.frame, width=self.key_size, height=self.key_size, bg=base_color)
             container.grid(row=r, column=c, padx=self.padding, pady=self.padding, sticky="nsew")
@@ -105,4 +107,5 @@ class ZQSDKeys:
                 container.config(bg=bg_color)
                 gauge.place_configure(relheight=0)
 
+    def update_q_value_label(self, q_value):
         self.q_label.config(text=f"Q: {q_value:.2f}")
