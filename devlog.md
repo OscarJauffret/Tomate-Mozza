@@ -129,3 +129,8 @@ Launch multiple clients at the same time, logging in, launching the map and focu
 
 - Implemented a double DQN. We previously had an issue where the reward values would explode out of control. This is probably because we updated the same network that was used to calculate the target. Now we have two networks, one to calculate the target and one to update the weights. The target network is updated every 5 iterations (parameter in the config).
 - Added a label to display the largest reward to the real time plot.
+
+### 27 March 2025, 3h
+
+- Changed the state to include the acceleration of the car.
+- Removed the clamp on the position

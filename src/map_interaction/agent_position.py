@@ -119,8 +119,7 @@ class AgentPosition:
         # Calculate relative position along edge (x)
         # Map from [start_node - 0.5, end_node + 0.5] to [0, 1]
         x_relative = (dot_product + 0.5) / (edge_length + 1)
-        x_relative = max(0, min(1, x_relative))  # Clamp to [0, 1]
-        
+
         # Calculate perpendicular distance (y)
         # Cross product to determine side (left/right)
         cross_product = agent_vector[1] * normalized_edge[0] - agent_vector[0] * normalized_edge[1]
@@ -128,9 +127,8 @@ class AgentPosition:
         # Map perpendicular distance to [-1, 1]
         # Where -1 means 0.5 units to the left, 1 means 0.5 units to the right
         y_relative = cross_product / 0.5
-        y_relative = max(-1, min(1, y_relative))  # Clamp to [-1, 1]
-        
-        return (x_relative, y_relative)
+
+        return x_relative, y_relative
 
     def get_relative_position_and_next_turn(self, agent_absolute_position: Tuple[float, float]) -> Tuple[Tuple[float, float], int]:
         """
