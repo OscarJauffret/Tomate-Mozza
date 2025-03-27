@@ -29,6 +29,7 @@ class HorizonClient(Client):
 
         self.memory = deque(maxlen=self.hyperparameters["max_memory"])
         self.reward = 0.0
+        self.penalty = torch.tensor(0.0, device=self.device, dtype=torch.float)
         self.epsilon = self.hyperparameters["epsilon_start"]
 
         self.prev_position = None
@@ -192,11 +193,15 @@ class HorizonClient(Client):
     def determine_done(self, iface: TMInterface):
         state = iface.get_simulation_state()
 
+        self.penalty = torch.tensor(0.0, device=self.device, dtype=torch.float)
         if state.position[1] < 23: # If the car is below the track
+            self.penalty = torch.tensor(20.0, device=self.device, dtype=torch.float)
             return torch.tensor(1.0, device=self.device, dtype=torch.float)
         if not state.player_info.finish_not_passed:
+            self.penalty = torch.tensor(-10.0, device=self.device, dtype=torch.float)
             return torch.tensor(1.0, device=self.device, dtype=torch.float)
         if self.prev_positions and len(self.prev_positions) == 50 and np.linalg.norm(np.array(self.prev_positions[0]) - np.array(self.prev_positions[-1])) < 5:    # If less than 5 meters were travelled in the last 5 seconds
+            self.penalty = torch.tensor(20.0, device=self.device, dtype=torch.float)
             return torch.tensor(1.0, device=self.device, dtype=torch.float)
 
         return torch.tensor(0.0, device=self.device, dtype=torch.float)
@@ -234,7 +239,7 @@ class HorizonClient(Client):
             done = self.determine_done(iface)
 
             if self.prev_game_state is not None:         # If this is not the first state, train the model
-                current_reward = self.get_reward(iface)
+                current_reward = self.get_reward(iface) - self.penalty
                 if not self.epsilon_dict["manual"]:
                     self.remember(self.prev_game_state.state, self.prev_game_state.action, current_reward, self.current_state, done)
                     # self.train_short_memory(self.prev_game_state.state, self.prev_game_state.action, current_reward, self.current_state, done)

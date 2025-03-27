@@ -134,3 +134,4 @@ Launch multiple clients at the same time, logging in, launching the map and focu
 
 - Changed the state to include the acceleration of the car.
 - Removed the clamp on the position
+- Added a penalty if the agent dies, or stops moving. It is a fixed penalty of -20.
