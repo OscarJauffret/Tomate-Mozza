@@ -231,6 +231,11 @@ class HorizonClient(Client):
             if Config.Game.RANDOM_SPAWN:
                 iface.execute_command(f"load_state {random.choice(self.random_states)}")
             self.ready = True
+            if self.epsilon == 0.0:
+                random_steering_value = np.random.randint(-10000, 10000)
+                iface.execute_command(f"steer {random_steering_value}; press up")
+                return
+
 
         if _time >= 0 and _time % Config.Game.INTERVAL_BETWEEN_ACTIONS == 0 and self.ready:
             start_time = time.time()

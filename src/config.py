@@ -41,7 +41,7 @@ class Config:
         EPSILON_START: float = 0.9
         EPSILON_END: float = 0.05
         EPSILON_DECAY: int = 10000
-        UPDATE_TARGET_EVERY: int = 2000
+        UPDATE_TARGET_EVERY: int = 1000
 
         TAU: float = 0.005
 
