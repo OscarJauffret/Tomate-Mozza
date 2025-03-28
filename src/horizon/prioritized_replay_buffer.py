@@ -12,7 +12,7 @@ class PrioritizedReplayBuffer:
 
         self.alpha = alpha
         self.beta = beta
-        self.epsilon = 1e-6
+        self.epsilon = 0.001
 
     def __len__(self):
         return self.fill_level
