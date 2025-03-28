@@ -33,7 +33,7 @@ class Config:
         RANDOM_SPAWN: bool = False
 
     class NN:
-        LEARNING_RATE: float = 0.0005
+        LEARNING_RATE: float = 0.001
         GAMMA: float = 0.99
         MAX_MEMORY: int = 100_000
         MIN_MEMORY: int = 10_000
@@ -60,7 +60,12 @@ class Config:
                 "epsilon_start": Config.NN.EPSILON_START,
                 "epsilon_end": Config.NN.EPSILON_END,
                 "epsilon_decay": Config.NN.EPSILON_DECAY,
-                "update_target_every": Config.NN.UPDATE_TARGET_EVERY
+                "update_target_every": Config.NN.UPDATE_TARGET_EVERY,
+                "tau": Config.NN.TAU,
+                "alpha": Config.NN.ALPHA,
+                "beta_start": Config.NN.BETA_START,
+                "beta_max": Config.NN.BETA_MAX,
+                "beta_increment_steps": Config.NN.BETA_INCREMENT_STEPS
             }
 
         class Arch:
