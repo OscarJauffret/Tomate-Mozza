@@ -150,9 +150,12 @@ class AgentPosition:
         # Get the next turn
         try:
             turn = self.turns[self.nodes.index(closest_edge[1]) - 1]
-        except ValueError:
+        except ValueError or IndexError:
             print("Error: No turn found")
             turn = 0  # No turn found
+        except Exception as e:
+            print(f"Error: {e}")
+            turn = 0
 
         return section_relative_position, turn
 
