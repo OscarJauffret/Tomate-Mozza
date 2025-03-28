@@ -33,14 +33,22 @@ class Config:
         RANDOM_SPAWN: bool = False
 
     class NN:
-        LEARNING_RATE: float = 0.001
+        LEARNING_RATE: float = 0.0005
         GAMMA: float = 0.99
         MAX_MEMORY: int = 100_000
+        MIN_MEMORY: int = 10_000
         BATCH_SIZE: int = 128
         EPSILON_START: float = 0.9
         EPSILON_END: float = 0.05
         EPSILON_DECAY: int = 10000
-        UPDATE_TARGET_EVERY: int = 5
+        UPDATE_TARGET_EVERY: int = 2000
+
+        TAU: float = 0.005
+
+        ALPHA: float = 0.6
+        BETA_START: float = 0.4
+        BETA_MAX: float = 1.0
+        BETA_INCREMENT_STEPS: int = 20000
 
         @staticmethod
         def get_hyperparameters():
@@ -56,7 +64,7 @@ class Config:
             }
 
         class Arch:
-            INPUTS_DESC: list[str] = ["section_rel_x", "section_rel_y", "next_turn" ,"in_game_velocity", "acceleration", "relative_yaw"]
+            INPUTS_DESC: list[str] = ["section_rel_x", "section_rel_y", "next_turn" ,"velocity", "acceleration", "relative_yaw"]
             OUTPUTS_DESC: list[str] = ["release", "forward", "right", "left", "forward_right", "forward_left"]
             ACTIVATED_KEYS_PER_OUTPUT: list[tuple[int]] = [(1, 1, 1, 1), (1, 0, 0, 0), (0, 0, 0, 1), (0, 1, 0, 0), (1, 0, 0, 1), (1, 1, 0, 0)]
             REWARD_DESC: str = "distance travelled projected on the section's x axis (progression on the track)"

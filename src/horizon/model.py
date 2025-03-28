@@ -8,12 +8,12 @@ class Model(nn.Module):
         super(Model, self).__init__()
         self.layer1 = nn.Linear(Config.NN.Arch.INPUT_SIZE, Config.NN.Arch.LAYER_SIZES[0])
         self.layer2 = nn.Linear(Config.NN.Arch.LAYER_SIZES[0], Config.NN.Arch.LAYER_SIZES[1])
-        self.layer3 = nn.Linear(Config.NN.Arch.LAYER_SIZES[1], Config.NN.Arch.OUTPUT_SIZE)
+        self.output = nn.Linear(Config.NN.Arch.LAYER_SIZES[1], Config.NN.Arch.OUTPUT_SIZE)
 
     def forward(self, x):
         x = torch.relu(self.layer1(x))
         x = torch.relu(self.layer2(x))
-        x = self.layer3(x)
+        x = self.output(x)
         return x
 
 class QTrainer:
@@ -24,12 +24,12 @@ class QTrainer:
         self.device = device
         self.optimizer = torch.optim.Adam(model.parameters(), lr=self.lr)
 
-        self.criterion = nn.SmoothL1Loss()  # Huber loss
+        self.criterion = nn.SmoothL1Loss(reduction="none")  # Huber loss
 
         self.target_model = copy.deepcopy(self.main_model).to(self.device)
         self.target_model.eval()
 
-    def train_step(self, state, action, reward, next_state, done):
+    def train_step(self, state, action, reward, next_state, done, weights=None):
         state = state.to(self.device) if state.device != self.device else state
         next_state = next_state.to(self.device) if next_state.device != self.device else next_state
         action = action.to(self.device) if action.device != self.device else action
@@ -55,12 +55,19 @@ class QTrainer:
         if torch.any(target > 1000):
             print("Target values are too high")
 
+        td_errors = (pred[range(len(action)), action] - target[range(len(action)), action]).abs().detach()
+
         self.optimizer.zero_grad(set_to_none=True)
         loss = self.criterion(pred, target)
+        if weights is not None:
+            weights = torch.tensor(weights).to(self.device)
+            per_sample_loss = loss[range(len(action)), action]
+            loss = (per_sample_loss * weights).mean()
+
         loss.backward()
         self.optimizer.step()
 
-        return loss.item()
+        return td_errors.cpu().numpy()
 
     def update_target(self):
         self.target_model.load_state_dict(self.main_model.state_dict())
