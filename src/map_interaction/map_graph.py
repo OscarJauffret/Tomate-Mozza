@@ -30,7 +30,7 @@ def _keep_highest_blocks(blocks):
     :param blocks: the list of blocks
     :return: the list of blocks that are the highest in their column
     """
-    blocks = sorted(blocks, key=lambda x: x[1][1])  # Sort by height
+    blocks = sorted(blocks, key=lambda x: x[1][1], reverse=True)  # Sort by height
     highest_blocks = []
 
     for i, block in enumerate(blocks):
