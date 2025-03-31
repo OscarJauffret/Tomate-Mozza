@@ -130,34 +130,63 @@ class AgentPosition:
 
         return x_relative, y_relative
 
-    def get_relative_position_and_next_turn(self, agent_absolute_position: Tuple[float, float]) -> Tuple[Tuple[float, float], int]:
+    def get_relative_position_and_next_turns(self, agent_absolute_position: Tuple[float, float]) -> Tuple[Tuple[float, float], int, float, int, float, int]:
         """
         Get the relative position of the agent on the track and the next turn
         :param agent_absolute_position: the absolute position of the agent
-        :return: the relative position of the agent and the next turn where:
+        :return: the relative position of the agent, the next turn, the length of the next edge, the 2nd next turn, the length of the 3rd edge, the 3rd next turn
                 the relative position is a tuple (x, y) where:
                     x: position along the edge (0 = start, 1 = end)
                     y: perpendicular distance from the edge (-1 = left, 0 = center, 1 = right)
-                the next turn is an integer representing the next turn (-1 = left, 1 = right, 0 = no turn)
+                the next turn is an integer representing the next turn (-1 = left, 1 = right, 0 = no turn),
+                the length of the next edge is an integer representing the length of the next edge,
+                the 2nd next turn is an integer representing the 2nd next turn (-1 = left, 1 = right, 0 = no turn)
+                the third edge length is an integer representing the length of the 3rd edge,
+                the 3rd next turn is an integer representing the 3rd next turn (-1 = left, 1 = right, 0 = no turn)
+
         """
         agent_block_position = self._absolute_position_to_block_position(agent_absolute_position)
         closest_edge = self._get_closest_edge(agent_block_position)
         section_relative_position = self._block_to_relative_position(agent_block_position, closest_edge)
 
         if section_relative_position == (-1, -1):
-            return (-1, -1), 0
+            return (-1, -1), 0, 0.0, 0, 0.0, 0
 
         # Get the next turn
-        try:
-            turn = self.turns[self.nodes.index(closest_edge[1]) - 1]
-        except ValueError or IndexError:
-            print("Error: No turn found")
-            turn = 0  # No turn found
-        except Exception as e:
-            print(f"Error: {e}")
+        if closest_edge[1] == self.nodes[-1]:  # Last edge
             turn = 0
+            second_turn = 0
+            third_turn = 0
+            second_edge_length = 0
+            third_edge_length = 0
+        elif closest_edge[1] == self.nodes[-2]:  # Second to last edge
+            turn = self.turns[-1]
+            second_turn = 0
+            third_turn = 0
+            second_edge = [closest_edge[1], self.nodes[self.nodes.index(closest_edge[1]) + 1]]
+            second_edge_length = self._get_edge_length(tuple(second_edge)) / (Config.Game.BLOCK_SIZE * 4)
+            third_edge_length = 0
+        elif closest_edge[1] == self.nodes[-3]:  # Third to last edge
+            turn = self.turns[-2]
+            second_turn = self.turns[-1]
+            third_turn = 0
+            second_edge = [closest_edge[1], self.nodes[self.nodes.index(closest_edge[1]) + 1]]
+            second_edge_length = self._get_edge_length(tuple(second_edge)) / (Config.Game.BLOCK_SIZE * 4)
 
-        return section_relative_position, turn
+            third_edge = [second_edge[1], self.nodes[self.nodes.index(second_edge[1]) + 1]]
+            third_edge_length = self._get_edge_length(tuple(third_edge)) / (Config.Game.BLOCK_SIZE * 4)
+        else:
+            turn = self.turns[self.nodes.index(closest_edge[1]) - 1]
+            second_turn = self.turns[self.nodes.index(closest_edge[1])]
+            third_turn = self.turns[self.nodes.index(closest_edge[1]) + 1]
+
+            second_edge = [closest_edge[1], self.nodes[self.nodes.index(closest_edge[1]) + 1]]
+            second_edge_length = self._get_edge_length(tuple(second_edge)) / (Config.Game.BLOCK_SIZE * 4)
+
+            third_edge = [second_edge[1], self.nodes[self.nodes.index(second_edge[1]) + 1]]
+            third_edge_length = self._get_edge_length(tuple(third_edge)) / (Config.Game.BLOCK_SIZE * 4)
+
+        return section_relative_position, turn, second_edge_length, second_turn, third_edge_length, third_turn
 
 
 

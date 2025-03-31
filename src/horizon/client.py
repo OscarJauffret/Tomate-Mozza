@@ -1,3 +1,4 @@
+import os.path
 import random
 
 import numpy as np
@@ -49,12 +50,19 @@ class HorizonClient(Client):
         self.model_path = shared_dict["model_path"]
         self.manual_epsilon = None
 
-        self.random_states = [os.path.join(Config.Paths.MAP, state) for state in os.listdir(os.path.join(get_states_path(), Config.Paths.MAP)) if state.endswith(".bin")]
+        if not os.path.exists(os.path.join(get_states_path(), Config.Paths.MAP)):
+            print(f"Map directory not found at {os.path.join(get_states_path(), Config.Paths.MAP)}")
+            self.random_states = []
+        else:
+            self.random_states = [os.path.join(Config.Paths.MAP, state) for state in os.listdir(os.path.join(get_states_path(), Config.Paths.MAP)) if state.endswith(".bin")]
 
         self.model.train()
 
     def __str__(self) -> str:
-        return f"x position: {self.current_state[0].item():<8.2f} y position: {self.current_state[1].item():<8.2f} next turn: {self.current_state[2].item():<8} yaw: {self.current_state[3].item():<8.2f}"
+        return (f"x position: {self.current_state[0].item():<8.2f} y position: {self.current_state[1].item():<8.2f} next turn: {self.current_state[2].item():<8} "
+                f"velocity: {self.current_state[3].item():<8.2f} acceleration: {self.current_state[4].item():<8.2f} relative yaw: {self.current_state[5].item():<8.2f} "
+                f"next edge length: {self.current_state[6].item():<8.2f} second turn: {self.current_state[7].item():<8} third edge length: {self.current_state[8].item():<8.2f} "
+                f"third turn: {self.current_state[9].item():<8}")
 
     def load_model(self) -> None:
         if self.model_path.qsize() > 0:
@@ -124,7 +132,7 @@ class HorizonClient(Client):
         self.prev_velocity = current_velocity
 
         agent_absolute_position = (state.position[0], state.position[2])
-        section_relative_position, next_turn = self.agent_position.get_relative_position_and_next_turn(agent_absolute_position)
+        section_relative_position, next_turn, second_edge_length, second_turn, third_edge_length, third_turn = self.agent_position.get_relative_position_and_next_turns(agent_absolute_position)
         relative_yaw = self.agent_position.get_car_orientation(state.yaw_pitch_roll[0], agent_absolute_position)
 
         current_state = torch.tensor([
@@ -133,7 +141,11 @@ class HorizonClient(Client):
             next_turn,
             velocity_norm / 50,
             acceleration_scalar / 15,
-            relative_yaw
+            relative_yaw,
+            second_edge_length,
+            second_turn,
+            third_edge_length,
+            third_turn
         ], dtype=torch.float, device=self.device)
 
         return current_state
@@ -207,9 +219,6 @@ class HorizonClient(Client):
     def remember(self, state, action, reward, next_state, done):
         self.memory.add((state, action, reward, next_state, done)) # No priority, it will take the highest priority by default
 
-    def train_short_memory(self, state, action, reward, next_state, done):
-        self.trainer.train_step(state, action, reward, next_state, done)
-
     def train_long_memory(self):
         batch = self.memory.sample(self.hyperparameters["batch_size"])
         if batch is None:
@@ -245,7 +254,6 @@ class HorizonClient(Client):
             if self.prev_game_state is not None:         # If this is not the first state, train the model
                 current_reward = self.get_reward(iface) - self.penalty
                 if not self.epsilon_dict["manual"]:
-                    # self.train_short_memory(self.prev_game_state.state, self.prev_game_state.action, current_reward, self.current_state, done)
                     self.remember(self.prev_game_state.state, self.prev_game_state.action, current_reward, self.current_state, done)
                 self.reward += current_reward.item()
 

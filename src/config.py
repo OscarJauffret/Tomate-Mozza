@@ -5,7 +5,7 @@ class Config:
 
     class Paths:
         MAP_PREFIX: str = "maps"
-        MAP: str = "horizon"        # Verify that the map here is the same as the one in your .env file
+        MAP: str = "horizon_unlimited"        # Verify that the map here is the same as the one in your .env file
         MAP_BLOCKS_PATH: str = os.path.join(MAP_PREFIX, MAP, "ordered_blocks.json")
         MAP_LAYOUT_PATH: str = os.path.join(MAP_PREFIX, MAP, "layout.txt")
 
@@ -45,10 +45,10 @@ class Config:
 
         TAU: float = 0.005
 
-        ALPHA: float = 0.6
+        ALPHA: float = 0.7
         BETA_START: float = 0.4
         BETA_MAX: float = 1.0
-        BETA_INCREMENT_STEPS: int = 20000
+        BETA_INCREMENT_STEPS: int = 40000
 
         @staticmethod
         def get_hyperparameters():
@@ -69,7 +69,7 @@ class Config:
             }
 
         class Arch:
-            INPUTS_DESC: list[str] = ["section_rel_x", "section_rel_y", "next_turn" ,"velocity", "acceleration", "relative_yaw"]
+            INPUTS_DESC: list[str] = ["section_rel_x", "section_rel_y", "next_turn" ,"velocity", "acceleration", "relative_yaw", "second_edge_length", "second_turn", "third_edge_length", "third_turn"]
             OUTPUTS_DESC: list[str] = ["release", "forward", "right", "left", "forward_right", "forward_left"]
             ACTIVATED_KEYS_PER_OUTPUT: list[tuple[int]] = [(1, 1, 1, 1), (1, 0, 0, 0), (0, 0, 0, 1), (0, 1, 0, 0), (1, 0, 0, 1), (1, 1, 0, 0)]
             REWARD_DESC: str = "distance travelled projected on the section's x axis (progression on the track)"
