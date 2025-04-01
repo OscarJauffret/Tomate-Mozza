@@ -31,7 +31,6 @@ class HorizonClient(Client):
 
         self.memory: PrioritizedReplayBuffer = PrioritizedReplayBuffer(self.hyperparameters["max_memory"], Config.NN.ALPHA, beta=Config.NN.BETA_START)
         self.reward = 0.0
-        self.penalty = torch.tensor(0.0, device=self.device, dtype=torch.float)
         self.epsilon = self.hyperparameters["epsilon_start"]
 
         self.prev_position = None
@@ -39,6 +38,7 @@ class HorizonClient(Client):
         self.current_state = None
         self.prev_game_state: StateAction = None
         self.prev_velocity = None
+        self.has_finished = False
 
         self.iterations = 0
         self.ready = False
@@ -206,10 +206,10 @@ class HorizonClient(Client):
     def determine_done(self, iface: TMInterface):
         state = iface.get_simulation_state()
 
-        self.penalty = torch.tensor(0.0, device=self.device, dtype=torch.float)
         if state.position[1] < 23: # If the car is below the track
             return torch.tensor(1.0, device=self.device, dtype=torch.float)
-        if not state.player_info.finish_not_passed:
+        if self.agent_position.finish_line_crossed((state.position[0], state.position[2])):
+            self.has_finished = True
             return torch.tensor(1.0, device=self.device, dtype=torch.float)
         if self.prev_positions and len(self.prev_positions) == 50 and np.linalg.norm(np.array(self.prev_positions[0]) - np.array(self.prev_positions[-1])) < 5:    # If less than 5 meters were travelled in the last 5 seconds
             return torch.tensor(1.0, device=self.device, dtype=torch.float)
@@ -252,7 +252,7 @@ class HorizonClient(Client):
             done = self.determine_done(iface)
 
             if self.prev_game_state is not None:         # If this is not the first state, train the model
-                current_reward = self.get_reward(iface) - self.penalty
+                current_reward = self.get_reward(iface) 
                 if not self.epsilon_dict["manual"]:
                     self.remember(self.prev_game_state.state, self.prev_game_state.action, current_reward, self.current_state, done)
                 self.reward += current_reward.item()
@@ -284,8 +284,12 @@ class HorizonClient(Client):
                 self.prev_positions.clear()
                 self.prev_game_state = None
                 self.prev_velocity = None
-                iface.horn()
-                iface.respawn()
+                if self.has_finished:
+                    self.has_finished = False
+                    self.launch_map(iface)
+                else:
+                    iface.horn()
+                    iface.respawn()
 
 class StateAction:
     def __init__(self, state, action):
