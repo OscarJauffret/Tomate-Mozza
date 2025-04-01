@@ -84,8 +84,8 @@ class ZQSDKeys:
         self.frame = tk.Frame(self.parent, width=3 * self.frame_size[0], height=3 * self.frame_size[1])
         self.frame.grid(row=self.row, column=self.col, padx=10, pady=10)
 
-        self.q_label = tk.Label(self.frame, text="Q: 0.00", font=("Arial", 10), fg="black")
-        self.q_label.grid(row=0, column=1)
+        self.q_label = tk.Label(self.frame, text="Q: 0.00", font=("Arial", 10), fg="black", anchor="center", justify="center")
+        self.q_label.grid(row=0, column=0, columnspan=3, sticky="ew")
 
         for i, (r, c) in enumerate([(1, 1), (2, 0), (2, 1), (2, 2)]):  # up, left, down, right
             base_color = self.key_colors[i]
