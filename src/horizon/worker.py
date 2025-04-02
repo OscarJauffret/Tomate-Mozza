@@ -9,8 +9,7 @@ class Worker(multiprocessing.Process):
                 shared_dict): 
         super().__init__()
         self.server_id = server_id
-        self.client = HorizonClient(self.server_id, shared_dict) 
-        self.iface = TMInterface(f"TMInterface{self.server_id}")
+        self.shared_dict = shared_dict
         self.choose_map_event = choose_map_event
         self.print_state_event = print_state_event
         self.load_model_event = load_model_event
@@ -22,6 +21,9 @@ class Worker(multiprocessing.Process):
         self.iface.close()
 
     def run(self):
+        self.client = HorizonClient(self.server_id, self.shared_dict) 
+        self.iface = TMInterface(f"TMInterface{self.server_id}")
+
         signal.signal(signal.SIGINT, self.close_signal_handler)
         signal.signal(signal.SIGTERM, self.close_signal_handler)
         self.iface.register(self.client)
