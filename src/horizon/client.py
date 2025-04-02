@@ -201,6 +201,10 @@ class HorizonClient(Client):
         prev_position = self.prev_position
         current_position = iface.get_simulation_state().position[0], iface.get_simulation_state().position[2]
         current_reward = self.agent_position.get_distance_reward(prev_position, current_position)
+        if self.has_finished:
+            current_reward += Config.Game.BLOCK_SIZE
+        if iface.get_simulation_state().position[1] < 23:
+            current_reward -= Config.Game.BLOCK_SIZE
         return torch.tensor(current_reward, device=self.device)
 
     def determine_done(self, iface: TMInterface):
@@ -236,7 +240,7 @@ class HorizonClient(Client):
         self.memory.update_priorities(indices, td_sample)
 
     def on_run_step(self, iface: TMInterface, _time: int) -> None:
-        
+
         if _time == 20:
             if Config.Game.RANDOM_SPAWN:
                 iface.execute_command(f"load_state {random.choice(self.random_states)}")
