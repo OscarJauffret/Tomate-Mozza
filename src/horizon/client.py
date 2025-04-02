@@ -236,7 +236,8 @@ class HorizonClient(Client):
         self.memory.update_priorities(indices, td_sample)
 
     def on_run_step(self, iface: TMInterface, _time: int) -> None:
-        if _time == 0:
+        
+        if _time == 20:
             if Config.Game.RANDOM_SPAWN:
                 iface.execute_command(f"load_state {random.choice(self.random_states)}")
             self.ready = True
@@ -289,7 +290,7 @@ class HorizonClient(Client):
                     self.launch_map(iface)
                 else:
                     iface.horn()
-                    iface.respawn()
+                    iface.execute_command(f"load_state {self.random_states[0]}")    # State 0 of HorizonUnlimited
 
 class StateAction:
     def __init__(self, state, action):
