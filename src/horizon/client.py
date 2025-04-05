@@ -36,7 +36,7 @@ class HorizonClient(Client):
         self.prev_position = None
         self.prev_positions = deque(maxlen=5 * Config.Game.NUMBER_OF_ACTIONS_PER_SECOND)        # 5-second long memory
         self.current_state = None
-        self.prev_game_state: StateAction = None
+        self.n_step_buffer: NStepBuffer = NStepBuffer()
         self.prev_velocity = None
         self.has_finished = False
 
@@ -257,19 +257,22 @@ class HorizonClient(Client):
             start_time = time.time()
             self.current_state = self.get_state(iface)  # Get the current state
             done = self.determine_done(iface)
-
-            if self.prev_game_state is not None:         # If this is not the first state, train the model
+            current_reward = 0
+            if len(self.n_step_buffer) > 0:
                 current_reward = self.get_reward(iface)
-                if not self.epsilon_dict["manual"]:
-                    self.remember(self.prev_game_state.state, self.prev_game_state.action, current_reward, self.current_state, done)
                 self.reward += current_reward.item()
 
-            action = self.get_action(self.current_state)                                    # Get the action
-            self.prev_game_state = StateAction(self.current_state, action)       # Save the current state and action for the next iteration
+            action = self.get_action(self.current_state)                             
+            self.n_step_buffer.add(self.current_state, action, current_reward)        
             self.prev_position = iface.get_simulation_state().position[0], iface.get_simulation_state().position[2] # Save the previous position for the reward's calculation
             self.prev_positions.append(self.prev_position)
 
             self.send_input(iface, action)                # Send the action to the game
+
+            if (self.n_step_buffer.is_full() or done) and not self.epsilon_dict["manual"]:
+                state, action, reward = self.n_step_buffer.get_transition()
+                next_state = self.current_state
+                self.remember(state, action, reward, next_state, done)
 
             end_time = time.time()
             total_time = end_time - start_time
@@ -289,7 +292,7 @@ class HorizonClient(Client):
                 self.reward = 0.0
                 self.prev_position = None
                 self.prev_positions.clear()
-                self.prev_game_state = None
+                self.n_step_buffer.clear()
                 self.prev_velocity = None
                 if self.has_finished:
                     self.has_finished = False
@@ -298,7 +301,35 @@ class HorizonClient(Client):
                     iface.horn()
                     iface.execute_command(f"load_state {self.random_states[0]}")    # State 0 of HorizonUnlimited
 
-class StateAction:
-    def __init__(self, state, action):
-        self.state = state
-        self.action = action
+class NStepBuffer:
+    def __init__(self):
+        self.states = deque(maxlen=Config.NN.N_STEPS)
+        self.actions = deque(maxlen=Config.NN.N_STEPS)
+        self.rewards = deque(maxlen=Config.NN.N_STEPS)
+        self.gammas = Config.NN.GAMMA ** np.arange(Config.NN.N_STEPS) 
+
+    def __len__(self):
+        return len(self.states)
+
+    def clear(self):
+        self.states.clear()
+        self.actions.clear()
+        self.rewards.clear()
+
+    def get_transition(self):
+        return self.states[0], self.actions[0], self.cumulative_reward()
+    
+    def is_full(self):
+        return len(self.states) == Config.NN.N_STEPS
+
+    def cumulative_reward(self):
+        return sum([self.rewards[i] * self.gammas[i] for i in range(len(self.rewards))])
+        
+
+    def add(self, state, action, reward):
+        self.states.append(state)
+        self.actions.append(action)
+        self.rewards.append(reward)
+
+    
+
