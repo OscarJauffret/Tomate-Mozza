@@ -294,24 +294,3 @@ class AgentPosition:
         section_angle = direction_to_angle[direction]
         theta = (section_angle - yaw)
         return ((theta + np.pi) % (2 * np.pi) - np.pi) / np.pi
-
-    def finish_line_crossed(self, agent_absolute_position: Tuple[float, float]) -> bool:
-        """
-        Check if the agent has crossed the finish line
-        :param agent_absolute_position: the absolute position of the agent
-        :return: True if the agent has crossed the finish line, False otherwise
-        """
-        agent_block_position = self._absolute_position_to_block_position(agent_absolute_position)
-        closest_edge = self._get_closest_edge(agent_block_position)
-
-        if closest_edge == ((-1, -1), (-1, -1)):
-            return False
-        
-        if closest_edge[1] != self.nodes[-1]:
-            return False
-        
-        agent_relative_pos = self._block_to_relative_position(agent_block_position, closest_edge)
-        if agent_relative_pos[0] >= 1:
-            return True
-
-        return False

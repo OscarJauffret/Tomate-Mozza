@@ -201,10 +201,10 @@ class HorizonClient(Client):
         prev_position = self.prev_position
         current_position = iface.get_simulation_state().position[0], iface.get_simulation_state().position[2]
         current_reward = self.agent_position.get_distance_reward(prev_position, current_position)
-        if self.has_finished:
-            current_reward += Config.Game.BLOCK_SIZE
-        if iface.get_simulation_state().position[1] < 23:
-            current_reward -= Config.Game.BLOCK_SIZE
+        # if self.has_finished:
+        #     current_reward += Config.Game.BLOCK_SIZE
+        # if iface.get_simulation_state().position[1] < 23:
+        #     current_reward -= Config.Game.BLOCK_SIZE
         return torch.tensor(current_reward, device=self.device)
 
     def determine_done(self, iface: TMInterface):
@@ -212,9 +212,11 @@ class HorizonClient(Client):
 
         if state.position[1] < 23: # If the car is below the track
             return torch.tensor(1.0, device=self.device, dtype=torch.float)
-        if self.agent_position.finish_line_crossed((state.position[0], state.position[2])):
+
+        if state.player_info.race_finished:
             self.has_finished = True
             return torch.tensor(1.0, device=self.device, dtype=torch.float)
+
         if self.prev_positions and len(self.prev_positions) == 50 and np.linalg.norm(np.array(self.prev_positions[0]) - np.array(self.prev_positions[-1])) < 5:    # If less than 5 meters were travelled in the last 5 seconds
             return torch.tensor(1.0, device=self.device, dtype=torch.float)
 
@@ -257,7 +259,7 @@ class HorizonClient(Client):
             done = self.determine_done(iface)
 
             if self.prev_game_state is not None:         # If this is not the first state, train the model
-                current_reward = self.get_reward(iface) 
+                current_reward = self.get_reward(iface)
                 if not self.epsilon_dict["manual"]:
                     self.remember(self.prev_game_state.state, self.prev_game_state.action, current_reward, self.current_state, done)
                 self.reward += current_reward.item()

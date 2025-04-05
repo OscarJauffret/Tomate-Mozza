@@ -5,7 +5,7 @@ class Config:
 
     class Paths:
         MAP_PREFIX: str = "maps"
-        MAP: str = "horizon_unlimited"        # Verify that the map here is the same as the one in your .env file
+        MAP: str = "short_horizon"        # Verify that the map here is the same as the one in your .env file
         MAP_BLOCKS_PATH: str = os.path.join(MAP_PREFIX, MAP, "ordered_blocks.json")
         MAP_LAYOUT_PATH: str = os.path.join(MAP_PREFIX, MAP, "layout.txt")
 
@@ -56,6 +56,7 @@ class Config:
                 "learning_rate": Config.NN.LEARNING_RATE,
                 "gamma": Config.NN.GAMMA,
                 "max_memory": Config.NN.MAX_MEMORY,
+                "min_memory": Config.NN.MIN_MEMORY,
                 "batch_size": Config.NN.BATCH_SIZE,
                 "epsilon_start": Config.NN.EPSILON_START,
                 "epsilon_end": Config.NN.EPSILON_END,
