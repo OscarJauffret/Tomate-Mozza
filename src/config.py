@@ -5,7 +5,7 @@ class Config:
 
     class Paths:
         MAP_PREFIX: str = "maps"
-        MAP: str = "horizon_unlimited"        # Verify that the map here is the same as the one in your .env file
+        MAP: str = "zigzags"        # Verify that the map here is the same as the one in your .env file
         MAP_BLOCKS_PATH: str = os.path.join(MAP_PREFIX, MAP, "ordered_blocks.json")
         MAP_LAYOUT_PATH: str = os.path.join(MAP_PREFIX, MAP, "layout.txt")
 
@@ -41,16 +41,16 @@ class Config:
         EPSILON_START: float = 0.9
         EPSILON_END: float = 0.05
         EPSILON_DECAY: int = 10000
-        UPDATE_TARGET_EVERY: int = 1000
+        UPDATE_TARGET_EVERY: int = 1
 
-        TAU: float = 0.005
+        TAU: float = 0.02
 
         ALPHA: float = 0.7
         BETA_START: float = 0.4
         BETA_MAX: float = 1.0
         BETA_INCREMENT_STEPS: int = 40000
 
-        N_STEPS: int = 20 # 2 Seconds
+        N_STEPS: int = 50 # 5 Seconds
 
         @staticmethod
         def get_hyperparameters():

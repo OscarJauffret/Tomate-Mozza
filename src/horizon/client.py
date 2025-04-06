@@ -31,6 +31,7 @@ class HorizonClient(Client):
 
         self.memory: PrioritizedReplayBuffer = PrioritizedReplayBuffer(self.hyperparameters["max_memory"], Config.NN.ALPHA, beta=Config.NN.BETA_START)
         self.reward = 0.0
+        self.penalty = 0.0
         self.epsilon = self.hyperparameters["epsilon_start"]
 
         self.prev_position = None
@@ -203,14 +204,14 @@ class HorizonClient(Client):
         current_reward = self.agent_position.get_distance_reward(prev_position, current_position)
         if self.has_finished:
             current_reward += Config.Game.BLOCK_SIZE
-        # if iface.get_simulation_state().position[1] < 23:
-        #     current_reward -= Config.Game.BLOCK_SIZE
         return torch.tensor(current_reward, device=self.device)
 
     def determine_done(self, iface: TMInterface):
         state = iface.get_simulation_state()
 
+        self.penalty = 0.0
         if state.position[1] < 23: # If the car is below the track
+            self.penalty = torch.tensor(-Config.Game.BLOCK_SIZE, device=self.device, dtype=torch.float)
             return torch.tensor(1.0, device=self.device, dtype=torch.float)
 
         if state.player_info.race_finished:
@@ -218,6 +219,7 @@ class HorizonClient(Client):
             return torch.tensor(1.0, device=self.device, dtype=torch.float)
 
         if self.prev_positions and len(self.prev_positions) == 50 and np.linalg.norm(np.array(self.prev_positions[0]) - np.array(self.prev_positions[-1])) < 5:    # If less than 5 meters were travelled in the last 5 seconds
+            self.penalty = torch.tensor(-Config.Game.BLOCK_SIZE, device=self.device, dtype=torch.float)
             return torch.tensor(1.0, device=self.device, dtype=torch.float)
 
         return torch.tensor(0.0, device=self.device, dtype=torch.float)
@@ -242,7 +244,6 @@ class HorizonClient(Client):
         self.memory.update_priorities(indices, td_sample)
 
     def on_run_step(self, iface: TMInterface, _time: int) -> None:
-
         if _time == 20:
             if Config.Game.RANDOM_SPAWN:
                 iface.execute_command(f"load_state {random.choice(self.random_states)}")
@@ -259,7 +260,7 @@ class HorizonClient(Client):
             done = self.determine_done(iface)
             current_reward = 0
             if len(self.n_step_buffer) > 0:
-                current_reward = self.get_reward(iface)
+                current_reward = self.get_reward(iface) + self.penalty
                 self.reward += current_reward.item()
 
             action = self.get_action(self.current_state)                             
@@ -269,7 +270,7 @@ class HorizonClient(Client):
 
             self.send_input(iface, action)                # Send the action to the game
 
-            if (self.n_step_buffer.is_full() or done) and not self.epsilon_dict["manual"]:
+            if self.n_step_buffer.is_full() and not self.epsilon_dict["manual"]:
                 state, action, reward = self.n_step_buffer.get_transition()
                 next_state = self.current_state
                 self.remember(state, action, reward, next_state, done)
@@ -282,6 +283,12 @@ class HorizonClient(Client):
             if done:
                 self.ready = False
                 if not self.epsilon_dict["manual"]:
+                    while not self.n_step_buffer.is_empty():
+                        state, action, reward = self.n_step_buffer.get_transition()
+                        next_state = self.current_state
+                        self.n_step_buffer.pop_transition()
+                        self.remember(state, action, reward, next_state, done)
+
                     self.iterations += 1
                     self.rewards_queue.put(self.reward)
                     self.logger.add_run(self.iterations, _time, self.reward)
@@ -319,12 +326,19 @@ class NStepBuffer:
     def get_transition(self):
         return self.states[0], self.actions[0], self.cumulative_reward()
     
+    def pop_transition(self):
+        self.states.popleft()
+        self.actions.popleft()
+        self.rewards.popleft()
+
     def is_full(self):
         return len(self.states) == Config.NN.N_STEPS
 
+    def is_empty(self):
+        return len(self.states) == 0
+
     def cumulative_reward(self):
         return sum([self.rewards[i] * self.gammas[i] for i in range(len(self.rewards))])
-        
 
     def add(self, state, action, reward):
         self.states.append(state)
