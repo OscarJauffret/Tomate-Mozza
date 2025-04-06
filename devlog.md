@@ -145,3 +145,10 @@ Launch multiple clients at the same time, logging in, launching the map and focu
 - Added a priority replay buffer. The priority is based on the huber loss between the target and the prediction.
 - Changed the target update to 2000 iterations.
 - Removed the train_short memory.
+
+---
+
+### 5 April 2025, 2h
+- Tried several different discount factors: 0.9, 0.96 and 0.99. The last one seems to be the best, but we don't know why.
+- Tried implementing n-step learning. We are launching training to see if it works.
+- Made a simple map that is just a series of turns, each separated by the same distance. We will use this map because it is easier for the agent to learn.
