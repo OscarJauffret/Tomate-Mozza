@@ -6,6 +6,7 @@ import json
 
 from tminterface.client import Client
 from tminterface.interface import TMInterface
+from tminterface.structs import SimStateData
 from collections import deque
 import shutil
 
@@ -31,7 +32,6 @@ class HorizonClient(Client):
 
         self.memory: PrioritizedReplayBuffer = PrioritizedReplayBuffer(self.hyperparameters["max_memory"], Config.NN.ALPHA, beta=Config.NN.BETA_START)
         self.reward = 0.0
-        self.penalty = 0.0
         self.epsilon = self.hyperparameters["epsilon_start"]
 
         self.prev_position = None
@@ -118,9 +118,8 @@ class HorizonClient(Client):
 
         print(f"Model saved to {model_path} and in the latest model directory")
 
-    def get_state(self, iface: TMInterface):
-        state = iface.get_simulation_state()
-        current_velocity = np.array(state.velocity)
+    def get_state(self, simulation_state: SimStateData) -> torch.Tensor:
+        current_velocity = np.array(simulation_state.velocity)
 
         acceleration_scalar = 0
         velocity_norm = 0
@@ -132,9 +131,9 @@ class HorizonClient(Client):
                 acceleration_scalar = np.dot(delta_v, direction) / (Config.Game.INTERVAL_BETWEEN_ACTIONS / 1000)
         self.prev_velocity = current_velocity
 
-        agent_absolute_position = (state.position[0], state.position[2])
+        agent_absolute_position = (simulation_state.position[0], simulation_state.position[2])
         section_relative_position, next_turn, second_edge_length, second_turn, third_edge_length, third_turn = self.agent_position.get_relative_position_and_next_turns(agent_absolute_position)
-        relative_yaw = self.agent_position.get_car_orientation(state.yaw_pitch_roll[0], agent_absolute_position)
+        relative_yaw = self.agent_position.get_car_orientation(simulation_state.yaw_pitch_roll[0], agent_absolute_position)
 
         current_state = torch.tensor([
             section_relative_position[0],
@@ -196,30 +195,26 @@ class HorizonClient(Client):
             case _:
                 iface.set_input_state(accelerate=False, left=False, right=False)
 
-    def get_reward(self, iface: TMInterface):
+    def get_reward(self, simulation_state: SimStateData) -> torch.Tensor:
         if self.prev_position is None:
             return torch.tensor(0, device=self.device)
         prev_position = self.prev_position
-        current_position = iface.get_simulation_state().position[0], iface.get_simulation_state().position[2]
+        current_position = (simulation_state.position[0], simulation_state.position[2])
         current_reward = self.agent_position.get_distance_reward(prev_position, current_position)
         if self.has_finished:
             current_reward += Config.Game.BLOCK_SIZE
         return torch.tensor(current_reward, device=self.device)
 
-    def determine_done(self, iface: TMInterface):
-        state = iface.get_simulation_state()
+    def determine_done(self, simulation_state: SimStateData) -> torch.Tensor:
 
-        self.penalty = 0.0
-        if state.position[1] < 23: # If the car is below the track
-            self.penalty = torch.tensor(-Config.Game.BLOCK_SIZE, device=self.device, dtype=torch.float)
+        if simulation_state.position[1] < 23: # If the car is below the track
             return torch.tensor(1.0, device=self.device, dtype=torch.float)
 
-        if state.player_info.race_finished:
+        if simulation_state.player_info.race_finished:
             self.has_finished = True
             return torch.tensor(1.0, device=self.device, dtype=torch.float)
 
         if self.prev_positions and len(self.prev_positions) == 50 and np.linalg.norm(np.array(self.prev_positions[0]) - np.array(self.prev_positions[-1])) < 5:    # If less than 5 meters were travelled in the last 5 seconds
-            self.penalty = torch.tensor(-Config.Game.BLOCK_SIZE, device=self.device, dtype=torch.float)
             return torch.tensor(1.0, device=self.device, dtype=torch.float)
 
         return torch.tensor(0.0, device=self.device, dtype=torch.float)
@@ -256,16 +251,17 @@ class HorizonClient(Client):
 
         if _time >= 0 and _time % Config.Game.INTERVAL_BETWEEN_ACTIONS == 0 and self.ready:
             start_time = time.time()
-            self.current_state = self.get_state(iface)  # Get the current state
-            done = self.determine_done(iface)
+            simulation_state = iface.get_simulation_state()
+            self.current_state = self.get_state(simulation_state)  # Get the current state
+            done = self.determine_done(simulation_state)
             current_reward = 0
             if len(self.n_step_buffer) > 0:
-                current_reward = self.get_reward(iface) + self.penalty
+                current_reward = self.get_reward(simulation_state)
                 self.reward += current_reward.item()
 
             action = self.get_action(self.current_state)                             
             self.n_step_buffer.add(self.current_state, action, current_reward)        
-            self.prev_position = iface.get_simulation_state().position[0], iface.get_simulation_state().position[2] # Save the previous position for the reward's calculation
+            self.prev_position = simulation_state.position[0], simulation_state.position[2]  # Get the current position
             self.prev_positions.append(self.prev_position)
 
             self.send_input(iface, action)                # Send the action to the game

@@ -9,6 +9,7 @@ from time import sleep
 from .tm_launcher import TMLauncher
 
 load_dotenv()
+profile_times = {}
 
 def get_executable_path() -> tuple[str, str]:
     return os.getenv("EXECUTABLE"), os.getenv("EXECUTABLE_PATH")
@@ -56,6 +57,13 @@ def profile_time(func):
         start_time = time.time()
         result = func(*args, **kwargs)
         end_time = time.time()
-        print(f"{func.__name__} took {(end_time - start_time) * 1000:.2f}ms to execute")
+        if func.__name__ not in profile_times:
+            profile_times[func.__name__] = []
+        profile_times[func.__name__].append(end_time - start_time)
         return result
     return wrapper
+
+def print_profile_times():
+    for func_name, times in profile_times.items():
+        avg_time = sum(times) / len(times)
+        print(f"{func_name}: {avg_time:.4f} seconds (called {len(times)} times)")
