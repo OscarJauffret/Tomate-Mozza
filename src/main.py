@@ -24,7 +24,7 @@ if __name__ == "__main__":
     manager = multiprocessing.Manager()
     outputs = Config.NN.Arch.OUTPUTS_DESC
     shared_dict = manager.dict({
-                                "epsilon": manager.dict({"value": Config.NN.EPSILON_START, "manual": False}),
+                                "eval": False,
                                 "reward": manager.Queue(),
                                 "q_values": manager.dict({outputs[0]: 0, outputs[1]: 0, outputs[2]: 0, outputs[3]: 0, outputs[4]: 0, outputs[5]: 0, "is_random": False}),
                                 "model_path": manager.Queue(),

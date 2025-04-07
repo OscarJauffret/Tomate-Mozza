@@ -32,9 +32,7 @@ class Interface:
         self.quit_event = quit_event
         self.shared_dict = shared_dict
 
-        self.epsilon_scale = None
-    
-        self.epsilon_toggle = tk.IntVar(value=0)
+        self.evaluation_toggle_variable = tk.IntVar(value=0)
 
         self.game_geometry = (640, 480)
         self.graph_geometry = (640, 480)
@@ -42,7 +40,6 @@ class Interface:
         self.create_game_frame()
         self.create_graph_frame()
         self.create_button_frame()
-        self.create_epsilon_scale()
         self.create_actions_squares()
         self.create_reward_label()
 
@@ -95,19 +92,12 @@ class Interface:
         self.quit_button = ttk.Button(self.button_frame, text="Quit", command=self.close_window)
         self.quit_button.grid(row=0, column=4, padx=5, sticky="nsew")
 
-        self.toggle_epsilon_scale = tk.Checkbutton(self.button_frame, text="Manual Epsilon", command=self.send_manual_epsilon, 
-                                                   variable=self.epsilon_toggle)
-        self.toggle_epsilon_scale.grid(row=0, column=5, padx=5, sticky="nsew")
+        self.evaluation_toggle = tk.Checkbutton(self.button_frame, text="Manual Epsilon", command=self.send_manual_epsilon,
+                                                variable=self.evaluation_toggle_variable)
+        self.evaluation_toggle.grid(row=0, column=5, padx=5, sticky="nsew")
 
         self.root.grid_columnconfigure(0, weight=1)
         self.root.grid_rowconfigure(0, weight=1)
-
-    def create_epsilon_scale(self):
-        """Create the scale"""
-        self.epsilon_scale = tk.Scale(self.root, from_=1, to=0, orient="horizontal",
-                                    tickinterval=0.1, length=400, label="Epsilon",
-                                    resolution=0.01, command=self.send_manual_epsilon)
-        self.epsilon_scale.grid(row=1, column=0, padx=5, sticky="nsew")
 
     def create_reward_label(self):
         """Create the reward label"""
@@ -119,11 +109,7 @@ class Interface:
 
     def send_manual_epsilon(self, new_epsilon_value=None):
         """Send the manual epsilon value to the client"""
-        if self.epsilon_toggle.get() == 1:  
-            self.shared_dict["epsilon"]["value"] = self.epsilon_scale.get()
-            self.shared_dict["epsilon"]["manual"] = True
-        else:
-            self.shared_dict["epsilon"]["manual"] = False
+        self.shared_dict["eval"] = self.evaluation_toggle_variable.get()
 
     def update_interface(self):
         if not self.shared_dict["reward"].empty():
@@ -131,11 +117,8 @@ class Interface:
             if reward > self.best_reward:
                 self.best_reward = reward
                 self.best_reward_label["text"] = f"Best Reward: {self.best_reward:.2f}"
-            if not self.shared_dict["epsilon"]["manual"]:
+            if not self.shared_dict["eval"]:
                 self.graph.add_point(reward)
-
-        if not self.shared_dict["epsilon"]["manual"]:
-            self.epsilon_scale.set(self.shared_dict["epsilon"]["value"])
 
         self.action_keys.update_keys(self.shared_dict["q_values"])
         self.after_id = self.root.after(100, self.update_interface)

@@ -5,14 +5,16 @@ class Config:
 
     class Paths:
         MAP_PREFIX: str = "maps"
-        MAP: str = "horizon_unlimited"        # Verify that the map here is the same as the one in your .env file
+        MAP: str = "zigzags"        # Verify that the map here is the same as the one in your .env file
         MAP_BLOCKS_PATH: str = os.path.join(MAP_PREFIX, MAP, "ordered_blocks.json")
         MAP_LAYOUT_PATH: str = os.path.join(MAP_PREFIX, MAP, "layout.txt")
 
         MODELS_PATH: str = "models/"
         LATEST_MODEL_PATH: str = os.path.join(MODELS_PATH, "latest")
         STAT_FILE_NAME: str = "stats.json"
-        MODEL_FILE_NAME: str = "model.pth"
+        # MODEL_FILE_NAME: str = "model.pth"
+        ACTOR_FILE_NAME: str = "actor.pth"
+        CRITIC_FILE_NAME: str = "critic.pth"
 
         @staticmethod
         def get_map():
@@ -34,13 +36,12 @@ class Config:
 
     class NN:
         LEARNING_RATE: float = 0.001
-        GAMMA: float = 0.97
-        MAX_MEMORY: int = 100_000
-        MIN_MEMORY: int = 10_000
-        BATCH_SIZE: int = 128
-        EPSILON_START: float = 0.9
-        EPSILON_END: float = 0.05
-        EPSILON_DECAY: int = 10000
+        GAMMA: float = 0.99
+        LAMBDA: float = 0.95
+        EPSILON: float = 0.2
+        C1: float = 1
+        MEMORY_SIZE: int = 128
+        BATCH_SIZE: int = 32
         UPDATE_TARGET_EVERY: int = 1
 
         TAU: float = 0.02
@@ -57,12 +58,11 @@ class Config:
             return {
                 "learning_rate": Config.NN.LEARNING_RATE,
                 "gamma": Config.NN.GAMMA,
-                "max_memory": Config.NN.MAX_MEMORY,
-                "min_memory": Config.NN.MIN_MEMORY,
+                "lambda": Config.NN.LAMBDA,
+                "epsilon": Config.NN.EPSILON,
+                "c1": Config.NN.C1,
+                "memory_size": Config.NN.MEMORY_SIZE,
                 "batch_size": Config.NN.BATCH_SIZE,
-                "epsilon_start": Config.NN.EPSILON_START,
-                "epsilon_end": Config.NN.EPSILON_END,
-                "epsilon_decay": Config.NN.EPSILON_DECAY,
                 "update_target_every": Config.NN.UPDATE_TARGET_EVERY,
                 "tau": Config.NN.TAU,
                 "alpha": Config.NN.ALPHA,

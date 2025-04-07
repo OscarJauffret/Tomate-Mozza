@@ -21,7 +21,7 @@ class Worker(multiprocessing.Process):
         self.iface.close()
 
     def run(self):
-        self.client = HorizonClient(self.server_id, self.shared_dict) 
+        self.client = HorizonClient(self.shared_dict)
         self.iface = TMInterface(f"TMInterface{self.server_id}")
 
         signal.signal(signal.SIGINT, self.close_signal_handler)
