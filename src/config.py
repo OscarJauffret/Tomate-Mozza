@@ -68,7 +68,8 @@ class Config:
                 "alpha": Config.NN.ALPHA,
                 "beta_start": Config.NN.BETA_START,
                 "beta_max": Config.NN.BETA_MAX,
-                "beta_increment_steps": Config.NN.BETA_INCREMENT_STEPS
+                "beta_increment_steps": Config.NN.BETA_INCREMENT_STEPS,
+                "n_steps": Config.NN.N_STEPS
             }
 
         class Arch:
