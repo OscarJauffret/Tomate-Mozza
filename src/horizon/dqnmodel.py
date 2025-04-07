@@ -3,9 +3,9 @@ import torch.nn as nn
 import copy
 from ..config import Config
 
-class Model(nn.Module):
+class DQNModel(nn.Module):
     def __init__(self):
-        super(Model, self).__init__()
+        super(DQNModel, self).__init__()
         self.layer1 = nn.Linear(Config.NN.Arch.INPUT_SIZE, Config.NN.Arch.LAYER_SIZES[0])
         self.layer2 = nn.Linear(Config.NN.Arch.LAYER_SIZES[0], Config.NN.Arch.LAYER_SIZES[1])
         self.output = nn.Linear(Config.NN.Arch.LAYER_SIZES[1], Config.NN.Arch.OUTPUT_SIZE)

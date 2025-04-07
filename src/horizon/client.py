@@ -12,7 +12,7 @@ import shutil
 
 from ..map_interaction.agent_position import AgentPosition
 from ..utils.utils import *
-from .model import Model, QTrainer
+from .dqnmodel import DQNModel, QTrainer
 from ..config import Config
 from ..utils.tm_logger import TMLogger
 from .prioritized_replay_buffer import PrioritizedReplayBuffer
@@ -27,7 +27,7 @@ class HorizonClient(Client):
         print(f"Using device: {self.device}")
 
         self.hyperparameters = Config.NN.get_hyperparameters()
-        self.model = Model().to(self.device)
+        self.model = DQNModel().to(self.device)
         self.trainer = QTrainer(self.model, self.device, self.hyperparameters["learning_rate"], self.hyperparameters["gamma"])
 
         self.memory: PrioritizedReplayBuffer = PrioritizedReplayBuffer(self.hyperparameters["max_memory"], Config.NN.ALPHA, beta=Config.NN.BETA_START)
@@ -80,7 +80,7 @@ class HorizonClient(Client):
         else:
             # Load fresh model with random weights
             self.hyperparameters = Config.NN.get_hyperparameters()
-            self.model = Model().to(self.device)
+            self.model = DQNModel().to(self.device)
             self.trainer = QTrainer(self.model, self.device, self.hyperparameters["learning_rate"], self.hyperparameters["gamma"])
             print("Loaded a fresh model with random weights")
 
