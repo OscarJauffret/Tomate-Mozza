@@ -44,8 +44,9 @@ class RolloutBuffer:
     def generate_batches(self):
         assert self.is_full(), "Rollout buffer is not full. Please fill it before generating batches."
 
-        batch_start = np.arange(0, self.position, self.batch_size)
-        indices = np.arange(self.position, dtype=np.int64)
-        np.random.shuffle(indices)
-        batches = [indices[i:i + self.batch_size] for i in batch_start] # batches is a list of arrays of indices. These indices indicate a batch of states, actions, probs, values, rewards and dones
+        num_batches = self.position // self.batch_size
+
+        indices = torch.randperm(self.position, device=self.device)  # Randomly permute the indices of the buffer
+        batches = indices.view(num_batches, self.batch_size) # batches is a list of arrays of indices. These indices indicate a batch of states, actions, probs, values, rewards and dones
+        print(batches)
         return self.states, self.actions, self.probs, self.values, self.rewards, self.dones, batches
