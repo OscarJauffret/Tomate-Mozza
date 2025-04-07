@@ -30,14 +30,14 @@ class HorizonClient(Client):
         self.model = Model().to(self.device)
         self.trainer = QTrainer(self.model, self.device, self.hyperparameters["learning_rate"], self.hyperparameters["gamma"])
 
-        self.memory: PrioritizedReplayBuffer = PrioritizedReplayBuffer(self.hyperparameters["max_memory"], Config.NN.ALPHA, beta=Config.NN.BETA_START)
+        self.memory = PrioritizedReplayBuffer(self.hyperparameters["max_memory"], alpha=self.hyperparameters["alpha"], beta=self.hyperparameters["beta_start"]) 
         self.reward = 0.0
         self.epsilon = self.hyperparameters["epsilon_start"]
 
         self.prev_position = None
         self.prev_positions = deque(maxlen=5 * Config.Game.NUMBER_OF_ACTIONS_PER_SECOND)        # 5-second long memory
         self.current_state = None
-        self.n_step_buffer: NStepBuffer = NStepBuffer()
+        self.n_step_buffer: NStepBuffer = NStepBuffer(self.hyperparameters["n_steps"])
         self.prev_velocity = None
         self.has_finished = False
 
@@ -73,6 +73,8 @@ class HorizonClient(Client):
                 self.hyperparameters = self.load_hyperparameters(path)
                 self.model.load_state_dict(torch.load(model_pth, map_location=self.device))
                 self.trainer = QTrainer(self.model, self.device, self.hyperparameters["learning_rate"], self.hyperparameters["gamma"])
+                self.n_step_buffer = NStepBuffer(self.hyperparameters["n_steps"])
+                self.memory = PrioritizedReplayBuffer(self.hyperparameters["max_memory"], alpha=self.hyperparameters["alpha"], beta=self.hyperparameters["beta_start"]) 
                 self.logger.load(os.path.join(path, Config.Paths.STAT_FILE_NAME))
                 print(f"Model loaded from {model_pth}")
             else:
@@ -82,6 +84,8 @@ class HorizonClient(Client):
             self.hyperparameters = Config.NN.get_hyperparameters()
             self.model = Model().to(self.device)
             self.trainer = QTrainer(self.model, self.device, self.hyperparameters["learning_rate"], self.hyperparameters["gamma"])
+            self.n_step_buffer = NStepBuffer(self.hyperparameters["n_steps"])
+            self.memory = PrioritizedReplayBuffer(self.hyperparameters["max_memory"], alpha=self.hyperparameters["alpha"], beta=self.hyperparameters["beta_start"]) 
             print("Loaded a fresh model with random weights")
 
     def load_hyperparameters(self, path: str) -> dict:
@@ -305,11 +309,12 @@ class HorizonClient(Client):
                     iface.execute_command(f"load_state {self.random_states[0]}")    # State 0 of HorizonUnlimited
 
 class NStepBuffer:
-    def __init__(self):
-        self.states = deque(maxlen=Config.NN.N_STEPS)
-        self.actions = deque(maxlen=Config.NN.N_STEPS)
-        self.rewards = deque(maxlen=Config.NN.N_STEPS)
-        self.gammas = Config.NN.GAMMA ** np.arange(Config.NN.N_STEPS) 
+    def __init__(self, n_steps:int) -> None:
+        self.n_steps = n_steps
+        self.states = deque(maxlen=self.n_steps)
+        self.actions = deque(maxlen=self.n_steps)
+        self.rewards = deque(maxlen=self.n_steps)
+        self.gammas = Config.NN.GAMMA ** np.arange(self.n_steps)
 
     def __len__(self):
         return len(self.states)
@@ -328,7 +333,7 @@ class NStepBuffer:
         self.rewards.popleft()
 
     def is_full(self):
-        return len(self.states) == Config.NN.N_STEPS
+        return len(self.states) == self.n_steps
 
     def is_empty(self):
         return len(self.states) == 0

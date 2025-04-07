@@ -17,7 +17,8 @@
         "alpha": 0.7,
         "beta_start": 0.4,
         "beta_max": 1.0,
-        "beta_increment_steps": 40000
+        "beta_increment_steps": 40000,
+        "n_steps": 25
     },
     "device": "NVIDIA GeForce RTX 2060 SUPER",
     "architecture": {
@@ -51,30 +52,30 @@
         "reward_description": "distance travelled projected on the section's x axis (progression on the track)"
     },
     "statistics": {
-        "total number of runs": 30479,
+        "total number of runs": 31391,
         "training time": {
-            "hours": 80.47294444444445,
-            "milliseconds": 289702600
+            "hours": 84.61808333333333,
+            "milliseconds": 304625100
         },
-        "average reward": 245.247198174262,
-        "best reward": 1014.3624392747879,
+        "average reward": 252.39610678774267,
+        "best reward": 1071.405382156372,
         "recent average reward": {
             "percentage of runs considered": 0.1,
-            "number of runs considered": 3048,
-            "average reward": 416.3127667602024
+            "number of runs considered": 3140,
+            "average reward": 442.42970899757114
         },
         "lowest rewards average": {
             "percentage of runs considered": 0.1,
             "percentage of low runs considered among the recent ones": 0.1,
-            "number of runs considered": 305,
-            "average reward": 151.33019326712142
+            "number of runs considered": 314,
+            "average reward": 155.90928279415118
         },
         "recent quartiles reward": {
             "percentage of runs considered": 0.1,
-            "number of runs considered": 3048,
-            "first quartile": 258.20551201701164,
-            "second quartile": 401.71488931775093,
-            "third quartile": 619.2611797749996
+            "number of runs considered": 3140,
+            "first quartile": 260.8363186568022,
+            "second quartile": 411.878259986639,
+            "third quartile": 619.9580513089895
         }
     },
     "runs": [
@@ -152472,6 +152473,4566 @@
             "iteration": 30479,
             "run_time": 18100,
             "reward": 619.6918766498566
+        },
+        {
+            "iteration": 30480,
+            "run_time": 6100,
+            "reward": 177.72871458530426
+        },
+        {
+            "iteration": 30481,
+            "run_time": 15400,
+            "reward": 445.4167734980583
+        },
+        {
+            "iteration": 30482,
+            "run_time": 19600,
+            "reward": 620.6088373661041
+        },
+        {
+            "iteration": 30483,
+            "run_time": 9800,
+            "reward": 282.52549731731415
+        },
+        {
+            "iteration": 30484,
+            "run_time": 13700,
+            "reward": 477.451766371727
+        },
+        {
+            "iteration": 30485,
+            "run_time": 18900,
+            "reward": 585.9986509680748
+        },
+        {
+            "iteration": 30486,
+            "run_time": 5900,
+            "reward": 177.66191112995148
+        },
+        {
+            "iteration": 30487,
+            "run_time": 13500,
+            "reward": 422.14878845214844
+        },
+        {
+            "iteration": 30488,
+            "run_time": 21600,
+            "reward": 641.8114422112703
+        },
+        {
+            "iteration": 30489,
+            "run_time": 17000,
+            "reward": 507.88129138946533
+        },
+        {
+            "iteration": 30490,
+            "run_time": 13200,
+            "reward": 421.7127958536148
+        },
+        {
+            "iteration": 30491,
+            "run_time": 17800,
+            "reward": 478.734605461359
+        },
+        {
+            "iteration": 30492,
+            "run_time": 12600,
+            "reward": 414.5718046426773
+        },
+        {
+            "iteration": 30493,
+            "run_time": 17500,
+            "reward": 619.7437521219254
+        },
+        {
+            "iteration": 30494,
+            "run_time": 19500,
+            "reward": 620.6093258857727
+        },
+        {
+            "iteration": 30495,
+            "run_time": 14400,
+            "reward": 475.9949793815613
+        },
+        {
+            "iteration": 30496,
+            "run_time": 18200,
+            "reward": 619.8693926334381
+        },
+        {
+            "iteration": 30497,
+            "run_time": 19200,
+            "reward": 620.7422913312912
+        },
+        {
+            "iteration": 30498,
+            "run_time": 17800,
+            "reward": 618.978189766407
+        },
+        {
+            "iteration": 30499,
+            "run_time": 18600,
+            "reward": 621.0164626836777
+        },
+        {
+            "iteration": 30500,
+            "run_time": 8100,
+            "reward": 216.5830945968628
+        },
+        {
+            "iteration": 30501,
+            "run_time": 8100,
+            "reward": 222.3273594379425
+        },
+        {
+            "iteration": 30502,
+            "run_time": 17900,
+            "reward": 619.614758849144
+        },
+        {
+            "iteration": 30503,
+            "run_time": 14500,
+            "reward": 468.5844172388315
+        },
+        {
+            "iteration": 30504,
+            "run_time": 18400,
+            "reward": 621.1030091643333
+        },
+        {
+            "iteration": 30505,
+            "run_time": 18900,
+            "reward": 624.7646285295486
+        },
+        {
+            "iteration": 30506,
+            "run_time": 12700,
+            "reward": 399.18007999658585
+        },
+        {
+            "iteration": 30507,
+            "run_time": 14100,
+            "reward": 397.15143179893494
+        },
+        {
+            "iteration": 30508,
+            "run_time": 17900,
+            "reward": 619.3479727506638
+        },
+        {
+            "iteration": 30509,
+            "run_time": 6300,
+            "reward": 177.16294658184052
+        },
+        {
+            "iteration": 30510,
+            "run_time": 6000,
+            "reward": 177.127650141716
+        },
+        {
+            "iteration": 30511,
+            "run_time": 6200,
+            "reward": 176.83287024497986
+        },
+        {
+            "iteration": 30512,
+            "run_time": 13400,
+            "reward": 431.31142473220825
+        },
+        {
+            "iteration": 30513,
+            "run_time": 21700,
+            "reward": 622.1446946850047
+        },
+        {
+            "iteration": 30514,
+            "run_time": 20200,
+            "reward": 620.6249200105667
+        },
+        {
+            "iteration": 30515,
+            "run_time": 20100,
+            "reward": 619.7009999752045
+        },
+        {
+            "iteration": 30516,
+            "run_time": 12100,
+            "reward": 363.28029477596283
+        },
+        {
+            "iteration": 30517,
+            "run_time": 13000,
+            "reward": 395.8519550561905
+        },
+        {
+            "iteration": 30518,
+            "run_time": 20500,
+            "reward": 624.7567872405052
+        },
+        {
+            "iteration": 30519,
+            "run_time": 18900,
+            "reward": 619.9664114713669
+        },
+        {
+            "iteration": 30520,
+            "run_time": 5900,
+            "reward": 175.0327810049057
+        },
+        {
+            "iteration": 30521,
+            "run_time": 17700,
+            "reward": 620.6810095310211
+        },
+        {
+            "iteration": 30522,
+            "run_time": 6000,
+            "reward": 141.2194061279297
+        },
+        {
+            "iteration": 30523,
+            "run_time": 14400,
+            "reward": 478.2926704287529
+        },
+        {
+            "iteration": 30524,
+            "run_time": 18800,
+            "reward": 621.3640577793121
+        },
+        {
+            "iteration": 30525,
+            "run_time": 15100,
+            "reward": 485.18768697977066
+        },
+        {
+            "iteration": 30526,
+            "run_time": 12400,
+            "reward": 392.9732903242111
+        },
+        {
+            "iteration": 30527,
+            "run_time": 19000,
+            "reward": 618.4824002981186
+        },
+        {
+            "iteration": 30528,
+            "run_time": 15000,
+            "reward": 484.65444499254227
+        },
+        {
+            "iteration": 30529,
+            "run_time": 8000,
+            "reward": 225.42688286304474
+        },
+        {
+            "iteration": 30530,
+            "run_time": 36800,
+            "reward": 986.4696155488491
+        },
+        {
+            "iteration": 30531,
+            "run_time": 18700,
+            "reward": 619.322611823678
+        },
+        {
+            "iteration": 30532,
+            "run_time": 6600,
+            "reward": 185.7538092136383
+        },
+        {
+            "iteration": 30533,
+            "run_time": 19100,
+            "reward": 620.9530428647995
+        },
+        {
+            "iteration": 30534,
+            "run_time": 10400,
+            "reward": 346.35132467746735
+        },
+        {
+            "iteration": 30535,
+            "run_time": 19500,
+            "reward": 640.2123635709286
+        },
+        {
+            "iteration": 30536,
+            "run_time": 6000,
+            "reward": 177.46135079860687
+        },
+        {
+            "iteration": 30537,
+            "run_time": 6000,
+            "reward": 180.32819020748138
+        },
+        {
+            "iteration": 30538,
+            "run_time": 10000,
+            "reward": 300.08307230472565
+        },
+        {
+            "iteration": 30539,
+            "run_time": 18100,
+            "reward": 620.1579693555832
+        },
+        {
+            "iteration": 30540,
+            "run_time": 18500,
+            "reward": 619.9578682780266
+        },
+        {
+            "iteration": 30541,
+            "run_time": 18600,
+            "reward": 619.9461512565613
+        },
+        {
+            "iteration": 30542,
+            "run_time": 19400,
+            "reward": 619.194592833519
+        },
+        {
+            "iteration": 30543,
+            "run_time": 7900,
+            "reward": 233.06649124622345
+        },
+        {
+            "iteration": 30544,
+            "run_time": 13500,
+            "reward": 431.1712476015091
+        },
+        {
+            "iteration": 30545,
+            "run_time": 19900,
+            "reward": 619.4151709079742
+        },
+        {
+            "iteration": 30546,
+            "run_time": 13800,
+            "reward": 447.09815073013306
+        },
+        {
+            "iteration": 30547,
+            "run_time": 17700,
+            "reward": 619.4605543017387
+        },
+        {
+            "iteration": 30548,
+            "run_time": 21200,
+            "reward": 620.0277818441391
+        },
+        {
+            "iteration": 30549,
+            "run_time": 39900,
+            "reward": 1012.5629976168275
+        },
+        {
+            "iteration": 30550,
+            "run_time": 28400,
+            "reward": 888.2842997610569
+        },
+        {
+            "iteration": 30551,
+            "run_time": 19300,
+            "reward": 620.2117715477943
+        },
+        {
+            "iteration": 30552,
+            "run_time": 19100,
+            "reward": 619.8740647435188
+        },
+        {
+            "iteration": 30553,
+            "run_time": 18500,
+            "reward": 581.0690124034882
+        },
+        {
+            "iteration": 30554,
+            "run_time": 15800,
+            "reward": 480.80938655138016
+        },
+        {
+            "iteration": 30555,
+            "run_time": 17100,
+            "reward": 541.5240431427956
+        },
+        {
+            "iteration": 30556,
+            "run_time": 21300,
+            "reward": 626.7709766030312
+        },
+        {
+            "iteration": 30557,
+            "run_time": 19700,
+            "reward": 620.6534244418144
+        },
+        {
+            "iteration": 30558,
+            "run_time": 5800,
+            "reward": 133.39437428116798
+        },
+        {
+            "iteration": 30559,
+            "run_time": 18700,
+            "reward": 620.176925778389
+        },
+        {
+            "iteration": 30560,
+            "run_time": 20800,
+            "reward": 642.1046167016029
+        },
+        {
+            "iteration": 30561,
+            "run_time": 26400,
+            "reward": 766.2804339230061
+        },
+        {
+            "iteration": 30562,
+            "run_time": 34600,
+            "reward": 890.5204669833183
+        },
+        {
+            "iteration": 30563,
+            "run_time": 8300,
+            "reward": 220.73344492912292
+        },
+        {
+            "iteration": 30564,
+            "run_time": 8400,
+            "reward": 256.4344891309738
+        },
+        {
+            "iteration": 30565,
+            "run_time": 12300,
+            "reward": 391.6124931573868
+        },
+        {
+            "iteration": 30566,
+            "run_time": 12100,
+            "reward": 389.5474691390991
+        },
+        {
+            "iteration": 30567,
+            "run_time": 27100,
+            "reward": 761.6509616971016
+        },
+        {
+            "iteration": 30568,
+            "run_time": 29400,
+            "reward": 884.1349648535252
+        },
+        {
+            "iteration": 30569,
+            "run_time": 10100,
+            "reward": 279.2201198935509
+        },
+        {
+            "iteration": 30570,
+            "run_time": 29500,
+            "reward": 923.3705652952194
+        },
+        {
+            "iteration": 30571,
+            "run_time": 12400,
+            "reward": 391.5184587240219
+        },
+        {
+            "iteration": 30572,
+            "run_time": 32000,
+            "reward": 923.5747483372688
+        },
+        {
+            "iteration": 30573,
+            "run_time": 13200,
+            "reward": 389.1583911180496
+        },
+        {
+            "iteration": 30574,
+            "run_time": 13000,
+            "reward": 392.5286695957184
+        },
+        {
+            "iteration": 30575,
+            "run_time": 12100,
+            "reward": 391.7055480480194
+        },
+        {
+            "iteration": 30576,
+            "run_time": 15100,
+            "reward": 389.5059258341789
+        },
+        {
+            "iteration": 30577,
+            "run_time": 25100,
+            "reward": 760.9529626965523
+        },
+        {
+            "iteration": 30578,
+            "run_time": 17100,
+            "reward": 480.2535262107849
+        },
+        {
+            "iteration": 30579,
+            "run_time": 24400,
+            "reward": 755.4967037439346
+        },
+        {
+            "iteration": 30580,
+            "run_time": 8100,
+            "reward": 258.0100190639496
+        },
+        {
+            "iteration": 30581,
+            "run_time": 16400,
+            "reward": 464.6998962163925
+        },
+        {
+            "iteration": 30582,
+            "run_time": 15800,
+            "reward": 392.5506029725075
+        },
+        {
+            "iteration": 30583,
+            "run_time": 12600,
+            "reward": 394.6686041355133
+        },
+        {
+            "iteration": 30584,
+            "run_time": 31200,
+            "reward": 923.1443688869476
+        },
+        {
+            "iteration": 30585,
+            "run_time": 14000,
+            "reward": 405.6889097094536
+        },
+        {
+            "iteration": 30586,
+            "run_time": 13500,
+            "reward": 402.78286278247833
+        },
+        {
+            "iteration": 30587,
+            "run_time": 22700,
+            "reward": 646.6816840171814
+        },
+        {
+            "iteration": 30588,
+            "run_time": 24500,
+            "reward": 758.7809652686119
+        },
+        {
+            "iteration": 30589,
+            "run_time": 32900,
+            "reward": 922.0972088575363
+        },
+        {
+            "iteration": 30590,
+            "run_time": 12400,
+            "reward": 390.97756457328796
+        },
+        {
+            "iteration": 30591,
+            "run_time": 28900,
+            "reward": 724.2678604573011
+        },
+        {
+            "iteration": 30592,
+            "run_time": 31900,
+            "reward": 889.9225679636002
+        },
+        {
+            "iteration": 30593,
+            "run_time": 8500,
+            "reward": 255.8133373260498
+        },
+        {
+            "iteration": 30594,
+            "run_time": 13400,
+            "reward": 389.5293630361557
+        },
+        {
+            "iteration": 30595,
+            "run_time": 34100,
+            "reward": 893.9183734431863
+        },
+        {
+            "iteration": 30596,
+            "run_time": 13300,
+            "reward": 401.73077917099
+        },
+        {
+            "iteration": 30597,
+            "run_time": 5200,
+            "reward": 106.13731416035444
+        },
+        {
+            "iteration": 30598,
+            "run_time": 32700,
+            "reward": 890.5052955150604
+        },
+        {
+            "iteration": 30599,
+            "run_time": 31600,
+            "reward": 923.5033017843962
+        },
+        {
+            "iteration": 30600,
+            "run_time": 13500,
+            "reward": 393.31358432769775
+        },
+        {
+            "iteration": 30601,
+            "run_time": 21700,
+            "reward": 639.6243897080421
+        },
+        {
+            "iteration": 30602,
+            "run_time": 20900,
+            "reward": 624.064462184906
+        },
+        {
+            "iteration": 30603,
+            "run_time": 13000,
+            "reward": 392.86106991767883
+        },
+        {
+            "iteration": 30604,
+            "run_time": 30100,
+            "reward": 923.9166686534882
+        },
+        {
+            "iteration": 30605,
+            "run_time": 12400,
+            "reward": 392.9836674928665
+        },
+        {
+            "iteration": 30606,
+            "run_time": 14400,
+            "reward": 440.3267877101898
+        },
+        {
+            "iteration": 30607,
+            "run_time": 11300,
+            "reward": 301.0453552007675
+        },
+        {
+            "iteration": 30608,
+            "run_time": 27200,
+            "reward": 762.8293473124504
+        },
+        {
+            "iteration": 30609,
+            "run_time": 20300,
+            "reward": 620.698163151741
+        },
+        {
+            "iteration": 30610,
+            "run_time": 19500,
+            "reward": 620.8476942777634
+        },
+        {
+            "iteration": 30611,
+            "run_time": 13400,
+            "reward": 393.5414893627167
+        },
+        {
+            "iteration": 30612,
+            "run_time": 19800,
+            "reward": 620.0985211730003
+        },
+        {
+            "iteration": 30613,
+            "run_time": 22000,
+            "reward": 638.6648753881454
+        },
+        {
+            "iteration": 30614,
+            "run_time": 22700,
+            "reward": 624.9215518832207
+        },
+        {
+            "iteration": 30615,
+            "run_time": 12400,
+            "reward": 396.86078429222107
+        },
+        {
+            "iteration": 30616,
+            "run_time": 33700,
+            "reward": 923.3500606715679
+        },
+        {
+            "iteration": 30617,
+            "run_time": 20500,
+            "reward": 620.4043401479721
+        },
+        {
+            "iteration": 30618,
+            "run_time": 31500,
+            "reward": 924.3623464107513
+        },
+        {
+            "iteration": 30619,
+            "run_time": 6300,
+            "reward": 178.2823326587677
+        },
+        {
+            "iteration": 30620,
+            "run_time": 32900,
+            "reward": 922.5516376197338
+        },
+        {
+            "iteration": 30621,
+            "run_time": 33900,
+            "reward": 923.8834654986858
+        },
+        {
+            "iteration": 30622,
+            "run_time": 20000,
+            "reward": 619.504376411438
+        },
+        {
+            "iteration": 30623,
+            "run_time": 19300,
+            "reward": 620.6417964100838
+        },
+        {
+            "iteration": 30624,
+            "run_time": 32200,
+            "reward": 923.7253375649452
+        },
+        {
+            "iteration": 30625,
+            "run_time": 16400,
+            "reward": 499.30068588256836
+        },
+        {
+            "iteration": 30626,
+            "run_time": 13100,
+            "reward": 408.61953115463257
+        },
+        {
+            "iteration": 30627,
+            "run_time": 20700,
+            "reward": 620.8467220067978
+        },
+        {
+            "iteration": 30628,
+            "run_time": 15800,
+            "reward": 481.47133833169937
+        },
+        {
+            "iteration": 30629,
+            "run_time": 13000,
+            "reward": 398.9519703388214
+        },
+        {
+            "iteration": 30630,
+            "run_time": 21500,
+            "reward": 620.1527518630028
+        },
+        {
+            "iteration": 30631,
+            "run_time": 26100,
+            "reward": 629.3835245370865
+        },
+        {
+            "iteration": 30632,
+            "run_time": 21100,
+            "reward": 624.4754774570465
+        },
+        {
+            "iteration": 30633,
+            "run_time": 32900,
+            "reward": 923.6933183223009
+        },
+        {
+            "iteration": 30634,
+            "run_time": 16000,
+            "reward": 484.4956713914871
+        },
+        {
+            "iteration": 30635,
+            "run_time": 18700,
+            "reward": 626.2088414430618
+        },
+        {
+            "iteration": 30636,
+            "run_time": 20700,
+            "reward": 623.5700194239616
+        },
+        {
+            "iteration": 30637,
+            "run_time": 12900,
+            "reward": 224.61784360853198
+        },
+        {
+            "iteration": 30638,
+            "run_time": 15700,
+            "reward": 484.8926442563534
+        },
+        {
+            "iteration": 30639,
+            "run_time": 14800,
+            "reward": 432.95164489746094
+        },
+        {
+            "iteration": 30640,
+            "run_time": 14000,
+            "reward": 401.02968841791153
+        },
+        {
+            "iteration": 30641,
+            "run_time": 19600,
+            "reward": 620.6658762097359
+        },
+        {
+            "iteration": 30642,
+            "run_time": 19300,
+            "reward": 620.858593583107
+        },
+        {
+            "iteration": 30643,
+            "run_time": 6400,
+            "reward": 176.35929816961288
+        },
+        {
+            "iteration": 30644,
+            "run_time": 18700,
+            "reward": 621.8591711521149
+        },
+        {
+            "iteration": 30645,
+            "run_time": 19800,
+            "reward": 620.3913062810898
+        },
+        {
+            "iteration": 30646,
+            "run_time": 22200,
+            "reward": 628.2093611955643
+        },
+        {
+            "iteration": 30647,
+            "run_time": 13000,
+            "reward": 412.6112320423126
+        },
+        {
+            "iteration": 30648,
+            "run_time": 18500,
+            "reward": 620.7519624233246
+        },
+        {
+            "iteration": 30649,
+            "run_time": 10300,
+            "reward": 296.4057456254959
+        },
+        {
+            "iteration": 30650,
+            "run_time": 15300,
+            "reward": 491.30943274497986
+        },
+        {
+            "iteration": 30651,
+            "run_time": 11000,
+            "reward": 320.5408215522766
+        },
+        {
+            "iteration": 30652,
+            "run_time": 19200,
+            "reward": 620.835216999054
+        },
+        {
+            "iteration": 30653,
+            "run_time": 6000,
+            "reward": 176.47266149520874
+        },
+        {
+            "iteration": 30654,
+            "run_time": 12800,
+            "reward": 411.4824892282486
+        },
+        {
+            "iteration": 30655,
+            "run_time": 6100,
+            "reward": 176.8537656068802
+        },
+        {
+            "iteration": 30656,
+            "run_time": 19300,
+            "reward": 624.7175085544586
+        },
+        {
+            "iteration": 30657,
+            "run_time": 7100,
+            "reward": 191.07428658008575
+        },
+        {
+            "iteration": 30658,
+            "run_time": 12500,
+            "reward": 406.9153082370758
+        },
+        {
+            "iteration": 30659,
+            "run_time": 17700,
+            "reward": 619.8340003490448
+        },
+        {
+            "iteration": 30660,
+            "run_time": 5900,
+            "reward": 177.6160739660263
+        },
+        {
+            "iteration": 30661,
+            "run_time": 20200,
+            "reward": 619.8905447423458
+        },
+        {
+            "iteration": 30662,
+            "run_time": 19300,
+            "reward": 619.9409911632538
+        },
+        {
+            "iteration": 30663,
+            "run_time": 19000,
+            "reward": 621.2906002998352
+        },
+        {
+            "iteration": 30664,
+            "run_time": 10300,
+            "reward": 338.17227494716644
+        },
+        {
+            "iteration": 30665,
+            "run_time": 16600,
+            "reward": 551.9174501895905
+        },
+        {
+            "iteration": 30666,
+            "run_time": 15000,
+            "reward": 474.938010931015
+        },
+        {
+            "iteration": 30667,
+            "run_time": 10500,
+            "reward": 337.34232926368713
+        },
+        {
+            "iteration": 30668,
+            "run_time": 15700,
+            "reward": 487.4999431371689
+        },
+        {
+            "iteration": 30669,
+            "run_time": 13800,
+            "reward": 412.59186151623726
+        },
+        {
+            "iteration": 30670,
+            "run_time": 14300,
+            "reward": 263.701420920901
+        },
+        {
+            "iteration": 30671,
+            "run_time": 10200,
+            "reward": 287.8344168663025
+        },
+        {
+            "iteration": 30672,
+            "run_time": 8300,
+            "reward": 232.1052085161209
+        },
+        {
+            "iteration": 30673,
+            "run_time": 12100,
+            "reward": 396.14496314525604
+        },
+        {
+            "iteration": 30674,
+            "run_time": 7600,
+            "reward": 216.54919862747192
+        },
+        {
+            "iteration": 30675,
+            "run_time": 6800,
+            "reward": 187.40348827838898
+        },
+        {
+            "iteration": 30676,
+            "run_time": 19500,
+            "reward": 620.7597794532776
+        },
+        {
+            "iteration": 30677,
+            "run_time": 9100,
+            "reward": 287.7798111438751
+        },
+        {
+            "iteration": 30678,
+            "run_time": 6000,
+            "reward": 177.64376163482666
+        },
+        {
+            "iteration": 30679,
+            "run_time": 16000,
+            "reward": 489.6540359258652
+        },
+        {
+            "iteration": 30680,
+            "run_time": 5900,
+            "reward": 142.03642296791077
+        },
+        {
+            "iteration": 30681,
+            "run_time": 10700,
+            "reward": 339.9732800722122
+        },
+        {
+            "iteration": 30682,
+            "run_time": 13500,
+            "reward": 378.6096846014261
+        },
+        {
+            "iteration": 30683,
+            "run_time": 11900,
+            "reward": 407.00686115026474
+        },
+        {
+            "iteration": 30684,
+            "run_time": 10500,
+            "reward": 293.784939289093
+        },
+        {
+            "iteration": 30685,
+            "run_time": 10200,
+            "reward": 326.455450296402
+        },
+        {
+            "iteration": 30686,
+            "run_time": 10400,
+            "reward": 328.9728055000305
+        },
+        {
+            "iteration": 30687,
+            "run_time": 12200,
+            "reward": 403.9800041913986
+        },
+        {
+            "iteration": 30688,
+            "run_time": 20800,
+            "reward": 636.7637973427773
+        },
+        {
+            "iteration": 30689,
+            "run_time": 13000,
+            "reward": 392.4828555583954
+        },
+        {
+            "iteration": 30690,
+            "run_time": 11100,
+            "reward": 275.1219739019871
+        },
+        {
+            "iteration": 30691,
+            "run_time": 32100,
+            "reward": 924.6335034966469
+        },
+        {
+            "iteration": 30692,
+            "run_time": 14100,
+            "reward": 475.16176879405975
+        },
+        {
+            "iteration": 30693,
+            "run_time": 19300,
+            "reward": 620.4416610002518
+        },
+        {
+            "iteration": 30694,
+            "run_time": 14000,
+            "reward": 421.2836375236511
+        },
+        {
+            "iteration": 30695,
+            "run_time": 9500,
+            "reward": 289.1034607887268
+        },
+        {
+            "iteration": 30696,
+            "run_time": 30800,
+            "reward": 924.2300228476524
+        },
+        {
+            "iteration": 30697,
+            "run_time": 13600,
+            "reward": 426.9356143474579
+        },
+        {
+            "iteration": 30698,
+            "run_time": 24300,
+            "reward": 756.5486659258604
+        },
+        {
+            "iteration": 30699,
+            "run_time": 32300,
+            "reward": 923.9824636876583
+        },
+        {
+            "iteration": 30700,
+            "run_time": 16000,
+            "reward": 490.12815856933594
+        },
+        {
+            "iteration": 30701,
+            "run_time": 25300,
+            "reward": 755.3951015770435
+        },
+        {
+            "iteration": 30702,
+            "run_time": 20200,
+            "reward": 621.770977795124
+        },
+        {
+            "iteration": 30703,
+            "run_time": 24500,
+            "reward": 760.7430401593447
+        },
+        {
+            "iteration": 30704,
+            "run_time": 27700,
+            "reward": 765.6090918183327
+        },
+        {
+            "iteration": 30705,
+            "run_time": 26300,
+            "reward": 764.6915293931961
+        },
+        {
+            "iteration": 30706,
+            "run_time": 25300,
+            "reward": 763.05578738451
+        },
+        {
+            "iteration": 30707,
+            "run_time": 30200,
+            "reward": 924.1872982382774
+        },
+        {
+            "iteration": 30708,
+            "run_time": 13100,
+            "reward": 397.8701034784317
+        },
+        {
+            "iteration": 30709,
+            "run_time": 30400,
+            "reward": 924.3155136406422
+        },
+        {
+            "iteration": 30710,
+            "run_time": 32700,
+            "reward": 923.7044299840927
+        },
+        {
+            "iteration": 30711,
+            "run_time": 27900,
+            "reward": 757.3050980269909
+        },
+        {
+            "iteration": 30712,
+            "run_time": 31800,
+            "reward": 891.3695058822632
+        },
+        {
+            "iteration": 30713,
+            "run_time": 6100,
+            "reward": 174.85942089557648
+        },
+        {
+            "iteration": 30714,
+            "run_time": 30600,
+            "reward": 924.718019425869
+        },
+        {
+            "iteration": 30715,
+            "run_time": 8600,
+            "reward": 257.2315307855606
+        },
+        {
+            "iteration": 30716,
+            "run_time": 13200,
+            "reward": 400.5356708392501
+        },
+        {
+            "iteration": 30717,
+            "run_time": 26300,
+            "reward": 795.4100351780653
+        },
+        {
+            "iteration": 30718,
+            "run_time": 13100,
+            "reward": 434.5734499245882
+        },
+        {
+            "iteration": 30719,
+            "run_time": 26500,
+            "reward": 795.0479752421379
+        },
+        {
+            "iteration": 30720,
+            "run_time": 14400,
+            "reward": 431.8677020892501
+        },
+        {
+            "iteration": 30721,
+            "run_time": 17000,
+            "reward": 476.78127487003803
+        },
+        {
+            "iteration": 30722,
+            "run_time": 22300,
+            "reward": 646.401938855648
+        },
+        {
+            "iteration": 30723,
+            "run_time": 25800,
+            "reward": 761.3311806321144
+        },
+        {
+            "iteration": 30724,
+            "run_time": 15700,
+            "reward": 398.51870107650757
+        },
+        {
+            "iteration": 30725,
+            "run_time": 7900,
+            "reward": 221.7526502609253
+        },
+        {
+            "iteration": 30726,
+            "run_time": 30400,
+            "reward": 924.7587904334068
+        },
+        {
+            "iteration": 30727,
+            "run_time": 20900,
+            "reward": 633.8265396356583
+        },
+        {
+            "iteration": 30728,
+            "run_time": 13800,
+            "reward": 404.8320162296295
+        },
+        {
+            "iteration": 30729,
+            "run_time": 25600,
+            "reward": 794.5265714526176
+        },
+        {
+            "iteration": 30730,
+            "run_time": 29400,
+            "reward": 892.4249301552773
+        },
+        {
+            "iteration": 30731,
+            "run_time": 22400,
+            "reward": 620.9124550835113
+        },
+        {
+            "iteration": 30732,
+            "run_time": 18000,
+            "reward": 619.9818831682205
+        },
+        {
+            "iteration": 30733,
+            "run_time": 8400,
+            "reward": 228.07908761501312
+        },
+        {
+            "iteration": 30734,
+            "run_time": 12600,
+            "reward": 404.2936461567879
+        },
+        {
+            "iteration": 30735,
+            "run_time": 12400,
+            "reward": 417.5991871356964
+        },
+        {
+            "iteration": 30736,
+            "run_time": 18000,
+            "reward": 620.1993497610092
+        },
+        {
+            "iteration": 30737,
+            "run_time": 10900,
+            "reward": 337.19092333316803
+        },
+        {
+            "iteration": 30738,
+            "run_time": 17900,
+            "reward": 620.2720435857773
+        },
+        {
+            "iteration": 30739,
+            "run_time": 11100,
+            "reward": 138.85516950595775
+        },
+        {
+            "iteration": 30740,
+            "run_time": 12500,
+            "reward": 396.8111419081688
+        },
+        {
+            "iteration": 30741,
+            "run_time": 12900,
+            "reward": 400.4305661916733
+        },
+        {
+            "iteration": 30742,
+            "run_time": 6800,
+            "reward": 187.29954588413239
+        },
+        {
+            "iteration": 30743,
+            "run_time": 19400,
+            "reward": 619.9236246943474
+        },
+        {
+            "iteration": 30744,
+            "run_time": 15500,
+            "reward": 396.99591702222824
+        },
+        {
+            "iteration": 30745,
+            "run_time": 24300,
+            "reward": 755.6135259270668
+        },
+        {
+            "iteration": 30746,
+            "run_time": 16500,
+            "reward": 538.350844502449
+        },
+        {
+            "iteration": 30747,
+            "run_time": 16000,
+            "reward": 479.420678794384
+        },
+        {
+            "iteration": 30748,
+            "run_time": 8000,
+            "reward": 255.41460740566254
+        },
+        {
+            "iteration": 30749,
+            "run_time": 6900,
+            "reward": 216.16347754001617
+        },
+        {
+            "iteration": 30750,
+            "run_time": 10800,
+            "reward": 333.4283347129822
+        },
+        {
+            "iteration": 30751,
+            "run_time": 10900,
+            "reward": 343.91961348056793
+        },
+        {
+            "iteration": 30752,
+            "run_time": 9700,
+            "reward": 288.82562869787216
+        },
+        {
+            "iteration": 30753,
+            "run_time": 19100,
+            "reward": 621.1599231958389
+        },
+        {
+            "iteration": 30754,
+            "run_time": 7900,
+            "reward": 258.77250385284424
+        },
+        {
+            "iteration": 30755,
+            "run_time": 20800,
+            "reward": 620.852670788765
+        },
+        {
+            "iteration": 30756,
+            "run_time": 9400,
+            "reward": 272.47957932949066
+        },
+        {
+            "iteration": 30757,
+            "run_time": 12700,
+            "reward": 394.37640929222107
+        },
+        {
+            "iteration": 30758,
+            "run_time": 13200,
+            "reward": 394.01263892650604
+        },
+        {
+            "iteration": 30759,
+            "run_time": 6600,
+            "reward": 183.47550892829895
+        },
+        {
+            "iteration": 30760,
+            "run_time": 20300,
+            "reward": 619.973612010479
+        },
+        {
+            "iteration": 30761,
+            "run_time": 13500,
+            "reward": 434.71137034893036
+        },
+        {
+            "iteration": 30762,
+            "run_time": 26200,
+            "reward": 754.8039150238037
+        },
+        {
+            "iteration": 30763,
+            "run_time": 18400,
+            "reward": 620.4635728597641
+        },
+        {
+            "iteration": 30764,
+            "run_time": 19200,
+            "reward": 621.238932788372
+        },
+        {
+            "iteration": 30765,
+            "run_time": 18600,
+            "reward": 619.9092211723328
+        },
+        {
+            "iteration": 30766,
+            "run_time": 7100,
+            "reward": 191.32017385959625
+        },
+        {
+            "iteration": 30767,
+            "run_time": 6300,
+            "reward": 181.54492700099945
+        },
+        {
+            "iteration": 30768,
+            "run_time": 27500,
+            "reward": 794.6375352144241
+        },
+        {
+            "iteration": 30769,
+            "run_time": 20200,
+            "reward": 625.3924959897995
+        },
+        {
+            "iteration": 30770,
+            "run_time": 19600,
+            "reward": 624.9478824138641
+        },
+        {
+            "iteration": 30771,
+            "run_time": 15400,
+            "reward": 484.75848937034607
+        },
+        {
+            "iteration": 30772,
+            "run_time": 23600,
+            "reward": 754.2236763238907
+        },
+        {
+            "iteration": 30773,
+            "run_time": 9500,
+            "reward": 268.455259680748
+        },
+        {
+            "iteration": 30774,
+            "run_time": 13000,
+            "reward": 396.6359324455261
+        },
+        {
+            "iteration": 30775,
+            "run_time": 10000,
+            "reward": 280.15318381786346
+        },
+        {
+            "iteration": 30776,
+            "run_time": 13000,
+            "reward": 392.8690462112427
+        },
+        {
+            "iteration": 30777,
+            "run_time": 18300,
+            "reward": 620.0660173892975
+        },
+        {
+            "iteration": 30778,
+            "run_time": 9900,
+            "reward": 284.21881675720215
+        },
+        {
+            "iteration": 30779,
+            "run_time": 4800,
+            "reward": 100.09121143817902
+        },
+        {
+            "iteration": 30780,
+            "run_time": 26300,
+            "reward": 627.2932527065277
+        },
+        {
+            "iteration": 30781,
+            "run_time": 20000,
+            "reward": 643.7094321250916
+        },
+        {
+            "iteration": 30782,
+            "run_time": 25400,
+            "reward": 757.5442279875278
+        },
+        {
+            "iteration": 30783,
+            "run_time": 7300,
+            "reward": 216.46745413541794
+        },
+        {
+            "iteration": 30784,
+            "run_time": 30500,
+            "reward": 924.2542304992676
+        },
+        {
+            "iteration": 30785,
+            "run_time": 13800,
+            "reward": 443.32353484630585
+        },
+        {
+            "iteration": 30786,
+            "run_time": 11900,
+            "reward": 394.48509335517883
+        },
+        {
+            "iteration": 30787,
+            "run_time": 27700,
+            "reward": 795.852906703949
+        },
+        {
+            "iteration": 30788,
+            "run_time": 7600,
+            "reward": 216.44912308454514
+        },
+        {
+            "iteration": 30789,
+            "run_time": 13600,
+            "reward": 358.01170909404755
+        },
+        {
+            "iteration": 30790,
+            "run_time": 27300,
+            "reward": 793.8361409902573
+        },
+        {
+            "iteration": 30791,
+            "run_time": 8300,
+            "reward": 259.73215758800507
+        },
+        {
+            "iteration": 30792,
+            "run_time": 14300,
+            "reward": 445.6078734397888
+        },
+        {
+            "iteration": 30793,
+            "run_time": 14000,
+            "reward": 398.13938826322556
+        },
+        {
+            "iteration": 30794,
+            "run_time": 29100,
+            "reward": 888.1355000734329
+        },
+        {
+            "iteration": 30795,
+            "run_time": 29600,
+            "reward": 794.2523203252349
+        },
+        {
+            "iteration": 30796,
+            "run_time": 30700,
+            "reward": 892.2823095023632
+        },
+        {
+            "iteration": 30797,
+            "run_time": 31400,
+            "reward": 889.3723156452179
+        },
+        {
+            "iteration": 30798,
+            "run_time": 18800,
+            "reward": 619.7627358436584
+        },
+        {
+            "iteration": 30799,
+            "run_time": 30400,
+            "reward": 765.0573351532221
+        },
+        {
+            "iteration": 30800,
+            "run_time": 20300,
+            "reward": 637.1033540964127
+        },
+        {
+            "iteration": 30801,
+            "run_time": 17300,
+            "reward": 487.61591017246246
+        },
+        {
+            "iteration": 30802,
+            "run_time": 19200,
+            "reward": 620.0482642650604
+        },
+        {
+            "iteration": 30803,
+            "run_time": 36000,
+            "reward": 983.0366007089615
+        },
+        {
+            "iteration": 30804,
+            "run_time": 19100,
+            "reward": 628.8842764496803
+        },
+        {
+            "iteration": 30805,
+            "run_time": 34200,
+            "reward": 923.4180559515953
+        },
+        {
+            "iteration": 30806,
+            "run_time": 7200,
+            "reward": 217.32591271400452
+        },
+        {
+            "iteration": 30807,
+            "run_time": 20300,
+            "reward": 621.0609113276005
+        },
+        {
+            "iteration": 30808,
+            "run_time": 26000,
+            "reward": 764.7609047293663
+        },
+        {
+            "iteration": 30809,
+            "run_time": 29700,
+            "reward": 923.0237630009651
+        },
+        {
+            "iteration": 30810,
+            "run_time": 33100,
+            "reward": 924.9576875567436
+        },
+        {
+            "iteration": 30811,
+            "run_time": 31600,
+            "reward": 923.0562796741724
+        },
+        {
+            "iteration": 30812,
+            "run_time": 30800,
+            "reward": 924.3496534228325
+        },
+        {
+            "iteration": 30813,
+            "run_time": 32500,
+            "reward": 923.7077221572399
+        },
+        {
+            "iteration": 30814,
+            "run_time": 15600,
+            "reward": 500.9291423559189
+        },
+        {
+            "iteration": 30815,
+            "run_time": 22900,
+            "reward": 648.3903404474258
+        },
+        {
+            "iteration": 30816,
+            "run_time": 19800,
+            "reward": 626.4441653490067
+        },
+        {
+            "iteration": 30817,
+            "run_time": 20900,
+            "reward": 625.298104017973
+        },
+        {
+            "iteration": 30818,
+            "run_time": 20600,
+            "reward": 628.2296977639198
+        },
+        {
+            "iteration": 30819,
+            "run_time": 16500,
+            "reward": 496.0487340092659
+        },
+        {
+            "iteration": 30820,
+            "run_time": 32300,
+            "reward": 923.5862662196159
+        },
+        {
+            "iteration": 30821,
+            "run_time": 28000,
+            "reward": 924.590248927474
+        },
+        {
+            "iteration": 30822,
+            "run_time": 13300,
+            "reward": 408.08246371150017
+        },
+        {
+            "iteration": 30823,
+            "run_time": 9600,
+            "reward": 270.7511053085327
+        },
+        {
+            "iteration": 30824,
+            "run_time": 29000,
+            "reward": 924.2917061448097
+        },
+        {
+            "iteration": 30825,
+            "run_time": 8400,
+            "reward": 221.0130066871643
+        },
+        {
+            "iteration": 30826,
+            "run_time": 6000,
+            "reward": 176.74827575683594
+        },
+        {
+            "iteration": 30827,
+            "run_time": 25500,
+            "reward": 809.254883646965
+        },
+        {
+            "iteration": 30828,
+            "run_time": 13500,
+            "reward": 414.72732055187225
+        },
+        {
+            "iteration": 30829,
+            "run_time": 19300,
+            "reward": 479.47268093476305
+        },
+        {
+            "iteration": 30830,
+            "run_time": 9200,
+            "reward": 280.5350207090378
+        },
+        {
+            "iteration": 30831,
+            "run_time": 7800,
+            "reward": 257.21558570861816
+        },
+        {
+            "iteration": 30832,
+            "run_time": 7600,
+            "reward": 221.33498793840408
+        },
+        {
+            "iteration": 30833,
+            "run_time": 14900,
+            "reward": 492.7440858706832
+        },
+        {
+            "iteration": 30834,
+            "run_time": 12400,
+            "reward": 421.0007973909378
+        },
+        {
+            "iteration": 30835,
+            "run_time": 30800,
+            "reward": 926.1492552831769
+        },
+        {
+            "iteration": 30836,
+            "run_time": 32100,
+            "reward": 1012.1259252429008
+        },
+        {
+            "iteration": 30837,
+            "run_time": 16400,
+            "reward": 487.03937098383904
+        },
+        {
+            "iteration": 30838,
+            "run_time": 20100,
+            "reward": 624.4458118081093
+        },
+        {
+            "iteration": 30839,
+            "run_time": 15400,
+            "reward": 491.0490583181381
+        },
+        {
+            "iteration": 30840,
+            "run_time": 20800,
+            "reward": 624.341430068016
+        },
+        {
+            "iteration": 30841,
+            "run_time": 12500,
+            "reward": 404.7428661584854
+        },
+        {
+            "iteration": 30842,
+            "run_time": 15600,
+            "reward": 285.4567304486409
+        },
+        {
+            "iteration": 30843,
+            "run_time": 12800,
+            "reward": 403.4864763021469
+        },
+        {
+            "iteration": 30844,
+            "run_time": 12300,
+            "reward": 405.9368349313736
+        },
+        {
+            "iteration": 30845,
+            "run_time": 18700,
+            "reward": 627.0665706396103
+        },
+        {
+            "iteration": 30846,
+            "run_time": 30600,
+            "reward": 924.3028543293476
+        },
+        {
+            "iteration": 30847,
+            "run_time": 32300,
+            "reward": 925.2622493505478
+        },
+        {
+            "iteration": 30848,
+            "run_time": 14700,
+            "reward": 393.7183665931225
+        },
+        {
+            "iteration": 30849,
+            "run_time": 9700,
+            "reward": 264.7584880590439
+        },
+        {
+            "iteration": 30850,
+            "run_time": 13000,
+            "reward": 287.69778018971556
+        },
+        {
+            "iteration": 30851,
+            "run_time": 7200,
+            "reward": 191.61505750194192
+        },
+        {
+            "iteration": 30852,
+            "run_time": 14700,
+            "reward": 477.3854827284813
+        },
+        {
+            "iteration": 30853,
+            "run_time": 9200,
+            "reward": 263.4851186275482
+        },
+        {
+            "iteration": 30854,
+            "run_time": 7300,
+            "reward": 191.60527072101831
+        },
+        {
+            "iteration": 30855,
+            "run_time": 17200,
+            "reward": 234.59584919359622
+        },
+        {
+            "iteration": 30856,
+            "run_time": 8100,
+            "reward": 260.2689789533615
+        },
+        {
+            "iteration": 30857,
+            "run_time": 18700,
+            "reward": 619.5767018795013
+        },
+        {
+            "iteration": 30858,
+            "run_time": 7600,
+            "reward": 224.09316712617874
+        },
+        {
+            "iteration": 30859,
+            "run_time": 15400,
+            "reward": 433.46285355091095
+        },
+        {
+            "iteration": 30860,
+            "run_time": 14900,
+            "reward": 392.2772091627121
+        },
+        {
+            "iteration": 30861,
+            "run_time": 13800,
+            "reward": 425.8849537372589
+        },
+        {
+            "iteration": 30862,
+            "run_time": 33600,
+            "reward": 885.0000821352005
+        },
+        {
+            "iteration": 30863,
+            "run_time": 5700,
+            "reward": 135.53953552246094
+        },
+        {
+            "iteration": 30864,
+            "run_time": 7800,
+            "reward": 219.8621662557125
+        },
+        {
+            "iteration": 30865,
+            "run_time": 8800,
+            "reward": 220.70858347415924
+        },
+        {
+            "iteration": 30866,
+            "run_time": 18600,
+            "reward": 621.0485636405647
+        },
+        {
+            "iteration": 30867,
+            "run_time": 14200,
+            "reward": 432.7916117310524
+        },
+        {
+            "iteration": 30868,
+            "run_time": 24500,
+            "reward": 759.5443945229053
+        },
+        {
+            "iteration": 30869,
+            "run_time": 19800,
+            "reward": 624.3979108333588
+        },
+        {
+            "iteration": 30870,
+            "run_time": 29800,
+            "reward": 924.7374272495508
+        },
+        {
+            "iteration": 30871,
+            "run_time": 26300,
+            "reward": 794.7584619522095
+        },
+        {
+            "iteration": 30872,
+            "run_time": 31000,
+            "reward": 924.4105223119259
+        },
+        {
+            "iteration": 30873,
+            "run_time": 19800,
+            "reward": 632.7683516740799
+        },
+        {
+            "iteration": 30874,
+            "run_time": 12600,
+            "reward": 393.079901099205
+        },
+        {
+            "iteration": 30875,
+            "run_time": 26000,
+            "reward": 764.0133033692837
+        },
+        {
+            "iteration": 30876,
+            "run_time": 22700,
+            "reward": 652.7015395760536
+        },
+        {
+            "iteration": 30877,
+            "run_time": 13200,
+            "reward": 431.91355895996094
+        },
+        {
+            "iteration": 30878,
+            "run_time": 8200,
+            "reward": 256.9569343328476
+        },
+        {
+            "iteration": 30879,
+            "run_time": 15200,
+            "reward": 501.8633471727371
+        },
+        {
+            "iteration": 30880,
+            "run_time": 10600,
+            "reward": 286.7482353448868
+        },
+        {
+            "iteration": 30881,
+            "run_time": 14600,
+            "reward": 480.0390080809593
+        },
+        {
+            "iteration": 30882,
+            "run_time": 26900,
+            "reward": 794.1514052152634
+        },
+        {
+            "iteration": 30883,
+            "run_time": 24700,
+            "reward": 793.3056641817093
+        },
+        {
+            "iteration": 30884,
+            "run_time": 23600,
+            "reward": 754.5598582029343
+        },
+        {
+            "iteration": 30885,
+            "run_time": 31600,
+            "reward": 890.9632157087326
+        },
+        {
+            "iteration": 30886,
+            "run_time": 30400,
+            "reward": 890.9921073578298
+        },
+        {
+            "iteration": 30887,
+            "run_time": 13700,
+            "reward": 477.89354157447815
+        },
+        {
+            "iteration": 30888,
+            "run_time": 24000,
+            "reward": 766.9226462841034
+        },
+        {
+            "iteration": 30889,
+            "run_time": 19200,
+            "reward": 619.639994777739
+        },
+        {
+            "iteration": 30890,
+            "run_time": 17400,
+            "reward": 490.638209939003
+        },
+        {
+            "iteration": 30891,
+            "run_time": 29400,
+            "reward": 923.9139009714127
+        },
+        {
+            "iteration": 30892,
+            "run_time": 30900,
+            "reward": 923.506799697876
+        },
+        {
+            "iteration": 30893,
+            "run_time": 14400,
+            "reward": 434.3267451226711
+        },
+        {
+            "iteration": 30894,
+            "run_time": 22400,
+            "reward": 714.8705650568008
+        },
+        {
+            "iteration": 30895,
+            "run_time": 13000,
+            "reward": 392.57094621658325
+        },
+        {
+            "iteration": 30896,
+            "run_time": 29200,
+            "reward": 924.0390217080712
+        },
+        {
+            "iteration": 30897,
+            "run_time": 21300,
+            "reward": 526.741665928741
+        },
+        {
+            "iteration": 30898,
+            "run_time": 27900,
+            "reward": 923.3642171025276
+        },
+        {
+            "iteration": 30899,
+            "run_time": 12600,
+            "reward": 393.71674132347107
+        },
+        {
+            "iteration": 30900,
+            "run_time": 12900,
+            "reward": 278.3460939768702
+        },
+        {
+            "iteration": 30901,
+            "run_time": 30900,
+            "reward": 928.3900139257312
+        },
+        {
+            "iteration": 30902,
+            "run_time": 15300,
+            "reward": 481.15798461437225
+        },
+        {
+            "iteration": 30903,
+            "run_time": 6200,
+            "reward": 176.79533410072327
+        },
+        {
+            "iteration": 30904,
+            "run_time": 9200,
+            "reward": 282.2689872980118
+        },
+        {
+            "iteration": 30905,
+            "run_time": 29600,
+            "reward": 924.8078233599663
+        },
+        {
+            "iteration": 30906,
+            "run_time": 15600,
+            "reward": 482.6891918182373
+        },
+        {
+            "iteration": 30907,
+            "run_time": 21100,
+            "reward": 639.9121527671814
+        },
+        {
+            "iteration": 30908,
+            "run_time": 26100,
+            "reward": 781.7096368074417
+        },
+        {
+            "iteration": 30909,
+            "run_time": 6900,
+            "reward": 191.42944890260696
+        },
+        {
+            "iteration": 30910,
+            "run_time": 22100,
+            "reward": 755.1774517297745
+        },
+        {
+            "iteration": 30911,
+            "run_time": 14200,
+            "reward": 475.164005279541
+        },
+        {
+            "iteration": 30912,
+            "run_time": 30100,
+            "reward": 925.9854364991188
+        },
+        {
+            "iteration": 30913,
+            "run_time": 30000,
+            "reward": 924.6588553786278
+        },
+        {
+            "iteration": 30914,
+            "run_time": 7000,
+            "reward": 219.79466146230698
+        },
+        {
+            "iteration": 30915,
+            "run_time": 33800,
+            "reward": 1010.9407150149345
+        },
+        {
+            "iteration": 30916,
+            "run_time": 32200,
+            "reward": 925.919765454717
+        },
+        {
+            "iteration": 30917,
+            "run_time": 29300,
+            "reward": 924.2772624492645
+        },
+        {
+            "iteration": 30918,
+            "run_time": 31600,
+            "reward": 891.1879097223282
+        },
+        {
+            "iteration": 30919,
+            "run_time": 5300,
+            "reward": 131.59672582149506
+        },
+        {
+            "iteration": 30920,
+            "run_time": 11800,
+            "reward": 344.459523499012
+        },
+        {
+            "iteration": 30921,
+            "run_time": 25700,
+            "reward": 761.4233421981335
+        },
+        {
+            "iteration": 30922,
+            "run_time": 30200,
+            "reward": 924.6456314921379
+        },
+        {
+            "iteration": 30923,
+            "run_time": 30200,
+            "reward": 924.2072331905365
+        },
+        {
+            "iteration": 30924,
+            "run_time": 16000,
+            "reward": 476.8709172606468
+        },
+        {
+            "iteration": 30925,
+            "run_time": 30400,
+            "reward": 893.1338701844215
+        },
+        {
+            "iteration": 30926,
+            "run_time": 26200,
+            "reward": 765.121178150177
+        },
+        {
+            "iteration": 30927,
+            "run_time": 18800,
+            "reward": 524.5492595434189
+        },
+        {
+            "iteration": 30928,
+            "run_time": 13400,
+            "reward": 392.5261092185974
+        },
+        {
+            "iteration": 30929,
+            "run_time": 17100,
+            "reward": 492.8409257340245
+        },
+        {
+            "iteration": 30930,
+            "run_time": 14800,
+            "reward": 476.4820392727852
+        },
+        {
+            "iteration": 30931,
+            "run_time": 28800,
+            "reward": 793.99320307374
+        },
+        {
+            "iteration": 30932,
+            "run_time": 11100,
+            "reward": 333.3982855081558
+        },
+        {
+            "iteration": 30933,
+            "run_time": 35400,
+            "reward": 1010.8393664956093
+        },
+        {
+            "iteration": 30934,
+            "run_time": 8000,
+            "reward": 216.18900972604752
+        },
+        {
+            "iteration": 30935,
+            "run_time": 28600,
+            "reward": 794.442544952035
+        },
+        {
+            "iteration": 30936,
+            "run_time": 10900,
+            "reward": 340.1322166919708
+        },
+        {
+            "iteration": 30937,
+            "run_time": 30700,
+            "reward": 924.1453058123589
+        },
+        {
+            "iteration": 30938,
+            "run_time": 8500,
+            "reward": 234.08531093597412
+        },
+        {
+            "iteration": 30939,
+            "run_time": 10900,
+            "reward": 342.02266335487366
+        },
+        {
+            "iteration": 30940,
+            "run_time": 27700,
+            "reward": 764.8607598543167
+        },
+        {
+            "iteration": 30941,
+            "run_time": 8200,
+            "reward": 255.76037108898163
+        },
+        {
+            "iteration": 30942,
+            "run_time": 11100,
+            "reward": 337.24084174633026
+        },
+        {
+            "iteration": 30943,
+            "run_time": 8000,
+            "reward": 257.53228318691254
+        },
+        {
+            "iteration": 30944,
+            "run_time": 10500,
+            "reward": 337.40030539035797
+        },
+        {
+            "iteration": 30945,
+            "run_time": 9000,
+            "reward": 288.6739327907562
+        },
+        {
+            "iteration": 30946,
+            "run_time": 7900,
+            "reward": 232.45746302604675
+        },
+        {
+            "iteration": 30947,
+            "run_time": 10700,
+            "reward": 329.5157150030136
+        },
+        {
+            "iteration": 30948,
+            "run_time": 10000,
+            "reward": 284.0830342769623
+        },
+        {
+            "iteration": 30949,
+            "run_time": 29300,
+            "reward": 925.7533766925335
+        },
+        {
+            "iteration": 30950,
+            "run_time": 7300,
+            "reward": 216.84436577558517
+        },
+        {
+            "iteration": 30951,
+            "run_time": 16900,
+            "reward": 492.79974802210927
+        },
+        {
+            "iteration": 30952,
+            "run_time": 10500,
+            "reward": 347.6421717405319
+        },
+        {
+            "iteration": 30953,
+            "run_time": 8500,
+            "reward": 258.7676498889923
+        },
+        {
+            "iteration": 30954,
+            "run_time": 8000,
+            "reward": 255.5464425906539
+        },
+        {
+            "iteration": 30955,
+            "run_time": 11200,
+            "reward": 332.7957501411438
+        },
+        {
+            "iteration": 30956,
+            "run_time": 9000,
+            "reward": 255.63267117738724
+        },
+        {
+            "iteration": 30957,
+            "run_time": 7800,
+            "reward": 256.9117250442505
+        },
+        {
+            "iteration": 30958,
+            "run_time": 10800,
+            "reward": 293.0291351079941
+        },
+        {
+            "iteration": 30959,
+            "run_time": 19700,
+            "reward": 640.6982419490814
+        },
+        {
+            "iteration": 30960,
+            "run_time": 22400,
+            "reward": 636.3279627468437
+        },
+        {
+            "iteration": 30961,
+            "run_time": 9400,
+            "reward": 277.40269339084625
+        },
+        {
+            "iteration": 30962,
+            "run_time": 13900,
+            "reward": 392.87559509277344
+        },
+        {
+            "iteration": 30963,
+            "run_time": 13800,
+            "reward": 386.7763514496619
+        },
+        {
+            "iteration": 30964,
+            "run_time": 11300,
+            "reward": 339.7531417608261
+        },
+        {
+            "iteration": 30965,
+            "run_time": 7700,
+            "reward": 257.3253126144409
+        },
+        {
+            "iteration": 30966,
+            "run_time": 8000,
+            "reward": 256.01290452480316
+        },
+        {
+            "iteration": 30967,
+            "run_time": 16100,
+            "reward": 503.27830719947815
+        },
+        {
+            "iteration": 30968,
+            "run_time": 8100,
+            "reward": 228.68207156658173
+        },
+        {
+            "iteration": 30969,
+            "run_time": 23100,
+            "reward": 754.187214255333
+        },
+        {
+            "iteration": 30970,
+            "run_time": 8300,
+            "reward": 256.34024918079376
+        },
+        {
+            "iteration": 30971,
+            "run_time": 7800,
+            "reward": 257.77434623241425
+        },
+        {
+            "iteration": 30972,
+            "run_time": 4900,
+            "reward": 98.11668366193771
+        },
+        {
+            "iteration": 30973,
+            "run_time": 9400,
+            "reward": 282.02993416786194
+        },
+        {
+            "iteration": 30974,
+            "run_time": 19600,
+            "reward": 638.841797709465
+        },
+        {
+            "iteration": 30975,
+            "run_time": 23200,
+            "reward": 699.3959577679634
+        },
+        {
+            "iteration": 30976,
+            "run_time": 12900,
+            "reward": 391.5638691186905
+        },
+        {
+            "iteration": 30977,
+            "run_time": 9600,
+            "reward": 280.88890290260315
+        },
+        {
+            "iteration": 30978,
+            "run_time": 27900,
+            "reward": 765.6477046310902
+        },
+        {
+            "iteration": 30979,
+            "run_time": 13000,
+            "reward": 394.0738776922226
+        },
+        {
+            "iteration": 30980,
+            "run_time": 16100,
+            "reward": 492.6749940123409
+        },
+        {
+            "iteration": 30981,
+            "run_time": 26100,
+            "reward": 756.6218250393867
+        },
+        {
+            "iteration": 30982,
+            "run_time": 20600,
+            "reward": 633.3014721274376
+        },
+        {
+            "iteration": 30983,
+            "run_time": 13500,
+            "reward": 401.3954529464245
+        },
+        {
+            "iteration": 30984,
+            "run_time": 13300,
+            "reward": 397.39105789363384
+        },
+        {
+            "iteration": 30985,
+            "run_time": 10400,
+            "reward": 283.3514255285263
+        },
+        {
+            "iteration": 30986,
+            "run_time": 14400,
+            "reward": 393.50222450494766
+        },
+        {
+            "iteration": 30987,
+            "run_time": 29100,
+            "reward": 925.7114268392324
+        },
+        {
+            "iteration": 30988,
+            "run_time": 15200,
+            "reward": 497.9432229399681
+        },
+        {
+            "iteration": 30989,
+            "run_time": 14500,
+            "reward": 434.0534502863884
+        },
+        {
+            "iteration": 30990,
+            "run_time": 9900,
+            "reward": 294.94065833091736
+        },
+        {
+            "iteration": 30991,
+            "run_time": 22700,
+            "reward": 690.4471342563629
+        },
+        {
+            "iteration": 30992,
+            "run_time": 13600,
+            "reward": 430.9667811393738
+        },
+        {
+            "iteration": 30993,
+            "run_time": 8200,
+            "reward": 256.90595519542694
+        },
+        {
+            "iteration": 30994,
+            "run_time": 15200,
+            "reward": 475.70697566866875
+        },
+        {
+            "iteration": 30995,
+            "run_time": 13000,
+            "reward": 400.4270271062851
+        },
+        {
+            "iteration": 30996,
+            "run_time": 15800,
+            "reward": 498.0642322897911
+        },
+        {
+            "iteration": 30997,
+            "run_time": 9800,
+            "reward": 279.9274745583534
+        },
+        {
+            "iteration": 30998,
+            "run_time": 22700,
+            "reward": 613.910970098339
+        },
+        {
+            "iteration": 30999,
+            "run_time": 12500,
+            "reward": 393.94546127319336
+        },
+        {
+            "iteration": 31000,
+            "run_time": 25800,
+            "reward": 766.5059812068939
+        },
+        {
+            "iteration": 31001,
+            "run_time": 11700,
+            "reward": 344.4616077542305
+        },
+        {
+            "iteration": 31002,
+            "run_time": 17700,
+            "reward": 619.4426684379578
+        },
+        {
+            "iteration": 31003,
+            "run_time": 16800,
+            "reward": 482.7388374209404
+        },
+        {
+            "iteration": 31004,
+            "run_time": 16800,
+            "reward": 480.5058863759041
+        },
+        {
+            "iteration": 31005,
+            "run_time": 28800,
+            "reward": 924.1948254704475
+        },
+        {
+            "iteration": 31006,
+            "run_time": 11200,
+            "reward": 324.24763238430023
+        },
+        {
+            "iteration": 31007,
+            "run_time": 17800,
+            "reward": 620.1873304843903
+        },
+        {
+            "iteration": 31008,
+            "run_time": 6300,
+            "reward": 176.69503247737885
+        },
+        {
+            "iteration": 31009,
+            "run_time": 6900,
+            "reward": 191.01800858974457
+        },
+        {
+            "iteration": 31010,
+            "run_time": 10000,
+            "reward": 284.8902436494827
+        },
+        {
+            "iteration": 31011,
+            "run_time": 13300,
+            "reward": 386.27297472953796
+        },
+        {
+            "iteration": 31012,
+            "run_time": 10400,
+            "reward": 262.49766474962234
+        },
+        {
+            "iteration": 31013,
+            "run_time": 7100,
+            "reward": 216.4567316174507
+        },
+        {
+            "iteration": 31014,
+            "run_time": 8100,
+            "reward": 225.71655786037445
+        },
+        {
+            "iteration": 31015,
+            "run_time": 23800,
+            "reward": 767.1593436002731
+        },
+        {
+            "iteration": 31016,
+            "run_time": 13200,
+            "reward": 394.11896204948425
+        },
+        {
+            "iteration": 31017,
+            "run_time": 9900,
+            "reward": 274.8602976202965
+        },
+        {
+            "iteration": 31018,
+            "run_time": 26800,
+            "reward": 656.4642743292497
+        },
+        {
+            "iteration": 31019,
+            "run_time": 24400,
+            "reward": 793.5282801389694
+        },
+        {
+            "iteration": 31020,
+            "run_time": 9100,
+            "reward": 273.5245637893677
+        },
+        {
+            "iteration": 31021,
+            "run_time": 29600,
+            "reward": 932.2902865409851
+        },
+        {
+            "iteration": 31022,
+            "run_time": 31700,
+            "reward": 938.2250995337963
+        },
+        {
+            "iteration": 31023,
+            "run_time": 13900,
+            "reward": 437.4192355424166
+        },
+        {
+            "iteration": 31024,
+            "run_time": 9600,
+            "reward": 291.1172136068344
+        },
+        {
+            "iteration": 31025,
+            "run_time": 21300,
+            "reward": 526.9879577571519
+        },
+        {
+            "iteration": 31026,
+            "run_time": 9200,
+            "reward": 255.57860799133778
+        },
+        {
+            "iteration": 31027,
+            "run_time": 8100,
+            "reward": 229.7363737821579
+        },
+        {
+            "iteration": 31028,
+            "run_time": 23500,
+            "reward": 761.7504476308823
+        },
+        {
+            "iteration": 31029,
+            "run_time": 13000,
+            "reward": 428.1485043168068
+        },
+        {
+            "iteration": 31030,
+            "run_time": 9000,
+            "reward": 285.2931991815567
+        },
+        {
+            "iteration": 31031,
+            "run_time": 10500,
+            "reward": 341.97684156894684
+        },
+        {
+            "iteration": 31032,
+            "run_time": 28100,
+            "reward": 924.7016592919827
+        },
+        {
+            "iteration": 31033,
+            "run_time": 5800,
+            "reward": 142.36224871873856
+        },
+        {
+            "iteration": 31034,
+            "run_time": 24500,
+            "reward": 754.9859231710434
+        },
+        {
+            "iteration": 31035,
+            "run_time": 14400,
+            "reward": 447.86082541942596
+        },
+        {
+            "iteration": 31036,
+            "run_time": 8400,
+            "reward": 234.1394519408932
+        },
+        {
+            "iteration": 31037,
+            "run_time": 17100,
+            "reward": 541.2678383588791
+        },
+        {
+            "iteration": 31038,
+            "run_time": 8500,
+            "reward": 259.3046678304672
+        },
+        {
+            "iteration": 31039,
+            "run_time": 8200,
+            "reward": 226.80086660385132
+        },
+        {
+            "iteration": 31040,
+            "run_time": 11600,
+            "reward": 338.35696148872375
+        },
+        {
+            "iteration": 31041,
+            "run_time": 20500,
+            "reward": 639.230265378952
+        },
+        {
+            "iteration": 31042,
+            "run_time": 33100,
+            "reward": 923.5123294889927
+        },
+        {
+            "iteration": 31043,
+            "run_time": 30600,
+            "reward": 925.7727473825216
+        },
+        {
+            "iteration": 31044,
+            "run_time": 13800,
+            "reward": 443.8813337087631
+        },
+        {
+            "iteration": 31045,
+            "run_time": 12700,
+            "reward": 404.4079825282097
+        },
+        {
+            "iteration": 31046,
+            "run_time": 14900,
+            "reward": 407.6369043793529
+        },
+        {
+            "iteration": 31047,
+            "run_time": 23400,
+            "reward": 795.8869234025478
+        },
+        {
+            "iteration": 31048,
+            "run_time": 13600,
+            "reward": 480.855898886919
+        },
+        {
+            "iteration": 31049,
+            "run_time": 30900,
+            "reward": 925.6379010602832
+        },
+        {
+            "iteration": 31050,
+            "run_time": 11200,
+            "reward": 336.3788295388222
+        },
+        {
+            "iteration": 31051,
+            "run_time": 5900,
+            "reward": 175.98714631795883
+        },
+        {
+            "iteration": 31052,
+            "run_time": 14500,
+            "reward": 442.47864086925983
+        },
+        {
+            "iteration": 31053,
+            "run_time": 7800,
+            "reward": 211.47040331363678
+        },
+        {
+            "iteration": 31054,
+            "run_time": 12700,
+            "reward": 388.252832531929
+        },
+        {
+            "iteration": 31055,
+            "run_time": 12500,
+            "reward": 406.7464057803154
+        },
+        {
+            "iteration": 31056,
+            "run_time": 12600,
+            "reward": 408.3914633989334
+        },
+        {
+            "iteration": 31057,
+            "run_time": 13600,
+            "reward": 425.1361736059189
+        },
+        {
+            "iteration": 31058,
+            "run_time": 35200,
+            "reward": 1010.7792152166367
+        },
+        {
+            "iteration": 31059,
+            "run_time": 18800,
+            "reward": 620.7946579456329
+        },
+        {
+            "iteration": 31060,
+            "run_time": 6200,
+            "reward": 179.04647493362427
+        },
+        {
+            "iteration": 31061,
+            "run_time": 20200,
+            "reward": 622.0893960893154
+        },
+        {
+            "iteration": 31062,
+            "run_time": 8100,
+            "reward": 228.98936414718628
+        },
+        {
+            "iteration": 31063,
+            "run_time": 5000,
+            "reward": 130.7122861146927
+        },
+        {
+            "iteration": 31064,
+            "run_time": 13400,
+            "reward": 437.19702565670013
+        },
+        {
+            "iteration": 31065,
+            "run_time": 19300,
+            "reward": 403.75962910056114
+        },
+        {
+            "iteration": 31066,
+            "run_time": 13800,
+            "reward": 440.34707099199295
+        },
+        {
+            "iteration": 31067,
+            "run_time": 6100,
+            "reward": 175.4387664794922
+        },
+        {
+            "iteration": 31068,
+            "run_time": 7900,
+            "reward": 212.0739386677742
+        },
+        {
+            "iteration": 31069,
+            "run_time": 30900,
+            "reward": 924.9733493514359
+        },
+        {
+            "iteration": 31070,
+            "run_time": 42400,
+            "reward": 1071.405382156372
+        },
+        {
+            "iteration": 31071,
+            "run_time": 31100,
+            "reward": 925.4759135842323
+        },
+        {
+            "iteration": 31072,
+            "run_time": 11600,
+            "reward": 322.1081130504608
+        },
+        {
+            "iteration": 31073,
+            "run_time": 8600,
+            "reward": 219.31260445713997
+        },
+        {
+            "iteration": 31074,
+            "run_time": 16900,
+            "reward": 526.4460153579712
+        },
+        {
+            "iteration": 31075,
+            "run_time": 16300,
+            "reward": 491.77476501464844
+        },
+        {
+            "iteration": 31076,
+            "run_time": 26100,
+            "reward": 852.7173246145248
+        },
+        {
+            "iteration": 31077,
+            "run_time": 8500,
+            "reward": 228.59574830532074
+        },
+        {
+            "iteration": 31078,
+            "run_time": 25100,
+            "reward": 689.7354022264481
+        },
+        {
+            "iteration": 31079,
+            "run_time": 35600,
+            "reward": 1036.0583480596542
+        },
+        {
+            "iteration": 31080,
+            "run_time": 5900,
+            "reward": 177.08651286363602
+        },
+        {
+            "iteration": 31081,
+            "run_time": 10100,
+            "reward": 288.63710820674896
+        },
+        {
+            "iteration": 31082,
+            "run_time": 29400,
+            "reward": 924.6414801776409
+        },
+        {
+            "iteration": 31083,
+            "run_time": 5900,
+            "reward": 176.76341140270233
+        },
+        {
+            "iteration": 31084,
+            "run_time": 11500,
+            "reward": 139.41622302577525
+        },
+        {
+            "iteration": 31085,
+            "run_time": 20100,
+            "reward": 644.873373746872
+        },
+        {
+            "iteration": 31086,
+            "run_time": 22600,
+            "reward": 570.8422555439174
+        },
+        {
+            "iteration": 31087,
+            "run_time": 12500,
+            "reward": 405.1988373994827
+        },
+        {
+            "iteration": 31088,
+            "run_time": 5800,
+            "reward": 177.69430100917816
+        },
+        {
+            "iteration": 31089,
+            "run_time": 11000,
+            "reward": 360.1330295801163
+        },
+        {
+            "iteration": 31090,
+            "run_time": 5900,
+            "reward": 179.92588651180267
+        },
+        {
+            "iteration": 31091,
+            "run_time": 5800,
+            "reward": 175.778710603714
+        },
+        {
+            "iteration": 31092,
+            "run_time": 5800,
+            "reward": 175.7862800359726
+        },
+        {
+            "iteration": 31093,
+            "run_time": 10200,
+            "reward": 323.058340549469
+        },
+        {
+            "iteration": 31094,
+            "run_time": 12200,
+            "reward": 397.9227970838547
+        },
+        {
+            "iteration": 31095,
+            "run_time": 14400,
+            "reward": 480.884057238698
+        },
+        {
+            "iteration": 31096,
+            "run_time": 10800,
+            "reward": 329.79254758358
+        },
+        {
+            "iteration": 31097,
+            "run_time": 11500,
+            "reward": 324.5772924423218
+        },
+        {
+            "iteration": 31098,
+            "run_time": 10700,
+            "reward": 335.0657787322998
+        },
+        {
+            "iteration": 31099,
+            "run_time": 32000,
+            "reward": 881.5952967405319
+        },
+        {
+            "iteration": 31100,
+            "run_time": 10800,
+            "reward": 322.70322847366333
+        },
+        {
+            "iteration": 31101,
+            "run_time": 23500,
+            "reward": 801.46557700634
+        },
+        {
+            "iteration": 31102,
+            "run_time": 32900,
+            "reward": 979.4703481197357
+        },
+        {
+            "iteration": 31103,
+            "run_time": 10100,
+            "reward": 313.29916203022003
+        },
+        {
+            "iteration": 31104,
+            "run_time": 13800,
+            "reward": 433.0827679634094
+        },
+        {
+            "iteration": 31105,
+            "run_time": 8300,
+            "reward": 256.9509997367859
+        },
+        {
+            "iteration": 31106,
+            "run_time": 27600,
+            "reward": 931.1754975318909
+        },
+        {
+            "iteration": 31107,
+            "run_time": 13700,
+            "reward": 435.11330492794514
+        },
+        {
+            "iteration": 31108,
+            "run_time": 14200,
+            "reward": 477.8059334754944
+        },
+        {
+            "iteration": 31109,
+            "run_time": 10500,
+            "reward": 306.17690420150757
+        },
+        {
+            "iteration": 31110,
+            "run_time": 8200,
+            "reward": 219.18085289001465
+        },
+        {
+            "iteration": 31111,
+            "run_time": 15700,
+            "reward": 487.87425434589386
+        },
+        {
+            "iteration": 31112,
+            "run_time": 8000,
+            "reward": 221.69548106193542
+        },
+        {
+            "iteration": 31113,
+            "run_time": 5700,
+            "reward": 141.3413543701172
+        },
+        {
+            "iteration": 31114,
+            "run_time": 8100,
+            "reward": 256.43667113780975
+        },
+        {
+            "iteration": 31115,
+            "run_time": 11200,
+            "reward": 355.1660666465759
+        },
+        {
+            "iteration": 31116,
+            "run_time": 10800,
+            "reward": 325.5215884447098
+        },
+        {
+            "iteration": 31117,
+            "run_time": 35800,
+            "reward": 1010.9220371544361
+        },
+        {
+            "iteration": 31118,
+            "run_time": 18900,
+            "reward": 632.9887696504593
+        },
+        {
+            "iteration": 31119,
+            "run_time": 18500,
+            "reward": 620.4031162261963
+        },
+        {
+            "iteration": 31120,
+            "run_time": 11200,
+            "reward": 353.0628033876419
+        },
+        {
+            "iteration": 31121,
+            "run_time": 11100,
+            "reward": 347.4264496564865
+        },
+        {
+            "iteration": 31122,
+            "run_time": 19200,
+            "reward": 619.9344602823257
+        },
+        {
+            "iteration": 31123,
+            "run_time": 9200,
+            "reward": 281.0099104642868
+        },
+        {
+            "iteration": 31124,
+            "run_time": 8700,
+            "reward": 234.08569868374616
+        },
+        {
+            "iteration": 31125,
+            "run_time": 16100,
+            "reward": 480.5263927578926
+        },
+        {
+            "iteration": 31126,
+            "run_time": 4900,
+            "reward": 103.06040966510773
+        },
+        {
+            "iteration": 31127,
+            "run_time": 18400,
+            "reward": 619.538952589035
+        },
+        {
+            "iteration": 31128,
+            "run_time": 32800,
+            "reward": 978.9683309048414
+        },
+        {
+            "iteration": 31129,
+            "run_time": 11200,
+            "reward": 339.23305344581604
+        },
+        {
+            "iteration": 31130,
+            "run_time": 14000,
+            "reward": 441.2295786142349
+        },
+        {
+            "iteration": 31131,
+            "run_time": 19200,
+            "reward": 626.2723187208176
+        },
+        {
+            "iteration": 31132,
+            "run_time": 9300,
+            "reward": 285.61302304267883
+        },
+        {
+            "iteration": 31133,
+            "run_time": 18900,
+            "reward": 620.5145021080971
+        },
+        {
+            "iteration": 31134,
+            "run_time": 23700,
+            "reward": 760.4301345348358
+        },
+        {
+            "iteration": 31135,
+            "run_time": 19500,
+            "reward": 639.2623282670975
+        },
+        {
+            "iteration": 31136,
+            "run_time": 19000,
+            "reward": 620.0864967703819
+        },
+        {
+            "iteration": 31137,
+            "run_time": 19800,
+            "reward": 620.181529045105
+        },
+        {
+            "iteration": 31138,
+            "run_time": 19600,
+            "reward": 645.7219638824463
+        },
+        {
+            "iteration": 31139,
+            "run_time": 8400,
+            "reward": 232.4892029762268
+        },
+        {
+            "iteration": 31140,
+            "run_time": 4800,
+            "reward": 87.56175220012665
+        },
+        {
+            "iteration": 31141,
+            "run_time": 11100,
+            "reward": 325.9013270139694
+        },
+        {
+            "iteration": 31142,
+            "run_time": 24800,
+            "reward": 797.8416355550289
+        },
+        {
+            "iteration": 31143,
+            "run_time": 15800,
+            "reward": 494.9281250834465
+        },
+        {
+            "iteration": 31144,
+            "run_time": 31000,
+            "reward": 891.9460044503212
+        },
+        {
+            "iteration": 31145,
+            "run_time": 28400,
+            "reward": 924.9777490645647
+        },
+        {
+            "iteration": 31146,
+            "run_time": 24300,
+            "reward": 763.6374105215073
+        },
+        {
+            "iteration": 31147,
+            "run_time": 11000,
+            "reward": 326.6893448829651
+        },
+        {
+            "iteration": 31148,
+            "run_time": 6800,
+            "reward": 183.2118363380432
+        },
+        {
+            "iteration": 31149,
+            "run_time": 13700,
+            "reward": 424.5748940706253
+        },
+        {
+            "iteration": 31150,
+            "run_time": 14600,
+            "reward": 487.55170226097107
+        },
+        {
+            "iteration": 31151,
+            "run_time": 17600,
+            "reward": 619.1947427988052
+        },
+        {
+            "iteration": 31152,
+            "run_time": 15100,
+            "reward": 492.9837916512042
+        },
+        {
+            "iteration": 31153,
+            "run_time": 20200,
+            "reward": 638.9012467861176
+        },
+        {
+            "iteration": 31154,
+            "run_time": 12700,
+            "reward": 432.36406004428864
+        },
+        {
+            "iteration": 31155,
+            "run_time": 11300,
+            "reward": 322.6165962219238
+        },
+        {
+            "iteration": 31156,
+            "run_time": 12800,
+            "reward": 397.6369448900223
+        },
+        {
+            "iteration": 31157,
+            "run_time": 10800,
+            "reward": 327.81457257270813
+        },
+        {
+            "iteration": 31158,
+            "run_time": 8400,
+            "reward": 256.88009256124496
+        },
+        {
+            "iteration": 31159,
+            "run_time": 8100,
+            "reward": 256.2613489627838
+        },
+        {
+            "iteration": 31160,
+            "run_time": 17500,
+            "reward": 622.6454259157181
+        },
+        {
+            "iteration": 31161,
+            "run_time": 8700,
+            "reward": 216.82151806354523
+        },
+        {
+            "iteration": 31162,
+            "run_time": 8200,
+            "reward": 233.59945142269135
+        },
+        {
+            "iteration": 31163,
+            "run_time": 11200,
+            "reward": 329.64040887355804
+        },
+        {
+            "iteration": 31164,
+            "run_time": 10400,
+            "reward": 312.4604938030243
+        },
+        {
+            "iteration": 31165,
+            "run_time": 8300,
+            "reward": 214.64164727926254
+        },
+        {
+            "iteration": 31166,
+            "run_time": 7900,
+            "reward": 211.75816345214844
+        },
+        {
+            "iteration": 31167,
+            "run_time": 12200,
+            "reward": 313.577132165432
+        },
+        {
+            "iteration": 31168,
+            "run_time": 21100,
+            "reward": 619.8209011554718
+        },
+        {
+            "iteration": 31169,
+            "run_time": 11300,
+            "reward": 283.2210542857647
+        },
+        {
+            "iteration": 31170,
+            "run_time": 16100,
+            "reward": 491.2009907960892
+        },
+        {
+            "iteration": 31171,
+            "run_time": 20600,
+            "reward": 629.138135433197
+        },
+        {
+            "iteration": 31172,
+            "run_time": 6400,
+            "reward": 179.2916927933693
+        },
+        {
+            "iteration": 31173,
+            "run_time": 10500,
+            "reward": 291.87665259838104
+        },
+        {
+            "iteration": 31174,
+            "run_time": 13100,
+            "reward": 395.6391034126282
+        },
+        {
+            "iteration": 31175,
+            "run_time": 16000,
+            "reward": 481.38898146152496
+        },
+        {
+            "iteration": 31176,
+            "run_time": 6800,
+            "reward": 176.06427538394928
+        },
+        {
+            "iteration": 31177,
+            "run_time": 11500,
+            "reward": 319.36013400554657
+        },
+        {
+            "iteration": 31178,
+            "run_time": 13700,
+            "reward": 407.94118696451187
+        },
+        {
+            "iteration": 31179,
+            "run_time": 16800,
+            "reward": 482.05401933193207
+        },
+        {
+            "iteration": 31180,
+            "run_time": 13200,
+            "reward": 390.1385369002819
+        },
+        {
+            "iteration": 31181,
+            "run_time": 10900,
+            "reward": 297.9735554456711
+        },
+        {
+            "iteration": 31182,
+            "run_time": 20700,
+            "reward": 620.7465608119965
+        },
+        {
+            "iteration": 31183,
+            "run_time": 16100,
+            "reward": 488.543643951416
+        },
+        {
+            "iteration": 31184,
+            "run_time": 19500,
+            "reward": 489.67918542027473
+        },
+        {
+            "iteration": 31185,
+            "run_time": 13100,
+            "reward": 404.1953780055046
+        },
+        {
+            "iteration": 31186,
+            "run_time": 7500,
+            "reward": 215.7951499223709
+        },
+        {
+            "iteration": 31187,
+            "run_time": 16100,
+            "reward": 520.2458198666573
+        },
+        {
+            "iteration": 31188,
+            "run_time": 23800,
+            "reward": 632.4829500317574
+        },
+        {
+            "iteration": 31189,
+            "run_time": 8200,
+            "reward": 219.50586435198784
+        },
+        {
+            "iteration": 31190,
+            "run_time": 7700,
+            "reward": 216.82461214065552
+        },
+        {
+            "iteration": 31191,
+            "run_time": 20900,
+            "reward": 653.863282780163
+        },
+        {
+            "iteration": 31192,
+            "run_time": 15200,
+            "reward": 479.1798732280731
+        },
+        {
+            "iteration": 31193,
+            "run_time": 30900,
+            "reward": 924.5065933912992
+        },
+        {
+            "iteration": 31194,
+            "run_time": 5800,
+            "reward": 132.1620526611805
+        },
+        {
+            "iteration": 31195,
+            "run_time": 33900,
+            "reward": 978.7367699146271
+        },
+        {
+            "iteration": 31196,
+            "run_time": 14200,
+            "reward": 433.9852964878082
+        },
+        {
+            "iteration": 31197,
+            "run_time": 27700,
+            "reward": 924.7210659384727
+        },
+        {
+            "iteration": 31198,
+            "run_time": 12600,
+            "reward": 407.41689574718475
+        },
+        {
+            "iteration": 31199,
+            "run_time": 28300,
+            "reward": 924.4055214822292
+        },
+        {
+            "iteration": 31200,
+            "run_time": 10700,
+            "reward": 309.0329842865467
+        },
+        {
+            "iteration": 31201,
+            "run_time": 13100,
+            "reward": 406.7370845079422
+        },
+        {
+            "iteration": 31202,
+            "run_time": 12800,
+            "reward": 412.88556241989136
+        },
+        {
+            "iteration": 31203,
+            "run_time": 10700,
+            "reward": 328.4172201156616
+        },
+        {
+            "iteration": 31204,
+            "run_time": 6300,
+            "reward": 179.92631542682648
+        },
+        {
+            "iteration": 31205,
+            "run_time": 32600,
+            "reward": 981.1261730790138
+        },
+        {
+            "iteration": 31206,
+            "run_time": 14000,
+            "reward": 481.35427391529083
+        },
+        {
+            "iteration": 31207,
+            "run_time": 14800,
+            "reward": 482.18773114681244
+        },
+        {
+            "iteration": 31208,
+            "run_time": 14100,
+            "reward": 489.19537675380707
+        },
+        {
+            "iteration": 31209,
+            "run_time": 13300,
+            "reward": 393.222599029541
+        },
+        {
+            "iteration": 31210,
+            "run_time": 14400,
+            "reward": 483.5162607431412
+        },
+        {
+            "iteration": 31211,
+            "run_time": 28800,
+            "reward": 924.3898101523519
+        },
+        {
+            "iteration": 31212,
+            "run_time": 10400,
+            "reward": 268.91003942489624
+        },
+        {
+            "iteration": 31213,
+            "run_time": 24300,
+            "reward": 753.2486988306046
+        },
+        {
+            "iteration": 31214,
+            "run_time": 14600,
+            "reward": 483.36916613578796
+        },
+        {
+            "iteration": 31215,
+            "run_time": 23800,
+            "reward": 759.6377800703049
+        },
+        {
+            "iteration": 31216,
+            "run_time": 15600,
+            "reward": 486.0797799229622
+        },
+        {
+            "iteration": 31217,
+            "run_time": 12000,
+            "reward": 363.496747136116
+        },
+        {
+            "iteration": 31218,
+            "run_time": 24100,
+            "reward": 793.1304941773415
+        },
+        {
+            "iteration": 31219,
+            "run_time": 14800,
+            "reward": 481.6292979121208
+        },
+        {
+            "iteration": 31220,
+            "run_time": 14600,
+            "reward": 481.1356873512268
+        },
+        {
+            "iteration": 31221,
+            "run_time": 16400,
+            "reward": 481.39106035232544
+        },
+        {
+            "iteration": 31222,
+            "run_time": 13400,
+            "reward": 433.72166550159454
+        },
+        {
+            "iteration": 31223,
+            "run_time": 6000,
+            "reward": 177.67546164989471
+        },
+        {
+            "iteration": 31224,
+            "run_time": 33200,
+            "reward": 979.7306924462318
+        },
+        {
+            "iteration": 31225,
+            "run_time": 33800,
+            "reward": 979.4015273153782
+        },
+        {
+            "iteration": 31226,
+            "run_time": 7000,
+            "reward": 215.75995477102697
+        },
+        {
+            "iteration": 31227,
+            "run_time": 15800,
+            "reward": 487.3536619544029
+        },
+        {
+            "iteration": 31228,
+            "run_time": 6000,
+            "reward": 177.86424279212952
+        },
+        {
+            "iteration": 31229,
+            "run_time": 26400,
+            "reward": 762.3508714437485
+        },
+        {
+            "iteration": 31230,
+            "run_time": 5100,
+            "reward": 131.65841150283813
+        },
+        {
+            "iteration": 31231,
+            "run_time": 14300,
+            "reward": 481.6935084462166
+        },
+        {
+            "iteration": 31232,
+            "run_time": 5000,
+            "reward": 131.2959656715393
+        },
+        {
+            "iteration": 31233,
+            "run_time": 29800,
+            "reward": 923.1875431537628
+        },
+        {
+            "iteration": 31234,
+            "run_time": 16200,
+            "reward": 492.69753670692444
+        },
+        {
+            "iteration": 31235,
+            "run_time": 6100,
+            "reward": 141.92010927200317
+        },
+        {
+            "iteration": 31236,
+            "run_time": 15700,
+            "reward": 481.08022379875183
+        },
+        {
+            "iteration": 31237,
+            "run_time": 5100,
+            "reward": 104.29860997200012
+        },
+        {
+            "iteration": 31238,
+            "run_time": 16000,
+            "reward": 479.9352480173111
+        },
+        {
+            "iteration": 31239,
+            "run_time": 30400,
+            "reward": 894.0015470385551
+        },
+        {
+            "iteration": 31240,
+            "run_time": 6200,
+            "reward": 178.14048850536346
+        },
+        {
+            "iteration": 31241,
+            "run_time": 16700,
+            "reward": 481.7915304303169
+        },
+        {
+            "iteration": 31242,
+            "run_time": 16700,
+            "reward": 417.86257277429104
+        },
+        {
+            "iteration": 31243,
+            "run_time": 7500,
+            "reward": 188.59473049640656
+        },
+        {
+            "iteration": 31244,
+            "run_time": 6600,
+            "reward": 179.62317377328873
+        },
+        {
+            "iteration": 31245,
+            "run_time": 37300,
+            "reward": 984.459572583437
+        },
+        {
+            "iteration": 31246,
+            "run_time": 6500,
+            "reward": 177.89425164461136
+        },
+        {
+            "iteration": 31247,
+            "run_time": 7500,
+            "reward": 188.5930234193802
+        },
+        {
+            "iteration": 31248,
+            "run_time": 16900,
+            "reward": 481.6398365497589
+        },
+        {
+            "iteration": 31249,
+            "run_time": 7400,
+            "reward": 189.53174495697021
+        },
+        {
+            "iteration": 31250,
+            "run_time": 35400,
+            "reward": 890.8076585307717
+        },
+        {
+            "iteration": 31251,
+            "run_time": 17300,
+            "reward": 480.38145130872726
+        },
+        {
+            "iteration": 31252,
+            "run_time": 7000,
+            "reward": 176.20024222135544
+        },
+        {
+            "iteration": 31253,
+            "run_time": 7200,
+            "reward": 181.95941692590714
+        },
+        {
+            "iteration": 31254,
+            "run_time": 16600,
+            "reward": 477.43850141763687
+        },
+        {
+            "iteration": 31255,
+            "run_time": 17000,
+            "reward": 448.3396255970001
+        },
+        {
+            "iteration": 31256,
+            "run_time": 35200,
+            "reward": 890.4193946868181
+        },
+        {
+            "iteration": 31257,
+            "run_time": 26900,
+            "reward": 707.701025903225
+        },
+        {
+            "iteration": 31258,
+            "run_time": 18800,
+            "reward": 480.23371011018753
+        },
+        {
+            "iteration": 31259,
+            "run_time": 7000,
+            "reward": 180.06325781345367
+        },
+        {
+            "iteration": 31260,
+            "run_time": 6800,
+            "reward": 178.63322323560715
+        },
+        {
+            "iteration": 31261,
+            "run_time": 6800,
+            "reward": 175.98456251621246
+        },
+        {
+            "iteration": 31262,
+            "run_time": 6900,
+            "reward": 180.01150028407574
+        },
+        {
+            "iteration": 31263,
+            "run_time": 7700,
+            "reward": 188.57402157783508
+        },
+        {
+            "iteration": 31264,
+            "run_time": 6900,
+            "reward": 178.18199145793915
+        },
+        {
+            "iteration": 31265,
+            "run_time": 18100,
+            "reward": 504.21005126833916
+        },
+        {
+            "iteration": 31266,
+            "run_time": 6800,
+            "reward": 179.6327155828476
+        },
+        {
+            "iteration": 31267,
+            "run_time": 6500,
+            "reward": 180.73094165325165
+        },
+        {
+            "iteration": 31268,
+            "run_time": 7400,
+            "reward": 188.14172899723053
+        },
+        {
+            "iteration": 31269,
+            "run_time": 25700,
+            "reward": 718.975699365139
+        },
+        {
+            "iteration": 31270,
+            "run_time": 13600,
+            "reward": 392.9885091781616
+        },
+        {
+            "iteration": 31271,
+            "run_time": 19700,
+            "reward": 566.8581716418266
+        },
+        {
+            "iteration": 31272,
+            "run_time": 25300,
+            "reward": 753.8073356151581
+        },
+        {
+            "iteration": 31273,
+            "run_time": 31700,
+            "reward": 924.2593624591827
+        },
+        {
+            "iteration": 31274,
+            "run_time": 5200,
+            "reward": 130.6670993566513
+        },
+        {
+            "iteration": 31275,
+            "run_time": 31800,
+            "reward": 891.3042823337018
+        },
+        {
+            "iteration": 31276,
+            "run_time": 16700,
+            "reward": 481.35870909690857
+        },
+        {
+            "iteration": 31277,
+            "run_time": 30600,
+            "reward": 799.5049245283008
+        },
+        {
+            "iteration": 31278,
+            "run_time": 16100,
+            "reward": 482.1133891940117
+        },
+        {
+            "iteration": 31279,
+            "run_time": 27600,
+            "reward": 801.6729744672775
+        },
+        {
+            "iteration": 31280,
+            "run_time": 25600,
+            "reward": 752.9675300121307
+        },
+        {
+            "iteration": 31281,
+            "run_time": 20800,
+            "reward": 645.1843259930611
+        },
+        {
+            "iteration": 31282,
+            "run_time": 30700,
+            "reward": 923.815517604351
+        },
+        {
+            "iteration": 31283,
+            "run_time": 17300,
+            "reward": 555.1760439872742
+        },
+        {
+            "iteration": 31284,
+            "run_time": 33700,
+            "reward": 985.0637001991272
+        },
+        {
+            "iteration": 31285,
+            "run_time": 20400,
+            "reward": 629.1065677404404
+        },
+        {
+            "iteration": 31286,
+            "run_time": 28300,
+            "reward": 923.1077075600624
+        },
+        {
+            "iteration": 31287,
+            "run_time": 22800,
+            "reward": 634.5421152412891
+        },
+        {
+            "iteration": 31288,
+            "run_time": 7900,
+            "reward": 230.42792165279388
+        },
+        {
+            "iteration": 31289,
+            "run_time": 15800,
+            "reward": 513.256144285202
+        },
+        {
+            "iteration": 31290,
+            "run_time": 9900,
+            "reward": 281.18589746952057
+        },
+        {
+            "iteration": 31291,
+            "run_time": 15000,
+            "reward": 481.4979507923126
+        },
+        {
+            "iteration": 31292,
+            "run_time": 22000,
+            "reward": 641.5174159109592
+        },
+        {
+            "iteration": 31293,
+            "run_time": 13000,
+            "reward": 385.8541081547737
+        },
+        {
+            "iteration": 31294,
+            "run_time": 21400,
+            "reward": 682.1360704302788
+        },
+        {
+            "iteration": 31295,
+            "run_time": 19300,
+            "reward": 638.3756135702133
+        },
+        {
+            "iteration": 31296,
+            "run_time": 7100,
+            "reward": 191.35856783390045
+        },
+        {
+            "iteration": 31297,
+            "run_time": 12400,
+            "reward": 398.39960193634033
+        },
+        {
+            "iteration": 31298,
+            "run_time": 10700,
+            "reward": 348.7353370189667
+        },
+        {
+            "iteration": 31299,
+            "run_time": 11000,
+            "reward": 340.6858593225479
+        },
+        {
+            "iteration": 31300,
+            "run_time": 6100,
+            "reward": 178.74583518505096
+        },
+        {
+            "iteration": 31301,
+            "run_time": 11500,
+            "reward": 388.20738410949707
+        },
+        {
+            "iteration": 31302,
+            "run_time": 14700,
+            "reward": 484.84271597862244
+        },
+        {
+            "iteration": 31303,
+            "run_time": 6000,
+            "reward": 178.3511610031128
+        },
+        {
+            "iteration": 31304,
+            "run_time": 5800,
+            "reward": 177.22487843036652
+        },
+        {
+            "iteration": 31305,
+            "run_time": 12000,
+            "reward": 407.4777267575264
+        },
+        {
+            "iteration": 31306,
+            "run_time": 7900,
+            "reward": 234.043280801503
+        },
+        {
+            "iteration": 31307,
+            "run_time": 14000,
+            "reward": 412.01153963804245
+        },
+        {
+            "iteration": 31308,
+            "run_time": 7900,
+            "reward": 257.06702721118927
+        },
+        {
+            "iteration": 31309,
+            "run_time": 16000,
+            "reward": 560.7584190368652
+        },
+        {
+            "iteration": 31310,
+            "run_time": 6100,
+            "reward": 177.7429656982422
+        },
+        {
+            "iteration": 31311,
+            "run_time": 8100,
+            "reward": 228.09902489185333
+        },
+        {
+            "iteration": 31312,
+            "run_time": 10200,
+            "reward": 325.4972118139267
+        },
+        {
+            "iteration": 31313,
+            "run_time": 8600,
+            "reward": 257.15502393245697
+        },
+        {
+            "iteration": 31314,
+            "run_time": 17200,
+            "reward": 410.8985844645649
+        },
+        {
+            "iteration": 31315,
+            "run_time": 8000,
+            "reward": 226.14488208293915
+        },
+        {
+            "iteration": 31316,
+            "run_time": 7900,
+            "reward": 256.1074471473694
+        },
+        {
+            "iteration": 31317,
+            "run_time": 19000,
+            "reward": 632.1201982498169
+        },
+        {
+            "iteration": 31318,
+            "run_time": 12800,
+            "reward": 399.9201498031616
+        },
+        {
+            "iteration": 31319,
+            "run_time": 10500,
+            "reward": 334.2056176662445
+        },
+        {
+            "iteration": 31320,
+            "run_time": 7700,
+            "reward": 219.90228712558746
+        },
+        {
+            "iteration": 31321,
+            "run_time": 12400,
+            "reward": 407.26268231868744
+        },
+        {
+            "iteration": 31322,
+            "run_time": 6100,
+            "reward": 177.7718145251274
+        },
+        {
+            "iteration": 31323,
+            "run_time": 5000,
+            "reward": 94.61428320407867
+        },
+        {
+            "iteration": 31324,
+            "run_time": 11800,
+            "reward": 404.83234107494354
+        },
+        {
+            "iteration": 31325,
+            "run_time": 14000,
+            "reward": 261.42186757037416
+        },
+        {
+            "iteration": 31326,
+            "run_time": 10800,
+            "reward": 333.9669622182846
+        },
+        {
+            "iteration": 31327,
+            "run_time": 8200,
+            "reward": 257.96407663822174
+        },
+        {
+            "iteration": 31328,
+            "run_time": 18700,
+            "reward": 622.2822090387344
+        },
+        {
+            "iteration": 31329,
+            "run_time": 15600,
+            "reward": 491.24241733551025
+        },
+        {
+            "iteration": 31330,
+            "run_time": 6100,
+            "reward": 179.6332652568817
+        },
+        {
+            "iteration": 31331,
+            "run_time": 10700,
+            "reward": 323.04293543100357
+        },
+        {
+            "iteration": 31332,
+            "run_time": 30500,
+            "reward": 927.4051537513733
+        },
+        {
+            "iteration": 31333,
+            "run_time": 12200,
+            "reward": 384.69314074516296
+        },
+        {
+            "iteration": 31334,
+            "run_time": 7200,
+            "reward": 215.97160160541534
+        },
+        {
+            "iteration": 31335,
+            "run_time": 7900,
+            "reward": 224.6691950559616
+        },
+        {
+            "iteration": 31336,
+            "run_time": 13700,
+            "reward": 395.02492690086365
+        },
+        {
+            "iteration": 31337,
+            "run_time": 6400,
+            "reward": 178.18500316143036
+        },
+        {
+            "iteration": 31338,
+            "run_time": 10600,
+            "reward": 336.68745279312134
+        },
+        {
+            "iteration": 31339,
+            "run_time": 14300,
+            "reward": 393.41286712884903
+        },
+        {
+            "iteration": 31340,
+            "run_time": 13600,
+            "reward": 406.6192055940628
+        },
+        {
+            "iteration": 31341,
+            "run_time": 11300,
+            "reward": 333.5162469148636
+        },
+        {
+            "iteration": 31342,
+            "run_time": 13000,
+            "reward": 402.96100544929504
+        },
+        {
+            "iteration": 31343,
+            "run_time": 6100,
+            "reward": 177.52915811538696
+        },
+        {
+            "iteration": 31344,
+            "run_time": 12200,
+            "reward": 401.7092117071152
+        },
+        {
+            "iteration": 31345,
+            "run_time": 10900,
+            "reward": 327.3353637456894
+        },
+        {
+            "iteration": 31346,
+            "run_time": 13500,
+            "reward": 257.1392620205879
+        },
+        {
+            "iteration": 31347,
+            "run_time": 12600,
+            "reward": 395.41034576296806
+        },
+        {
+            "iteration": 31348,
+            "run_time": 14600,
+            "reward": 488.70388346910477
+        },
+        {
+            "iteration": 31349,
+            "run_time": 11200,
+            "reward": 347.3916597366333
+        },
+        {
+            "iteration": 31350,
+            "run_time": 13800,
+            "reward": 419.2928295135498
+        },
+        {
+            "iteration": 31351,
+            "run_time": 10100,
+            "reward": 330.64039373397827
+        },
+        {
+            "iteration": 31352,
+            "run_time": 10700,
+            "reward": 302.8524421453476
+        },
+        {
+            "iteration": 31353,
+            "run_time": 11500,
+            "reward": 331.6656229496002
+        },
+        {
+            "iteration": 31354,
+            "run_time": 8100,
+            "reward": 230.52488613128662
+        },
+        {
+            "iteration": 31355,
+            "run_time": 10400,
+            "reward": 322.8494613170624
+        },
+        {
+            "iteration": 31356,
+            "run_time": 10000,
+            "reward": 285.7657724618912
+        },
+        {
+            "iteration": 31357,
+            "run_time": 16800,
+            "reward": 543.1985025405884
+        },
+        {
+            "iteration": 31358,
+            "run_time": 10500,
+            "reward": 334.26041305065155
+        },
+        {
+            "iteration": 31359,
+            "run_time": 12700,
+            "reward": 407.459620913025
+        },
+        {
+            "iteration": 31360,
+            "run_time": 8300,
+            "reward": 256.90540611743927
+        },
+        {
+            "iteration": 31361,
+            "run_time": 12700,
+            "reward": 406.6002858877182
+        },
+        {
+            "iteration": 31362,
+            "run_time": 6400,
+            "reward": 177.4346153140068
+        },
+        {
+            "iteration": 31363,
+            "run_time": 4900,
+            "reward": 132.07741820812225
+        },
+        {
+            "iteration": 31364,
+            "run_time": 13000,
+            "reward": 401.96804320812225
+        },
+        {
+            "iteration": 31365,
+            "run_time": 7100,
+            "reward": 215.85734522342682
+        },
+        {
+            "iteration": 31366,
+            "run_time": 7800,
+            "reward": 224.54998284578323
+        },
+        {
+            "iteration": 31367,
+            "run_time": 5500,
+            "reward": 106.28782629873604
+        },
+        {
+            "iteration": 31368,
+            "run_time": 23600,
+            "reward": 760.0222561955452
+        },
+        {
+            "iteration": 31369,
+            "run_time": 13700,
+            "reward": 446.4286153316498
+        },
+        {
+            "iteration": 31370,
+            "run_time": 10700,
+            "reward": 328.0187808275223
+        },
+        {
+            "iteration": 31371,
+            "run_time": 7900,
+            "reward": 256.08269810676575
+        },
+        {
+            "iteration": 31372,
+            "run_time": 28300,
+            "reward": 924.7865849882364
+        },
+        {
+            "iteration": 31373,
+            "run_time": 10400,
+            "reward": 334.3813053369522
+        },
+        {
+            "iteration": 31374,
+            "run_time": 11100,
+            "reward": 348.6574671268463
+        },
+        {
+            "iteration": 31375,
+            "run_time": 12400,
+            "reward": 395.36094880104065
+        },
+        {
+            "iteration": 31376,
+            "run_time": 10500,
+            "reward": 339.71148204803467
+        },
+        {
+            "iteration": 31377,
+            "run_time": 6200,
+            "reward": 178.39679563045502
+        },
+        {
+            "iteration": 31378,
+            "run_time": 18600,
+            "reward": 621.6583065986633
+        },
+        {
+            "iteration": 31379,
+            "run_time": 12200,
+            "reward": 396.11436569690704
+        },
+        {
+            "iteration": 31380,
+            "run_time": 28800,
+            "reward": 925.6335482746363
+        },
+        {
+            "iteration": 31381,
+            "run_time": 6200,
+            "reward": 178.88163661956787
+        },
+        {
+            "iteration": 31382,
+            "run_time": 9000,
+            "reward": 234.11595129966736
+        },
+        {
+            "iteration": 31383,
+            "run_time": 6200,
+            "reward": 178.63900315761566
+        },
+        {
+            "iteration": 31384,
+            "run_time": 14500,
+            "reward": 440.2728109359741
+        },
+        {
+            "iteration": 31385,
+            "run_time": 11700,
+            "reward": 308.266952753067
+        },
+        {
+            "iteration": 31386,
+            "run_time": 8000,
+            "reward": 255.93436753749847
+        },
+        {
+            "iteration": 31387,
+            "run_time": 18000,
+            "reward": 561.2330720424652
+        },
+        {
+            "iteration": 31388,
+            "run_time": 28800,
+            "reward": 924.1844908297062
+        },
+        {
+            "iteration": 31389,
+            "run_time": 9300,
+            "reward": 280.7966167628765
+        },
+        {
+            "iteration": 31390,
+            "run_time": 28700,
+            "reward": 937.3106296360493
+        },
+        {
+            "iteration": 31391,
+            "run_time": 29800,
+            "reward": 925.9256588220596
         }
     ]
 }
