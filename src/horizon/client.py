@@ -31,7 +31,7 @@ class HorizonClient(Client):
         self.critic: PPOCritic = PPOCritic().to(self.device)
         self.trainer: PPOTrainer = PPOTrainer(self.actor, self.critic, self.device)
 
-        self.memory: RolloutBuffer = RolloutBuffer()
+        self.memory: RolloutBuffer = RolloutBuffer(self.device)
         self.reward = 0.0
 
         self.prev_positions = deque(maxlen=5 * Config.Game.NUMBER_OF_ACTIONS_PER_SECOND)        # 5-second long memory

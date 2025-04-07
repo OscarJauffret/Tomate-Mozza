@@ -72,16 +72,17 @@ class PPOTrainer:
         :param dones: the done flags
         :return: the GAE
         """
-        advantages = []
+        advantages = torch.zeros_like(rewards, dtype=torch.float, device=self.device)  # Shape: [memory_size]
         for step in reversed(range(len(rewards))):
             if step == len(rewards) - 1:
-                next_value = 0
+                delta = rewards[step] - values[step]
+                advantages[step] = delta
             else:
                 next_value = values[step + 1] * (1 - dones[step])
-            delta = rewards[step] + self.gamma * next_value - values[step]
-            advantages.insert(0, delta + self.gamma * self.gae_lambda * advantages[0] if advantages else delta)
-        advantages = np.array(advantages)
-        return torch.from_numpy(advantages).to(self.device)  # Convert to tensor and move to device
+                delta = rewards[step] + self.gamma * next_value - values[step]
+                advantages[step] = delta + self.gamma * self.gae_lambda * advantages[step + 1]
+
+        return advantages  # Shape: [memory_size]
 
     def compute_returns(self, advantages, values):
         """
@@ -99,17 +100,12 @@ class PPOTrainer:
         """
         states, actions, probs, values, rewards, dones, batches = memory.generate_batches()
         # Convert to tensors and move to device
-        values = torch.from_numpy(values).to(self.device)  # Shape: [memory_size, 1]
-        values = values.squeeze(1)  # Shape: [memory_size]
+        # values = torch.from_numpy(values).to(self.device)  # Shape: [memory_size, 1]
         advantages = self.compute_gae(rewards, values, dones)   # Shape [memory_size]
-
         for batch in batches:
-            batch_states = torch.tensor(states[batch], dtype=torch.float, device=self.device)   # Now we randomize the order of the transitions
-            batch_old_probs = torch.tensor(probs[batch], dtype=torch.float, device=self.device)
-            batch_actions = torch.tensor(actions[batch], dtype=torch.float, device=self.device)
-            # batch_states is a tensor of shape [batch_size, state_size]
-            # batch_old_probs is a tensor of shape [batch_size]
-            # batch_actions is a tensor of shape [batch_size]
+            batch_states = states[batch]  # Shape: [batch_size, state_size]
+            batch_old_probs = probs[batch]  # Shape: [batch_size]
+            batch_actions = actions[batch] # Shape: [batch_size]
 
             dist = self.actor(batch_states) # Shape: [batch_size, n_actions]
             critic_value = self.critic(batch_states).squeeze(1)# Shap: [batch_size]
