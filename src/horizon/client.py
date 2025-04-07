@@ -6,6 +6,7 @@ import json
 
 from tminterface.client import Client
 from tminterface.interface import TMInterface
+from tminterface.structs import SimStateData
 from collections import deque
 import shutil
 
@@ -36,7 +37,7 @@ class HorizonClient(Client):
         self.prev_position = None
         self.prev_positions = deque(maxlen=5 * Config.Game.NUMBER_OF_ACTIONS_PER_SECOND)        # 5-second long memory
         self.current_state = None
-        self.prev_game_state: StateAction = None
+        self.n_step_buffer: NStepBuffer = NStepBuffer()
         self.prev_velocity = None
         self.has_finished = False
 
@@ -117,9 +118,8 @@ class HorizonClient(Client):
 
         print(f"Model saved to {model_path} and in the latest model directory")
 
-    def get_state(self, iface: TMInterface):
-        state = iface.get_simulation_state()
-        current_velocity = np.array(state.velocity)
+    def get_state(self, simulation_state: SimStateData) -> torch.Tensor:
+        current_velocity = np.array(simulation_state.velocity)
 
         acceleration_scalar = 0
         velocity_norm = 0
@@ -131,9 +131,9 @@ class HorizonClient(Client):
                 acceleration_scalar = np.dot(delta_v, direction) / (Config.Game.INTERVAL_BETWEEN_ACTIONS / 1000)
         self.prev_velocity = current_velocity
 
-        agent_absolute_position = (state.position[0], state.position[2])
+        agent_absolute_position = (simulation_state.position[0], simulation_state.position[2])
         section_relative_position, next_turn, second_edge_length, second_turn, third_edge_length, third_turn = self.agent_position.get_relative_position_and_next_turns(agent_absolute_position)
-        relative_yaw = self.agent_position.get_car_orientation(state.yaw_pitch_roll[0], agent_absolute_position)
+        relative_yaw = self.agent_position.get_car_orientation(simulation_state.yaw_pitch_roll[0], agent_absolute_position)
 
         current_state = torch.tensor([
             section_relative_position[0],
@@ -195,25 +195,22 @@ class HorizonClient(Client):
             case _:
                 iface.set_input_state(accelerate=False, left=False, right=False)
 
-    def get_reward(self, iface: TMInterface):
+    def get_reward(self, simulation_state: SimStateData) -> torch.Tensor:
         if self.prev_position is None:
             return torch.tensor(0, device=self.device)
         prev_position = self.prev_position
-        current_position = iface.get_simulation_state().position[0], iface.get_simulation_state().position[2]
+        current_position = (simulation_state.position[0], simulation_state.position[2])
         current_reward = self.agent_position.get_distance_reward(prev_position, current_position)
-        # if self.has_finished:
-        #     current_reward += Config.Game.BLOCK_SIZE
-        # if iface.get_simulation_state().position[1] < 23:
-        #     current_reward -= Config.Game.BLOCK_SIZE
+        if self.has_finished:
+            current_reward += Config.Game.BLOCK_SIZE
         return torch.tensor(current_reward, device=self.device)
 
-    def determine_done(self, iface: TMInterface):
-        state = iface.get_simulation_state()
+    def determine_done(self, simulation_state: SimStateData) -> torch.Tensor:
 
-        if state.position[1] < 23: # If the car is below the track
+        if simulation_state.position[1] < 23: # If the car is below the track
             return torch.tensor(1.0, device=self.device, dtype=torch.float)
 
-        if state.player_info.race_finished:
+        if simulation_state.player_info.race_finished:
             self.has_finished = True
             return torch.tensor(1.0, device=self.device, dtype=torch.float)
 
@@ -242,7 +239,6 @@ class HorizonClient(Client):
         self.memory.update_priorities(indices, td_sample)
 
     def on_run_step(self, iface: TMInterface, _time: int) -> None:
-
         if _time == 20:
             if Config.Game.RANDOM_SPAWN:
                 iface.execute_command(f"load_state {random.choice(self.random_states)}")
@@ -255,21 +251,25 @@ class HorizonClient(Client):
 
         if _time >= 0 and _time % Config.Game.INTERVAL_BETWEEN_ACTIONS == 0 and self.ready:
             start_time = time.time()
-            self.current_state = self.get_state(iface)  # Get the current state
-            done = self.determine_done(iface)
-
-            if self.prev_game_state is not None:         # If this is not the first state, train the model
-                current_reward = self.get_reward(iface)
-                if not self.epsilon_dict["manual"]:
-                    self.remember(self.prev_game_state.state, self.prev_game_state.action, current_reward, self.current_state, done)
+            simulation_state = iface.get_simulation_state()
+            self.current_state = self.get_state(simulation_state)  # Get the current state
+            done = self.determine_done(simulation_state)
+            current_reward = 0
+            if len(self.n_step_buffer) > 0:
+                current_reward = self.get_reward(simulation_state)
                 self.reward += current_reward.item()
 
-            action = self.get_action(self.current_state)                                    # Get the action
-            self.prev_game_state = StateAction(self.current_state, action)       # Save the current state and action for the next iteration
-            self.prev_position = iface.get_simulation_state().position[0], iface.get_simulation_state().position[2] # Save the previous position for the reward's calculation
+            action = self.get_action(self.current_state)                             
+            self.n_step_buffer.add(self.current_state, action, current_reward)        
+            self.prev_position = simulation_state.position[0], simulation_state.position[2]  # Get the current position
             self.prev_positions.append(self.prev_position)
 
             self.send_input(iface, action)                # Send the action to the game
+
+            if self.n_step_buffer.is_full() and not self.epsilon_dict["manual"]:
+                state, action, reward = self.n_step_buffer.get_transition()
+                next_state = self.current_state
+                self.remember(state, action, reward, next_state, done)
 
             end_time = time.time()
             total_time = end_time - start_time
@@ -279,6 +279,12 @@ class HorizonClient(Client):
             if done:
                 self.ready = False
                 if not self.epsilon_dict["manual"]:
+                    while not self.n_step_buffer.is_empty():
+                        state, action, reward = self.n_step_buffer.get_transition()
+                        next_state = self.current_state
+                        self.n_step_buffer.pop_transition()
+                        self.remember(state, action, reward, next_state, done)
+
                     self.iterations += 1
                     self.rewards_queue.put(self.reward)
                     self.logger.add_run(self.iterations, _time, self.reward)
@@ -289,7 +295,7 @@ class HorizonClient(Client):
                 self.reward = 0.0
                 self.prev_position = None
                 self.prev_positions.clear()
-                self.prev_game_state = None
+                self.n_step_buffer.clear()
                 self.prev_velocity = None
                 if self.has_finished:
                     self.has_finished = False
@@ -298,7 +304,42 @@ class HorizonClient(Client):
                     iface.horn()
                     iface.execute_command(f"load_state {self.random_states[0]}")    # State 0 of HorizonUnlimited
 
-class StateAction:
-    def __init__(self, state, action):
-        self.state = state
-        self.action = action
+class NStepBuffer:
+    def __init__(self):
+        self.states = deque(maxlen=Config.NN.N_STEPS)
+        self.actions = deque(maxlen=Config.NN.N_STEPS)
+        self.rewards = deque(maxlen=Config.NN.N_STEPS)
+        self.gammas = Config.NN.GAMMA ** np.arange(Config.NN.N_STEPS) 
+
+    def __len__(self):
+        return len(self.states)
+
+    def clear(self):
+        self.states.clear()
+        self.actions.clear()
+        self.rewards.clear()
+
+    def get_transition(self):
+        return self.states[0], self.actions[0], self.cumulative_reward()
+    
+    def pop_transition(self):
+        self.states.popleft()
+        self.actions.popleft()
+        self.rewards.popleft()
+
+    def is_full(self):
+        return len(self.states) == Config.NN.N_STEPS
+
+    def is_empty(self):
+        return len(self.states) == 0
+
+    def cumulative_reward(self):
+        return sum([self.rewards[i] * self.gammas[i] for i in range(len(self.rewards))])
+
+    def add(self, state, action, reward):
+        self.states.append(state)
+        self.actions.append(action)
+        self.rewards.append(reward)
+
+    
+

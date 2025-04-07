@@ -27,6 +27,7 @@ class Worker(multiprocessing.Process):
         signal.signal(signal.SIGINT, self.close_signal_handler)
         signal.signal(signal.SIGTERM, self.close_signal_handler)
         self.iface.register(self.client)
+        #self.iface.set_timeout(500000)
 
         while self.iface.running:
             if self.choose_map_event.is_set():
