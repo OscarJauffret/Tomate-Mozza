@@ -219,7 +219,7 @@ class HorizonClient(Client):
             self.has_finished = True
             return torch.tensor(1.0, device=self.device, dtype=torch.float)
 
-        if self.prev_positions and len(self.prev_positions) == 50 and np.linalg.norm(np.array(self.prev_positions[0]) - np.array(self.prev_positions[-1])) < 5:    # If less than 5 meters were travelled in the last 5 seconds
+        if self.prev_positions and len(self.prev_positions) == (5 * Config.Game.NUMBER_OF_ACTIONS_PER_SECOND) and np.linalg.norm(np.array(self.prev_positions[0]) - np.array(self.prev_positions[-1])) < 5:    # If less than 5 meters were travelled in the last 5 seconds
             return torch.tensor(1.0, device=self.device, dtype=torch.float)
 
         return torch.tensor(0.0, device=self.device, dtype=torch.float)
@@ -279,8 +279,8 @@ class HorizonClient(Client):
 
             end_time = time.time()
             total_time = end_time - start_time
-            # if total_time * 1000 > Config.Game.INTERVAL_BETWEEN_ACTIONS / Config.Game.GAME_SPEED:
-            #     print(f"Warning: the action took {total_time * 1000:.2f}ms to execute, it should've taken less than {Config.Game.INTERVAL_BETWEEN_ACTIONS / Config.Game.GAME_SPEED:.2f}ms")
+            if total_time * 1000 > Config.Game.INTERVAL_BETWEEN_ACTIONS / Config.Game.GAME_SPEED:
+                print(f"Warning: the action took {total_time * 1000:.2f}ms to execute, it should've taken less than {Config.Game.INTERVAL_BETWEEN_ACTIONS / Config.Game.GAME_SPEED:.2f}ms")
 
             if done:
                 self.ready = False
