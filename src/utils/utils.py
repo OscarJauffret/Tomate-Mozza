@@ -66,4 +66,4 @@ def profile_time(func):
 def print_profile_times():
     for func_name, times in profile_times.items():
         avg_time = sum(times) / len(times)
-        print(f"{func_name}: {avg_time:.4f} seconds (called {len(times)} times)")
+        print(f"{func_name}: {avg_time * 1000:.4f} ms (called {len(times)} times)")

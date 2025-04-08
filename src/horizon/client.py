@@ -36,8 +36,8 @@ class HorizonClient(Client):
 
         self.prev_position = None
         self.prev_positions = deque(maxlen=5 * Config.Game.NUMBER_OF_ACTIONS_PER_SECOND)        # 5-second long memory
-        self.current_state = None
-        self.n_step_buffer: NStepBuffer = NStepBuffer(self.hyperparameters["n_steps"])
+        self.current_state = torch.zeros(Config.NN.Arch.INPUT_SIZE, dtype=torch.float, device=self.device)
+        self.n_step_buffer: NStepBuffer = NStepBuffer(self.hyperparameters["n_steps"], self.device)
         self.prev_velocity = None
         self.has_finished = False
 
@@ -73,7 +73,7 @@ class HorizonClient(Client):
                 self.hyperparameters = self.load_hyperparameters(path)
                 self.model.load_state_dict(torch.load(model_pth, map_location=self.device))
                 self.trainer = QTrainer(self.model, self.device, self.hyperparameters["learning_rate"], self.hyperparameters["gamma"])
-                self.n_step_buffer = NStepBuffer(self.hyperparameters["n_steps"])
+                self.n_step_buffer = NStepBuffer(self.hyperparameters["n_steps"], self.device)
                 self.memory = PrioritizedReplayBuffer(self.hyperparameters["max_memory"], alpha=self.hyperparameters["alpha"], beta=self.hyperparameters["beta_start"]) 
                 self.logger.load(os.path.join(path, Config.Paths.STAT_FILE_NAME))
                 print(f"Model loaded from {model_pth}")
@@ -84,7 +84,7 @@ class HorizonClient(Client):
             self.hyperparameters = Config.NN.get_hyperparameters()
             self.model = Model().to(self.device)
             self.trainer = QTrainer(self.model, self.device, self.hyperparameters["learning_rate"], self.hyperparameters["gamma"])
-            self.n_step_buffer = NStepBuffer(self.hyperparameters["n_steps"])
+            self.n_step_buffer = NStepBuffer(self.hyperparameters["n_steps"], self.device)
             self.memory = PrioritizedReplayBuffer(self.hyperparameters["max_memory"], alpha=self.hyperparameters["alpha"], beta=self.hyperparameters["beta_start"]) 
             print("Loaded a fresh model with random weights")
 
@@ -122,9 +122,10 @@ class HorizonClient(Client):
 
         print(f"Model saved to {model_path} and in the latest model directory")
 
-    def get_state(self, simulation_state: SimStateData) -> torch.Tensor:
-        current_velocity = np.array(simulation_state.velocity)
+    
+    def update_state(self, simulation_state: SimStateData) -> None:
 
+        current_velocity = np.array(simulation_state.velocity)
         acceleration_scalar = 0
         velocity_norm = 0
         if self.prev_velocity is not None:
@@ -139,7 +140,7 @@ class HorizonClient(Client):
         section_relative_position, next_turn, second_edge_length, second_turn, third_edge_length, third_turn = self.agent_position.get_relative_position_and_next_turns(agent_absolute_position)
         relative_yaw = self.agent_position.get_car_orientation(simulation_state.yaw_pitch_roll[0], agent_absolute_position)
 
-        current_state = torch.tensor([
+        self.current_state = torch.tensor([
             section_relative_position[0],
             section_relative_position[1],
             next_turn,
@@ -152,7 +153,6 @@ class HorizonClient(Client):
             third_turn
         ], dtype=torch.float, device=self.device)
 
-        return current_state
     
     def update_epsilon(self):
         if self.epsilon_dict["manual"]:
@@ -161,27 +161,28 @@ class HorizonClient(Client):
             self.epsilon = self.hyperparameters["epsilon_end"] + \
                 (self.hyperparameters["epsilon_start"] - self.hyperparameters["epsilon_end"]) \
                       * np.exp(-1. * self.iterations / self.hyperparameters["epsilon_decay"])
-            self.epsilon_dict["value"] = self.epsilon
 
+    
     def get_action(self, state) -> torch.Tensor:
         self.update_epsilon()
 
         if random.random() < self.epsilon:
             move = torch.randint(0, Config.NN.Arch.OUTPUT_SIZE, (), device=self.device)
-            for i, action in enumerate(Config.NN.Arch.OUTPUTS_DESC):
-                self.q_values_dict[action] = 0.0
-            self.q_values_dict[Config.NN.Arch.OUTPUTS_DESC[move]] = 1.0
-            self.q_values_dict["is_random"] = True
+            # for i, action in enumerate(Config.NN.Arch.OUTPUTS_DESC):
+            #     self.q_values_dict[action] = 0.0
+            # self.q_values_dict[Config.NN.Arch.OUTPUTS_DESC[move]] = 1.0
+            # self.q_values_dict["is_random"] = True
             return move
         else:
             with torch.no_grad():
-                prediction = self.model(state.to(self.device))
-                for i, action in enumerate(Config.NN.Arch.OUTPUTS_DESC):
-                    self.q_values_dict[action] = prediction[i].item()
-                self.q_values_dict["is_random"] = False
+                prediction = self.model(state)
+                # for i, action in enumerate(Config.NN.Arch.OUTPUTS_DESC):
+                #     self.q_values_dict[action] = prediction[i].item()
+                # self.q_values_dict["is_random"] = False
                 return torch.argmax(prediction)
 
 
+    
     def send_input(self, iface: TMInterface, move) -> None:
         match move: 
             case 0:
@@ -256,7 +257,8 @@ class HorizonClient(Client):
         if _time >= 0 and _time % Config.Game.INTERVAL_BETWEEN_ACTIONS == 0 and self.ready:
             start_time = time.time()
             simulation_state = iface.get_simulation_state()
-            self.current_state = self.get_state(simulation_state)  # Get the current state
+            self.agent_position.update((simulation_state.position[0], simulation_state.position[2]))
+            self.update_state(simulation_state)  # Get the current state
             done = self.determine_done(simulation_state)
             current_reward = 0
             if len(self.n_step_buffer) > 0:
@@ -277,8 +279,8 @@ class HorizonClient(Client):
 
             end_time = time.time()
             total_time = end_time - start_time
-            if total_time * 1000 > Config.Game.INTERVAL_BETWEEN_ACTIONS / Config.Game.GAME_SPEED:
-                print(f"Warning: the action took {total_time * 1000:.2f}ms to execute, it should've taken less than {Config.Game.INTERVAL_BETWEEN_ACTIONS / Config.Game.GAME_SPEED:.2f}ms")
+            # if total_time * 1000 > Config.Game.INTERVAL_BETWEEN_ACTIONS / Config.Game.GAME_SPEED:
+            #     print(f"Warning: the action took {total_time * 1000:.2f}ms to execute, it should've taken less than {Config.Game.INTERVAL_BETWEEN_ACTIONS / Config.Game.GAME_SPEED:.2f}ms")
 
             if done:
                 self.ready = False
@@ -301,6 +303,7 @@ class HorizonClient(Client):
                 self.prev_positions.clear()
                 self.n_step_buffer.clear()
                 self.prev_velocity = None
+                self.epsilon_dict["value"] = self.epsilon
                 if self.has_finished:
                     self.has_finished = False
                     self.launch_map(iface)
@@ -309,42 +312,59 @@ class HorizonClient(Client):
                     iface.execute_command(f"load_state {self.random_states[0]}")    # State 0 of HorizonUnlimited
 
 class NStepBuffer:
-    def __init__(self, n_steps:int) -> None:
+    def __init__(self, n_steps:int, device) -> None:
         self.n_steps = n_steps
-        self.states = deque(maxlen=self.n_steps)
-        self.actions = deque(maxlen=self.n_steps)
-        self.rewards = deque(maxlen=self.n_steps)
-        self.gammas = Config.NN.GAMMA ** np.arange(self.n_steps)
+        self.current_size = 0
+        self.position = 0
+        self.device = device
+
+        self.states = torch.zeros((self.n_steps, Config.NN.Arch.INPUT_SIZE), dtype=torch.float, device=self.device)
+        self.actions = torch.zeros(self.n_steps, dtype=torch.int64, device=self.device)
+        self.rewards = torch.zeros(self.n_steps, dtype=torch.float, device=self.device)
+        self.gammas = torch.tensor(Config.NN.GAMMA ** np.arange(self.n_steps), dtype=torch.float, device=self.device)
 
     def __len__(self):
-        return len(self.states)
+        return self.current_size
 
     def clear(self):
-        self.states.clear()
-        self.actions.clear()
-        self.rewards.clear()
+        self.states.zero_()
+        self.actions.zero_()
+        self.rewards.zero_()
 
+        self.current_size = 0
+        self.position = 0
+
+    
     def get_transition(self):
-        return self.states[0], self.actions[0], self.cumulative_reward()
+        idx = (self.position - self.current_size) % self.n_steps
+        return self.states[idx], self.actions[idx], self.cumulative_reward()
     
     def pop_transition(self):
-        self.states.popleft()
-        self.actions.popleft()
-        self.rewards.popleft()
+        if self.current_size > 0:
+            self.current_size -= 1
 
     def is_full(self):
-        return len(self.states) == self.n_steps
+        return self.current_size == self.n_steps
 
     def is_empty(self):
-        return len(self.states) == 0
+        return self.current_size == 0
 
     def cumulative_reward(self):
-        return sum([self.rewards[i] * self.gammas[i] for i in range(len(self.rewards))])
+        indices = [(self.position - self.current_size + i) % self.n_steps for i in range(self.current_size)]
+
+        rewards_tensor = self.rewards[indices].to(self.device)
+        gammas_tensor = self.gammas[:self.current_size].to(self.device)
+        return torch.sum(rewards_tensor * gammas_tensor)
 
     def add(self, state, action, reward):
-        self.states.append(state)
-        self.actions.append(action)
-        self.rewards.append(reward)
+        self.states[self.position] = state
+        self.actions[self.position] = action
+        self.rewards[self.position] = reward
+
+        self.position = (self.position + 1) % self.n_steps
+        if self.current_size < self.n_steps:
+            self.current_size += 1
+
 
     
 
