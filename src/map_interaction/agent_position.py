@@ -218,6 +218,20 @@ class AgentPosition:
         return length * Config.Game.BLOCK_SIZE
 
     
+    def _car_out_of_track(self, agent_relative_position: Tuple[float, float]) -> bool:
+        """
+        Check if the car is out of the track
+        :param agent_relative_position: the relative position of the agent
+        :return: True if the car is out of the track, False otherwise
+        """
+        x, y = agent_relative_position
+
+        # Check if the car is out of the track
+        if x < 0 or x > 1 or abs(y) > 1:
+            return True
+
+        return False
+    
     def get_distance_reward(self, previous_absolute_pos: Tuple[float, float], 
                            current_absolute_pos: Tuple[float, float]) -> float:
         """
@@ -247,6 +261,8 @@ class AgentPosition:
 
         # Calculate the distance reward
         if self.prev_closest_edge == self.closest_edge:  # Same edge
+            if self._car_out_of_track(cur_relative_pos):
+                return 0
             return (cur_x - prev_x) * prev_edge_length
         else:
             # Different edge - handle corner cases
