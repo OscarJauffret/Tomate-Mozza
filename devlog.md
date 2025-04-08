@@ -152,3 +152,17 @@ Launch multiple clients at the same time, logging in, launching the map and focu
 - Tried several different discount factors: 0.9, 0.96 and 0.99. The last one seems to be the best, but we don't know why.
 - Tried implementing n-step learning. We are launching training to see if it works.
 - Made a simple map that is just a series of turns, each separated by the same distance. We will use this map because it is easier for the agent to learn.
+
+---
+
+### 7 April 2025, 2h
+- Started implementing PPO instead of DQN. We used the same architecture as the DQN agent.
+- Tried training without entropy term, the agent was too greedy and didn't explore enough.
+- Added the entropy term to the loss function. There is still a bug in the advantages so the agent could not learn properly.
+
+---
+
+### 8 April 2025, 2h
+- Fixed the bug in the advantages.
+- Tried training with a horizon of 40 steps, it was terrible.
+- Normalized the advantages.
