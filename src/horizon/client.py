@@ -212,7 +212,7 @@ class HorizonClient(Client):
 
     def determine_done(self, simulation_state: SimStateData) -> torch.Tensor:
 
-        if simulation_state.position[1] < 23: # If the car is below the track
+        if simulation_state.position[1] < 23.9: # If the car is below the track
             return torch.tensor(1.0, device=self.device, dtype=torch.float)
 
         if simulation_state.player_info.race_finished:
