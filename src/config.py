@@ -35,14 +35,14 @@ class Config:
         RANDOM_SPAWN: bool = False
 
     class NN:
-        LEARNING_RATE: float = 0.001
+        LEARNING_RATE: float = 0.0003
         GAMMA: float = 0.99
         LAMBDA: float = 0.95
         EPSILON: float = 0.2
         C1: float = 1
         C2: float = 0.01
-        MEMORY_SIZE: int = 128
-        BATCH_SIZE: int = 32
+        MEMORY_SIZE: int = 512
+        BATCH_SIZE: int = 128
 
         @staticmethod
         def get_hyperparameters():
