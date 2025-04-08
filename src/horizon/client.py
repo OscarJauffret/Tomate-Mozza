@@ -10,6 +10,7 @@ from tminterface.structs import SimStateData
 from collections import deque
 from torch import Tensor
 import shutil
+import concurrent.futures
 
 from .ppomodel import PPOActor, PPOCritic, PPOTrainer
 from .rollout_buffer import RolloutBuffer
@@ -41,6 +42,8 @@ class HorizonClient(Client):
 
         self.iterations = 0
         self.ready = False
+
+        self.thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=3)
 
         self.logger = TMLogger(get_device_info(self.device.type))
         self.rewards_queue = shared_dict["reward"]
@@ -211,10 +214,14 @@ class HorizonClient(Client):
         if _time >= 0 and _time % Config.Game.INTERVAL_BETWEEN_ACTIONS == 0 and self.ready:
             start_time = time.time()
             simulation_state = iface.get_simulation_state()
-            self.current_state = self.get_state(simulation_state)  # Get the current state
-            done = self.determine_done(simulation_state)
 
-            current_reward = self.get_reward(simulation_state)
+            future_state = self.thread_pool.submit(self.get_state, simulation_state)
+            future_done = self.thread_pool.submit(self.determine_done, simulation_state)
+            future_reward = self.thread_pool.submit(self.get_reward, simulation_state)
+
+            self.current_state = future_state.result()
+            done = future_done.result()
+            current_reward = future_reward.result()
             self.reward += current_reward.item()
 
             action, probs, value = self.get_action(self.current_state)
@@ -225,8 +232,10 @@ class HorizonClient(Client):
             self.send_input(iface, action)                # Send the action to the game
 
             if self.memory.is_full():
+                iface.set_speed(0)
                 self.trainer.train_step(self.memory)
                 self.memory.clear()
+                iface.set_speed(Config.Game.GAME_SPEED)
 
             end_time = time.time()
             total_time = end_time - start_time

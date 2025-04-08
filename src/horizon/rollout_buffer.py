@@ -47,6 +47,5 @@ class RolloutBuffer:
         num_batches = self.position // self.batch_size
 
         indices = torch.randperm(self.position, device=self.device)  # Randomly permute the indices of the buffer
-        batches = indices.view(num_batches, self.batch_size) # batches is a list of arrays of indices. These indices indicate a batch of states, actions, probs, values, rewards and dones
-        print(batches)
+        batches = indices.view(num_batches, self.batch_size) # batches is a tensor of arrays of indices. These indices indicate a batch of states, actions, probs, values, rewards and dones
         return self.states, self.actions, self.probs, self.values, self.rewards, self.dones, batches

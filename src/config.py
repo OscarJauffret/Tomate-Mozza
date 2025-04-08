@@ -40,18 +40,9 @@ class Config:
         LAMBDA: float = 0.95
         EPSILON: float = 0.2
         C1: float = 1
+        C2: float = 0.01
         MEMORY_SIZE: int = 128
         BATCH_SIZE: int = 32
-        UPDATE_TARGET_EVERY: int = 1
-
-        TAU: float = 0.02
-
-        ALPHA: float = 0.7
-        BETA_START: float = 0.4
-        BETA_MAX: float = 1.0
-        BETA_INCREMENT_STEPS: int = 40000
-
-        N_STEPS: int = 25 # 2.5 Seconds
 
         @staticmethod
         def get_hyperparameters():
@@ -61,14 +52,9 @@ class Config:
                 "lambda": Config.NN.LAMBDA,
                 "epsilon": Config.NN.EPSILON,
                 "c1": Config.NN.C1,
+                "c2": Config.NN.C2,
                 "memory_size": Config.NN.MEMORY_SIZE,
-                "batch_size": Config.NN.BATCH_SIZE,
-                "update_target_every": Config.NN.UPDATE_TARGET_EVERY,
-                "tau": Config.NN.TAU,
-                "alpha": Config.NN.ALPHA,
-                "beta_start": Config.NN.BETA_START,
-                "beta_max": Config.NN.BETA_MAX,
-                "beta_increment_steps": Config.NN.BETA_INCREMENT_STEPS
+                "batch_size": Config.NN.BATCH_SIZE
             }
 
         class Arch:

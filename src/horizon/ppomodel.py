@@ -74,14 +74,14 @@ class PPOTrainer:
         """
         advantages = torch.zeros_like(rewards, dtype=torch.float, device=self.device)  # Shape: [memory_size]
         for step in reversed(range(len(rewards))):
-            if step == len(rewards) - 1:
+            if dones[step] or step == len(rewards) - 1:
                 delta = rewards[step] - values[step]
                 advantages[step] = delta
             else:
                 next_value = values[step + 1] * (1 - dones[step])
                 delta = rewards[step] + self.gamma * next_value - values[step]
                 advantages[step] = delta + self.gamma * self.gae_lambda * advantages[step + 1]
-
+        advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)  # Normalize the advantages
         return advantages  # Shape: [memory_size]
 
     def compute_returns(self, advantages, values):
@@ -108,7 +108,7 @@ class PPOTrainer:
             batch_actions = actions[batch] # Shape: [batch_size]
 
             dist = self.actor(batch_states) # Shape: [batch_size, n_actions]
-            critic_value = self.critic(batch_states).squeeze(1)# Shap: [batch_size]
+            critic_value = self.critic(batch_states).squeeze(1) # Shape: [batch_size]
 
             new_probs = dist.log_prob(batch_actions)    # Shape: [batch_size]
             prob_ratio = torch.exp(new_probs - batch_old_probs)
@@ -120,7 +120,12 @@ class PPOTrainer:
 
             critic_loss = self.mse(critic_value, returns)
 
-            total_loss = actor_loss + Config.NN.C1 * critic_loss
+            entropy = dist.entropy().mean()  # Shape: [1]
+
+            total_loss = actor_loss + Config.NN.C1 * critic_loss - Config.NN.C2 * entropy
+            # In the original paper, the objective is to maximize the expected return (actor_loss - Config.NN.C1 * critic_loss + Config.NN.C2 * entropy).
+            # However, in PyTorch, we minimize the loss.
+            # This means that we need to minimize the negative of the expected return.(-actor_loss + Config.NN.C1 * critic_loss - Config.NN.C2 * entropy)
 
             self.actor_optimizer.zero_grad()
             self.critic_optimizer.zero_grad()
