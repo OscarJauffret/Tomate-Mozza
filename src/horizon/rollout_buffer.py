@@ -33,11 +33,11 @@ class RolloutBuffer:
     def add(self, state, action, log_prob, reward, done, value):
         assert self.position < Config.NN.MEMORY_SIZE, "Rollout buffer is full. Please clear it before adding new data."
 
-        self.states[self.position] = state.detach()
-        self.actions[self.position] = action.detach()
+        self.states[self.position] = state
+        self.actions[self.position] = action
         self.probs[self.position] = log_prob.detach()
-        self.rewards[self.position] = reward.detach()
-        self.dones[self.position] = done.detach()
+        self.rewards[self.position] = reward
+        self.dones[self.position] = done
         self.values[self.position] = value.detach()
         self.position += 1
 
