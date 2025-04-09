@@ -102,6 +102,7 @@ class PPOTrainer:
         # Convert to tensors and move to device
         # values = torch.from_numpy(values).to(self.device)  # Shape: [memory_size, 1]
         advantages = self.compute_gae(rewards, values, dones)   # Shape [memory_size]
+        returns = self.compute_returns(advantages, values)
         for batch in batches:
             batch_states = states[batch]  # Shape: [batch_size, state_size]
             batch_old_probs = probs[batch]  # Shape: [batch_size]
@@ -114,11 +115,9 @@ class PPOTrainer:
             prob_ratio = torch.exp(new_probs - batch_old_probs)
             weighted_probs = prob_ratio * advantages[batch] # Shape: [batch_size]
             clipped_probs = torch.clamp(prob_ratio, 1 - Config.NN.EPSILON, 1 + Config.NN.EPSILON) * advantages[batch]   # Shape: [batch_size]
+            actor_loss = (-torch.min(weighted_probs, clipped_probs)).mean()   # Shape: [1]
 
-            actor_loss = -torch.min(weighted_probs, clipped_probs).mean()   # Shape: [1]
-            returns = self.compute_returns(advantages[batch], values[batch])
-
-            critic_loss = self.mse(critic_value, returns)
+            critic_loss = self.mse(critic_value, returns[batch])
 
             entropy = dist.entropy().mean()  # Shape: [1]
 
