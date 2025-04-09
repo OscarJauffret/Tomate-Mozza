@@ -65,24 +65,27 @@ class HorizonClient(Client):
                 f"next edge length: {self.current_state[6].item():<8.2f} second turn: {self.current_state[7].item():<8} third edge length: {self.current_state[8].item():<8.2f} "
                 f"third turn: {self.current_state[9].item():<8}")
 
-#    def load_model(self) -> None:
-#        if self.model_path.qsize() > 0:
-#            path = self.model_path.get()
-#            model_pth = os.path.join(path, Config.Paths.MODEL_FILE_NAME)
-#            if os.path.exists(model_pth):
-#                self.hyperparameters = self.load_hyperparameters(path)
-#                self.model.load_state_dict(torch.load(model_pth, map_location=self.device))
-#                self.trainer = QTrainer(self.model, self.device, self.hyperparameters["learning_rate"], self.hyperparameters["gamma"])
-#                self.logger.load(os.path.join(path, Config.Paths.STAT_FILE_NAME))
-#                print(f"Model loaded from {model_pth}")
-#            else:
-#                print(f"Model not found at {model_pth}")
-#        else:
-#            # Load fresh model with random weights
-#            self.hyperparameters = Config.NN.get_hyperparameters()
-#            self.model = DQNModel().to(self.device)
-#            self.trainer = QTrainer(self.model, self.device, self.hyperparameters["learning_rate"], self.hyperparameters["gamma"])
-#            print("Loaded a fresh model with random weights")
+    def load_model(self) -> None:
+        if self.model_path.qsize() > 0:
+            path = self.model_path.get()
+            actor_pth = os.path.join(path, Config.Paths.ACTOR_FILE_NAME)
+            critic_pth = os.path.join(path, Config.Paths.CRITIC_FILE_NAME)
+            if os.path.exists(actor_pth) and os.path.exists(critic_pth):
+                self.hyperparameters = self.load_hyperparameters(path)
+                self.actor.load_state_dict(torch.load(actor_pth, map_location=self.device))
+                self.critic.load_state_dict(torch.load(critic_pth, map_location=self.device))
+                self.trainer: PPOTrainer = PPOTrainer(self.actor, self.critic, self.device) # TODO: allow to load hyperparameters
+                self.logger.load(os.path.join(path, Config.Paths.STAT_FILE_NAME))
+                print(f"Model loaded from {path}")
+            else:
+                print(f"Model not found at {path}")
+        else:
+            # Load fresh model with random weights
+            self.hyperparameters = Config.NN.get_hyperparameters()
+            self.actor: PPOActor = PPOActor().to(self.device)
+            self.critic: PPOCritic = PPOCritic().to(self.device)
+            self.trainer: PPOTrainer = PPOTrainer(self.actor, self.critic, self.device)
+            print("Loaded a fresh model with random weights")
 
     def load_hyperparameters(self, path: str) -> dict:
         hyperparameters = {}
