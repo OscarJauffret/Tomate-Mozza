@@ -157,9 +157,9 @@ class HorizonClient(Client):
         value = self.critic(state)
         action = dist.sample()
 
-        prob = dist.log_prob(action)
+        log_prob = dist.log_prob(action)
 
-        return action, prob, value
+        return action, log_prob, value
 
     def send_input(self, iface: TMInterface, move) -> None:
         match move: 
@@ -201,8 +201,8 @@ class HorizonClient(Client):
 
         return torch.tensor(0.0, device=self.device, dtype=torch.float)
 
-    def remember(self, state, action, probs, reward, done, value):
-        self.memory.add(state, action, probs, reward, done, value)
+    def remember(self, state, action, log_probs, reward, done, value):
+        self.memory.add(state, action, log_probs, reward, done, value)
 
     def on_run_step(self, iface: TMInterface, _time: int) -> None:
         if _time == 20:
@@ -223,8 +223,8 @@ class HorizonClient(Client):
             current_reward = future_reward.result()
             self.reward += current_reward.item()
 
-            action, probs, value = self.get_action(self.current_state)
-            self.remember(self.current_state, action, probs, current_reward, done, value)
+            action, log_probs, value = self.get_action(self.current_state)
+            self.remember(self.current_state, action, log_probs, current_reward, done, value)
 
             self.prev_positions.append((simulation_state.position[0], simulation_state.position[2]))
 
