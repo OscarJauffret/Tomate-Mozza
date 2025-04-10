@@ -356,10 +356,10 @@ class NStepBuffer:
         gammas_tensor = self.gammas[:self.current_size].to(self.device)
         return torch.sum(rewards_tensor * gammas_tensor)
 
-    def add(self, state, action, reward):
-        self.states[self.position] = state
-        self.actions[self.position] = action
-        self.rewards[self.position] = reward
+    def add(self, state: torch.Tensor, action: torch.Tensor, reward: torch.Tensor):
+        self.states[self.position] = state.detach()
+        self.actions[self.position] = action.detach()
+        self.rewards[self.position] = reward.detach()
 
         self.position = (self.position + 1) % self.n_steps
         if self.current_size < self.n_steps:
