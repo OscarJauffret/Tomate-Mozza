@@ -166,3 +166,11 @@ Launch multiple clients at the same time, logging in, launching the map and focu
 - Fixed the bug in the advantages.
 - Tried training with a horizon of 40 steps, it was terrible.
 - Normalized the advantages.
+
+---
+
+### 9 April 2025, 2h
+- Tried looking at the PPO implementation to understand what went wrong
+- Removed some detach() from the RolloutBuffer
+- Added multiple epochs to the train step
+- Trained the agent when running with multiple epochs and suddenly it is the best performance we ever had, completely dominating the DQN in terms of speed of learning.

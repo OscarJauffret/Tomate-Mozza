@@ -41,8 +41,9 @@ class Config:
         EPSILON: float = 0.2
         C1: float = 1
         C2: float = 0.01
-        MEMORY_SIZE: int = 512
-        BATCH_SIZE: int = 128
+        MEMORY_SIZE: int = 128
+        BATCH_SIZE: int = 32
+        EPOCHS: int = 4     # Number of times to train on a given memory batch
 
         @staticmethod
         def get_hyperparameters():
@@ -54,7 +55,8 @@ class Config:
                 "c1": Config.NN.C1,
                 "c2": Config.NN.C2,
                 "memory_size": Config.NN.MEMORY_SIZE,
-                "batch_size": Config.NN.BATCH_SIZE
+                "batch_size": Config.NN.BATCH_SIZE,
+                "epochs": Config.NN.EPOCHS,
             }
 
         class Arch:

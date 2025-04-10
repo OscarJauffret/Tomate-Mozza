@@ -3,6 +3,7 @@ import numpy as np
 import torch.nn as nn
 import torch.optim as optim
 from torch.distributions import Categorical
+from itertools import repeat
 
 from .rollout_buffer import RolloutBuffer
 from ..config import Config
@@ -98,36 +99,37 @@ class PPOTrainer:
         Train the actor and the critic using the data in the memory
         :param memory: the memory containing the data
         """
-        states, actions, probs, values, rewards, dones, batches = memory.generate_batches()
-        # Convert to tensors and move to device
-        # values = torch.from_numpy(values).to(self.device)  # Shape: [memory_size, 1]
-        advantages = self.compute_gae(rewards, values, dones)   # Shape [memory_size]
-        returns = self.compute_returns(advantages, values)
-        for batch in batches:
-            batch_states = states[batch]  # Shape: [batch_size, state_size]
-            batch_old_probs = probs[batch]  # Shape: [batch_size]
-            batch_actions = actions[batch] # Shape: [batch_size]
+        for _ in repeat(None, Config.NN.EPOCHS):
+            states, actions, probs, values, rewards, dones, batches = memory.generate_batches()
+            # Convert to tensors and move to device
+            # values = torch.from_numpy(values).to(self.device)  # Shape: [memory_size, 1]
+            advantages = self.compute_gae(rewards, values, dones)   # Shape [memory_size]
+            returns = self.compute_returns(advantages, values)
+            for batch in batches:
+                batch_states = states[batch]  # Shape: [batch_size, state_size]
+                batch_old_probs = probs[batch]  # Shape: [batch_size]
+                batch_actions = actions[batch] # Shape: [batch_size]
 
-            dist = self.actor(batch_states) # Shape: [batch_size, n_actions]
-            critic_value = self.critic(batch_states).squeeze(1) # Shape: [batch_size]
+                dist = self.actor(batch_states) # Shape: [batch_size, n_actions]
+                critic_value = self.critic(batch_states).squeeze(1) # Shape: [batch_size]
 
-            new_probs = dist.log_prob(batch_actions)    # Shape: [batch_size]
-            prob_ratio = torch.exp(new_probs - batch_old_probs)
-            weighted_probs = prob_ratio * advantages[batch] # Shape: [batch_size]
-            clipped_probs = torch.clamp(prob_ratio, 1 - Config.NN.EPSILON, 1 + Config.NN.EPSILON) * advantages[batch]   # Shape: [batch_size]
-            actor_loss = (-torch.min(weighted_probs, clipped_probs)).mean()   # Shape: [1]
+                new_probs = dist.log_prob(batch_actions)    # Shape: [batch_size]
+                prob_ratio = torch.exp(new_probs - batch_old_probs)
+                weighted_probs = prob_ratio * advantages[batch] # Shape: [batch_size]
+                clipped_probs = torch.clamp(prob_ratio, 1 - Config.NN.EPSILON, 1 + Config.NN.EPSILON) * advantages[batch]   # Shape: [batch_size]
+                actor_loss = (-torch.min(weighted_probs, clipped_probs)).mean()   # Shape: [1]
 
-            critic_loss = self.mse(critic_value, returns[batch])
+                critic_loss = self.mse(critic_value, returns[batch])
 
-            entropy = dist.entropy().mean()  # Shape: [1]
+                entropy = dist.entropy().mean()  # Shape: [1]
 
-            total_loss = actor_loss + Config.NN.C1 * critic_loss - Config.NN.C2 * entropy
-            # In the original paper, the objective is to maximize the expected return (actor_loss - Config.NN.C1 * critic_loss + Config.NN.C2 * entropy).
-            # However, in PyTorch, we minimize the loss.
-            # This means that we need to minimize the negative of the expected return.(-actor_loss + Config.NN.C1 * critic_loss - Config.NN.C2 * entropy)
+                total_loss = actor_loss + Config.NN.C1 * critic_loss - Config.NN.C2 * entropy
+                # In the original paper, the objective is to maximize the expected return (actor_loss - Config.NN.C1 * critic_loss + Config.NN.C2 * entropy).
+                # However, in PyTorch, we minimize the loss.
+                # This means that we need to minimize the negative of the expected return.(-actor_loss + Config.NN.C1 * critic_loss - Config.NN.C2 * entropy)
 
-            self.actor_optimizer.zero_grad()
-            self.critic_optimizer.zero_grad()
-            total_loss.backward()
-            self.actor_optimizer.step()
-            self.critic_optimizer.step()
+                self.actor_optimizer.zero_grad()
+                self.critic_optimizer.zero_grad()
+                total_loss.backward()
+                self.actor_optimizer.step()
+                self.critic_optimizer.step()
