@@ -24,6 +24,7 @@ class Interface:
         self.button_frame = None
         self.action_keys: ActionKeys = None
         self.best_reward_label = None
+        self.game_speed_slider = None
 
         self.choose_map_event = choose_map_event
         self.print_state_event = print_state_event
@@ -42,6 +43,7 @@ class Interface:
         self.create_button_frame()
         self.create_actions_squares()
         self.create_reward_label()
+        self.create_game_speed_slider()
 
         self.root.bind("<F11>", self.toggle_fullscreen)
 
@@ -92,7 +94,7 @@ class Interface:
         self.quit_button = ttk.Button(self.button_frame, text="Quit", command=self.close_window)
         self.quit_button.grid(row=0, column=4, padx=5, sticky="nsew")
 
-        self.evaluation_toggle = tk.Checkbutton(self.button_frame, text="Manual Epsilon", command=self.send_manual_epsilon,
+        self.evaluation_toggle = tk.Checkbutton(self.button_frame, text="Evaluation", command=self.toggle_evaluation,
                                                 variable=self.evaluation_toggle_variable)
         self.evaluation_toggle.grid(row=0, column=5, padx=5, sticky="nsew")
 
@@ -107,9 +109,20 @@ class Interface:
     def create_actions_squares(self):
         self.action_keys = ActionKeys(self.root, 2, 1, key_size=40, padding=3, margin=10)
 
-    def send_manual_epsilon(self, new_epsilon_value=None):
+    def create_game_speed_slider(self):
+        """Create the game speed slider"""
+        self.game_speed_slider = tk.Scale(self.root, from_=1, to=50, tickinterval=5, label="Game Speed", length=400, resolution=1,
+                                          orient="horizontal", command=self.update_game_speed)
+        self.game_speed_slider.set(Config.Game.GAME_SPEED)
+        self.game_speed_slider.grid(row=1, column=0, padx=10, sticky="nsew")
+
+    def toggle_evaluation(self, new_epsilon_value=None):
         """Send the manual epsilon value to the client"""
         self.shared_dict["eval"] = self.evaluation_toggle_variable.get()
+
+    def update_game_speed(self, value):
+        """Update the game speed"""
+        self.shared_dict["game_speed"] = int(float(value))
 
     def update_interface(self):
         if not self.shared_dict["reward"].empty():

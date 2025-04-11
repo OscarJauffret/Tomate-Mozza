@@ -50,6 +50,7 @@ class HorizonClient(Client):
         self.eval_mode = shared_dict["eval"]
         self.q_values_dict = shared_dict["q_values"]
         self.model_path = shared_dict["model_path"]
+        self.shared_dict = shared_dict
         self.manual_epsilon = None
 
         if not os.path.exists(os.path.join(get_states_path(), Config.Paths.MAP)):
@@ -237,12 +238,12 @@ class HorizonClient(Client):
                 iface.set_speed(0)
                 self.trainer.train_step(self.memory)
                 self.memory.clear()
-                iface.set_speed(Config.Game.GAME_SPEED)
+                iface.set_speed(self.shared_dict["game_speed"])
 
             end_time = time.time()
             total_time = end_time - start_time
-            if total_time * 1000 > Config.Game.INTERVAL_BETWEEN_ACTIONS / Config.Game.GAME_SPEED:
-                print(f"Warning: the action took {total_time * 1000:.2f}ms to execute, it should've taken less than {Config.Game.INTERVAL_BETWEEN_ACTIONS / Config.Game.GAME_SPEED:.2f}ms")
+            if total_time * 1000 > Config.Game.INTERVAL_BETWEEN_ACTIONS / self.shared_dict["game_speed"]:
+                print(f"Warning: the action took {total_time * 1000:.2f}ms to execute, it should've taken less than {Config.Game.INTERVAL_BETWEEN_ACTIONS / self.shared_dict["game_speed"]:.2f}ms")
 
             if done:
                 self.ready = False
