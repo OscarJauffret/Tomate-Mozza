@@ -36,7 +36,7 @@ class Config:
         LEARNING_RATE: float = 0.001
         GAMMA: float = 0.97
         MAX_MEMORY: int = 100_000
-        MIN_MEMORY: int = 10_000
+        MIN_MEMORY: int = 10_0
         BATCH_SIZE: int = 128
         EPSILON_START: float = 0.9
         EPSILON_END: float = 0.05

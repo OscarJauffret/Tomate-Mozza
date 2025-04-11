@@ -62,7 +62,6 @@ class NStepBufferOld:
         self.actions.append(action)
         self.rewards.append(reward)
 
-    ...
 
 class NStepBufferNew:
     def __init__(self, n_steps:int, device) -> None:

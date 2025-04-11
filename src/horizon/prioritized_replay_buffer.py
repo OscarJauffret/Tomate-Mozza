@@ -21,13 +21,13 @@ class PrioritizedReplayBuffer:
     def add(self, transition, priority=None):
         if priority is None:
             priority = self.priorities.max() if self.fill_level > 0 else 1.0
-
         self.buffer[self.pos] = transition
         self.priorities[self.pos] = priority
         self.pos = (self.pos + 1) % self.capacity
         self.fill_level = min(self.fill_level + 1, self.capacity)
 
     def sample(self, batch_size):
+        np.random.seed(0)
         if self.fill_level < Config.NN.MIN_MEMORY or batch_size > self.fill_level:
             return None
 

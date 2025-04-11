@@ -31,6 +31,10 @@ class QTrainer:
         self.target_model.eval()
 
     def train_step(self, state, action, reward, next_state, done, weights=None):
+        
+        # print(f"Training step with state: {state}, action: {action}, reward: {reward}, next_state: {next_state}, done: {done}")
+
+
         state = state.to(self.device) if state.device != self.device else state
         next_state = next_state.to(self.device) if next_state.device != self.device else next_state
         action = action.to(self.device) if action.device != self.device else action

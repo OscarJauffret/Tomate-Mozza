@@ -31,6 +31,7 @@ class HorizonClient(Client):
         self.trainer = QTrainer(self.model, self.device, self.hyperparameters["learning_rate"], self.hyperparameters["gamma"])
 
         self.memory = PrioritizedReplayBuffer(self.hyperparameters["max_memory"], alpha=self.hyperparameters["alpha"], beta=self.hyperparameters["beta_start"]) 
+        self.old_memory = PrioritizedReplayBuffer(self.hyperparameters["max_memory"], alpha=self.hyperparameters["alpha"], beta=self.hyperparameters["beta_start"])
         self.reward = 0.0
         self.epsilon = self.hyperparameters["epsilon_start"]
 
@@ -38,6 +39,7 @@ class HorizonClient(Client):
         self.prev_positions = deque(maxlen=5 * Config.Game.NUMBER_OF_ACTIONS_PER_SECOND)        # 5-second long memory
         self.current_state = torch.zeros(Config.NN.Arch.INPUT_SIZE, dtype=torch.float, device=self.device)
         self.n_step_buffer: NStepBuffer = NStepBuffer(self.hyperparameters["n_steps"], self.device)
+        self.n_step_buffer_old: NStepBufferOld = NStepBufferOld(self.hyperparameters["n_steps"])
         self.prev_velocity = None
         self.has_finished = False
 
@@ -74,7 +76,9 @@ class HorizonClient(Client):
                 self.model.load_state_dict(torch.load(model_pth, map_location=self.device))
                 self.trainer = QTrainer(self.model, self.device, self.hyperparameters["learning_rate"], self.hyperparameters["gamma"])
                 self.n_step_buffer = NStepBuffer(self.hyperparameters["n_steps"], self.device)
+                self.n_step_buffer_old = NStepBufferOld(self.hyperparameters["n_steps"])
                 self.memory = PrioritizedReplayBuffer(self.hyperparameters["max_memory"], alpha=self.hyperparameters["alpha"], beta=self.hyperparameters["beta_start"]) 
+                self.old_memory = PrioritizedReplayBuffer(self.hyperparameters["max_memory"], alpha=self.hyperparameters["alpha"], beta=self.hyperparameters["beta_start"])
                 self.logger.load(os.path.join(path, Config.Paths.STAT_FILE_NAME))
                 print(f"Model loaded from {model_pth}")
             else:
@@ -85,7 +89,9 @@ class HorizonClient(Client):
             self.model = Model().to(self.device)
             self.trainer = QTrainer(self.model, self.device, self.hyperparameters["learning_rate"], self.hyperparameters["gamma"])
             self.n_step_buffer = NStepBuffer(self.hyperparameters["n_steps"], self.device)
+            self.n_step_buffer_old = NStepBufferOld(self.hyperparameters["n_steps"])
             self.memory = PrioritizedReplayBuffer(self.hyperparameters["max_memory"], alpha=self.hyperparameters["alpha"], beta=self.hyperparameters["beta_start"]) 
+            self.old_memory = PrioritizedReplayBuffer(self.hyperparameters["max_memory"], alpha=self.hyperparameters["alpha"], beta=self.hyperparameters["beta_start"])
             print("Loaded a fresh model with random weights")
 
     def load_hyperparameters(self, path: str) -> dict:
@@ -234,14 +240,36 @@ class HorizonClient(Client):
         else:
             sample, indices, weights = batch
         states, actions, rewards, next_states, dones = zip(*sample)
+        # print(f"New State: {states}, Action: {actions}")
         states =  torch.stack(states).to(self.device)
         actions = torch.stack(actions).to(self.device)
         rewards = torch.stack(rewards).to(self.device)
         next_states = torch.stack(next_states).to(self.device)
         dones = torch.stack(dones).to(self.device)
 
+        print("New buffer")
         td_sample = self.trainer.train_step(states, actions, rewards, next_states, dones, weights)
         self.memory.update_priorities(indices, td_sample)
+
+        old_batch = self.old_memory.sample(self.hyperparameters["batch_size"])
+
+        if old_batch is None:
+            return
+        else:
+            old_sample, old_indices, old_weights = old_batch
+
+        old_states, old_actions, old_rewards, old_next_states, old_dones = zip(*old_sample)
+        # print(f"Old State: {old_states}, Old Action: {old_actions}")
+        old_states =  torch.stack(old_states).to(self.device)
+        old_actions = torch.stack(old_actions).to(self.device)
+        old_rewards = torch.stack(old_rewards).to(self.device)
+        old_next_states = torch.stack(old_next_states).to(self.device)
+        old_dones = torch.stack(old_dones).to(self.device)
+
+        print("Old buffer")
+        old_td_sample = self.trainer.train_step(old_states, old_actions, old_rewards, old_next_states, old_dones, old_weights)
+        self.old_memory.update_priorities(old_indices, old_td_sample)
+        exit(0)
 
     def on_run_step(self, iface: TMInterface, _time: int) -> None:
         if _time == 20:
@@ -260,13 +288,14 @@ class HorizonClient(Client):
             self.agent_position.update((simulation_state.position[0], simulation_state.position[2]))
             self.update_state(simulation_state)  # Get the current state
             done = self.determine_done(simulation_state)
-            current_reward = 0
+            current_reward = torch.tensor(0, device=self.device)
             if len(self.n_step_buffer) > 0:
                 current_reward = self.get_reward(simulation_state)
                 self.reward += current_reward.item()
 
             action = self.get_action(self.current_state)                             
             self.n_step_buffer.add(self.current_state, action, current_reward)        
+            self.n_step_buffer_old.add(self.current_state, action, current_reward)
             self.prev_position = simulation_state.position[0], simulation_state.position[2]  # Get the current position
             self.prev_positions.append(self.prev_position)
 
@@ -274,8 +303,12 @@ class HorizonClient(Client):
 
             if self.n_step_buffer.is_full() and not self.epsilon_dict["manual"]:
                 state, action, reward = self.n_step_buffer.get_transition()
+                old_state, old_action, old_reward = self.n_step_buffer_old.get_transition()
                 next_state = self.current_state
                 self.remember(state, action, reward, next_state, done)
+                self.old_memory.add((old_state, old_action, old_reward, next_state, done)) 
+                self.check_buffers()
+
 
             end_time = time.time()
             total_time = end_time - start_time
@@ -283,13 +316,17 @@ class HorizonClient(Client):
                 print(f"Warning: the action took {total_time * 1000:.2f}ms to execute, it should've taken less than {Config.Game.INTERVAL_BETWEEN_ACTIONS / Config.Game.GAME_SPEED:.2f}ms")
 
             if done:
+                exit()
                 self.ready = False
                 if not self.epsilon_dict["manual"]:
                     while not self.n_step_buffer.is_empty():
                         state, action, reward = self.n_step_buffer.get_transition()
+                        old_state, old_action, old_reward = self.n_step_buffer_old.get_transition()
                         next_state = self.current_state
                         self.n_step_buffer.pop_transition()
+                        self.n_step_buffer_old.pop_transition()
                         self.remember(state, action, reward, next_state, done)
+                        self.old_memory.add((old_state, old_action, old_reward, next_state, done))
 
                     self.iterations += 1
                     self.rewards_queue.put(self.reward)
@@ -302,6 +339,7 @@ class HorizonClient(Client):
                 self.prev_position = None
                 self.prev_positions.clear()
                 self.n_step_buffer.clear()
+                self.n_step_buffer_old.clear()
                 self.prev_velocity = None
                 self.epsilon_dict["value"] = self.epsilon
                 if self.has_finished:
@@ -311,6 +349,12 @@ class HorizonClient(Client):
                     iface.horn()
                     iface.execute_command(f"load_state {self.random_states[0]}")    # State 0 of HorizonUnlimited
 
+    def check_buffers(self):
+        assert len(self.memory) == len(self.old_memory), f"Memory size mismatch: {len(self.memory)} != {len(self.old_memory)}"
+
+        for i in range(len(self.memory)):
+            for element, old_element in zip(self.memory.buffer[i], self.old_memory.buffer[i]):
+                assert torch.allclose(element, old_element), f"Memory element mismatch: New {element} != Old {old_element}, at index {i}"
 class NStepBuffer:
     def __init__(self, n_steps:int, device) -> None:
         self.n_steps = n_steps
@@ -357,14 +401,51 @@ class NStepBuffer:
         return torch.sum(rewards_tensor * gammas_tensor)
 
     def add(self, state: torch.Tensor, action: torch.Tensor, reward: torch.Tensor):
-        self.states[self.position] = state.detach()
-        self.actions[self.position] = action.detach()
-        self.rewards[self.position] = reward.detach()
+        self.states[self.position] = state
+        self.actions[self.position] = action
+        self.rewards[self.position] = reward
 
         self.position = (self.position + 1) % self.n_steps
         if self.current_size < self.n_steps:
             self.current_size += 1
 
+class NStepBufferOld:
+    def __init__(self, n_steps:int) -> None:
+        self.n_steps = n_steps
+        self.states = deque(maxlen=self.n_steps)
+        self.actions = deque(maxlen=self.n_steps)
+        self.rewards = deque(maxlen=self.n_steps)
+        self.gammas = Config.NN.GAMMA ** np.arange(self.n_steps)
+
+    def __len__(self):
+        return len(self.states)
+
+    def clear(self):
+        self.states.clear()
+        self.actions.clear()
+        self.rewards.clear()
+
+    def get_transition(self) -> tuple[torch.Tensor, torch.Tensor, float]:
+        return self.states[0], self.actions[0], self.cumulative_reward()
+    
+    def pop_transition(self):
+        self.states.popleft()
+        self.actions.popleft()
+        self.rewards.popleft()
+
+    def is_full(self):
+        return len(self.states) == self.n_steps
+
+    def is_empty(self):
+        return len(self.states) == 0
+
+    def cumulative_reward(self):
+        return sum([self.rewards[i] * self.gammas[i] for i in range(len(self.rewards))])
+
+    def add(self, state: torch.Tensor, action: torch.Tensor, reward: float):
+        self.states.append(state)
+        self.actions.append(action)
+        self.rewards.append(reward)
 
     
 
