@@ -99,12 +99,11 @@ class PPOTrainer:
         Train the actor and the critic using the data in the memory
         :param memory: the memory containing the data
         """
+        states, actions, probs, values, rewards, dones = memory.get_buffer()
+        advantages = self.compute_gae(rewards, values, dones)   # Shape [memory_size]
+        returns = self.compute_returns(advantages, values)
         for _ in repeat(None, Config.NN.EPOCHS):
-            states, actions, probs, values, rewards, dones, batches = memory.generate_batches()
-            # Convert to tensors and move to device
-            # values = torch.from_numpy(values).to(self.device)  # Shape: [memory_size, 1]
-            advantages = self.compute_gae(rewards, values, dones)   # Shape [memory_size]
-            returns = self.compute_returns(advantages, values)
+            batches = memory.generate_batches()
             for batch in batches:
                 batch_states = states[batch]  # Shape: [batch_size, state_size]
                 batch_old_probs = probs[batch]  # Shape: [batch_size]

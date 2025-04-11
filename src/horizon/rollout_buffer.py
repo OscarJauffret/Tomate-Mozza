@@ -41,11 +41,15 @@ class RolloutBuffer:
         self.values[self.position] = value.detach()
         self.position += 1
 
-    def generate_batches(self):
+    def generate_batches(self) -> Tensor:
         assert self.is_full(), "Rollout buffer is not full. Please fill it before generating batches."
 
         num_batches = self.position // self.batch_size
 
         indices = torch.randperm(self.position, device=self.device)  # Randomly permute the indices of the buffer
         batches = indices.view(num_batches, self.batch_size) # batches is a tensor of arrays of indices. These indices indicate a batch of states, actions, probs, values, rewards and dones
-        return self.states, self.actions, self.probs, self.values, self.rewards, self.dones, batches
+        return batches
+
+    def get_buffer(self) -> tuple[Tensor, Tensor, Tensor, Tensor, Tensor, Tensor]:
+        assert self.is_full()
+        return self.states, self.actions, self.probs, self.values, self.rewards, self.dones
