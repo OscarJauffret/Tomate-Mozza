@@ -34,6 +34,7 @@ class HorizonClient(Client):
 
         self.memory: RolloutBuffer = RolloutBuffer(self.device)
         self.reward = 0.0
+        self.final_states = []
 
         self.prev_positions = deque(maxlen=5 * Config.Game.NUMBER_OF_ACTIONS_PER_SECOND)        # 5-second long memory
         self.current_state = None
@@ -44,14 +45,8 @@ class HorizonClient(Client):
         self.ready = False
 
         self.thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=3)
-
         self.logger = TMLogger(get_device_info(self.device.type))
-        self.rewards_queue = shared_dict["reward"]
-        self.eval_mode = shared_dict["eval"]
-        self.q_values_dict = shared_dict["q_values"]
-        self.model_path = shared_dict["model_path"]
         self.shared_dict = shared_dict
-        self.manual_epsilon = None
 
         if not os.path.exists(os.path.join(get_states_path(), Config.Paths.MAP)):
             print(f"Map directory not found at {os.path.join(get_states_path(), Config.Paths.MAP)}")
@@ -67,8 +62,8 @@ class HorizonClient(Client):
                 f"third turn: {self.current_state[9].item():<8}")
 
     def load_model(self) -> None:
-        if self.model_path.qsize() > 0:
-            path = self.model_path.get()
+        if self.shared_dict["model_path"].qsize() > 0:
+            path = self.shared_dict["model_path"].get()
             actor_pth = os.path.join(path, Config.Paths.ACTOR_FILE_NAME)
             critic_pth = os.path.join(path, Config.Paths.CRITIC_FILE_NAME)
             if os.path.exists(actor_pth) and os.path.exists(critic_pth):
@@ -103,7 +98,10 @@ class HorizonClient(Client):
 
     def launch_map(self, iface: TMInterface) -> None:
         iface.execute_command(f"map {get_default_map()}")
-        iface.set_speed(Config.Game.GAME_SPEED)
+        iface.set_speed(self.shared_dict["game_speed"])
+        with open("final_states.csv", "w") as f:
+            for state in self.final_states:
+                f.write(f"{state.tolist()}\n")
 
     def save_model(self) -> None:
         self.logger.update_log_id()
@@ -247,9 +245,10 @@ class HorizonClient(Client):
 
             if done:
                 self.ready = False
-                if not self.eval_mode:
+                self.final_states.append(self.current_state)
+                if not self.shared_dict["eval"]:
                     self.iterations += 1
-                    self.rewards_queue.put(self.reward)
+                    self.shared_dict["reward"].put(self.reward)
                     self.logger.add_run(self.iterations, _time, self.reward)
 
                 print(f"Iteration: {self.iterations:<8} reward: {self.reward:<8.2f}")
