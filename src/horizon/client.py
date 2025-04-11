@@ -275,7 +275,7 @@ class HorizonClient(Client):
             if self.n_step_buffer.is_full() and not self.epsilon_dict["manual"]:
                 state, action, reward = self.n_step_buffer.get_transition()
                 next_state = self.current_state
-                self.remember(state, action, reward, next_state, done)
+                self.remember(state.clone(), action.clone(), reward, next_state, done)
 
             end_time = time.time()
             total_time = end_time - start_time
@@ -289,7 +289,7 @@ class HorizonClient(Client):
                         state, action, reward = self.n_step_buffer.get_transition()
                         next_state = self.current_state
                         self.n_step_buffer.pop_transition()
-                        self.remember(state, action, reward, next_state, done)
+                        self.remember(state.clone(), action.clone(), reward, next_state, done)
 
                     self.iterations += 1
                     self.rewards_queue.put(self.reward)
@@ -357,9 +357,9 @@ class NStepBuffer:
         return torch.sum(rewards_tensor * gammas_tensor)
 
     def add(self, state: torch.Tensor, action: torch.Tensor, reward: torch.Tensor):
-        self.states[self.position] = state.detach()
-        self.actions[self.position] = action.detach()
-        self.rewards[self.position] = reward.detach()
+        self.states[self.position] = state
+        self.actions[self.position] = action
+        self.rewards[self.position] = reward
 
         self.position = (self.position + 1) % self.n_steps
         if self.current_size < self.n_steps:
