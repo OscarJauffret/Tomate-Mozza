@@ -173,9 +173,8 @@ class DQNAgent(Agent):
 
             end_time = time.time()
             total_time = end_time - start_time
-            if total_time * 1000 > Config.Game.INTERVAL_BETWEEN_ACTIONS / Config.Game.GAME_SPEED:
-                print(
-                    f"Warning: the action took {total_time * 1000:.2f}ms to execute, it should've taken less than {Config.Game.INTERVAL_BETWEEN_ACTIONS / Config.Game.GAME_SPEED:.2f}ms")
+            if total_time * 1000 > Config.Game.INTERVAL_BETWEEN_ACTIONS / self.game_speed:
+                print(f"Warning: the action took {total_time * 1000:.2f}ms to execute, it should've taken less than {Config.Game.INTERVAL_BETWEEN_ACTIONS / Config.Game.GAME_SPEED:.2f}ms")
 
             if done:
                 self.ready = False
