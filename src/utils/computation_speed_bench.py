@@ -1,7 +1,6 @@
 import time
 import torch
-import numpy as np
-from src.horizon.dqnmodel import DQNModel, QTrainer
+from src.horizon.dqn.model import Model, Trainer
 from src.config import Config
 
 
@@ -16,8 +15,8 @@ def benchmark_model_performance(num_iterations=1000):
     print(f"Benchmarking on: {device}")
 
     # Initialize model
-    model = DQNModel().to(device)
-    trainer = QTrainer(model, device, Config.DQN.LEARNING_RATE, Config.DQN.GAMMA)
+    model = Model().to(device)
+    trainer = Trainer(model, device, Config.DQN.LEARNING_RATE, Config.DQN.GAMMA)
 
     # Create random input for inference benchmark
     single_input = torch.rand((1, Config.Arch.INPUT_SIZE), device=device)

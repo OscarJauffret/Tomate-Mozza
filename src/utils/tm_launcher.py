@@ -39,7 +39,7 @@ class TMLauncher:
         Focus all Trackmania windows
         :return: None
         """
-        windows = gw.getWindowsWithTitle(Config.Game.WINDOW_NAME)
+        windows = gw.getWindowsWithTitle(Config.Game.TMI_WINDOW_NAME)
         print(f"Focusing {len(windows)} windows")
         for window in windows:
             app = pywinauto.Application().connect(handle=window._hWnd)
@@ -57,7 +57,7 @@ class TMLauncher:
         windows_horizontally = 1920 // w
         windows_vertically = 1080 // h
 
-        windows = gw.getWindowsWithTitle(Config.Game.WINDOW_NAME)
+        windows = gw.getWindowsWithTitle(Config.Game.TMI_WINDOW_NAME)
         print(f"Moving {len(windows)} windows")
         for i, window in enumerate(windows):
             x = (i % windows_horizontally) * w

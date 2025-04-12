@@ -1,6 +1,6 @@
 import numpy as np
-from ..config import Config
-from ..utils.utils import profile_time
+from src.config import Config
+from src.utils.utils import profile_time
 
 class PrioritizedReplayBuffer:
 
@@ -28,11 +28,11 @@ class PrioritizedReplayBuffer:
         self.fill_level = min(self.fill_level + 1, self.capacity)
 
     def sample(self, batch_size):
-        if self.fill_level < Config.NN.MIN_MEMORY or batch_size > self.fill_level:
+        if self.fill_level < Config.DQN.MIN_MEMORY or batch_size > self.fill_level:
             return None
 
-        self.beta += (Config.NN.BETA_MAX - Config.NN.BETA_START) / Config.NN.BETA_INCREMENT_STEPS
-        self.beta = min(self.beta, Config.NN.BETA_MAX)
+        self.beta += (Config.DQN.BETA_MAX - Config.DQN.BETA_START) / Config.DQN.BETA_INCREMENT_STEPS
+        self.beta = min(self.beta, Config.DQN.BETA_MAX)
 
         valid_priorities = self.priorities[:self.fill_level]
         scaled = (valid_priorities + self.epsilon) ** self.alpha

@@ -23,7 +23,8 @@ class Config:
 
     class Game:
         NUMBER_OF_CLIENTS: int = 1
-        WINDOW_NAME: str = "TrackMania Nations Forever (TMInterface 1.4.3)"
+        TMI_WINDOW_NAME: str = "TrackMania Nations Forever (TMInterface 1.4.3)"
+        WINDOW_NAME: str = "TrackMania Nations Forever"
         PROCESS_NAME: str = "TmForever.exe"
 
         BLOCK_SIZE: int = 32
@@ -39,11 +40,11 @@ class Config:
         GAMMA: float = 0.99
         LAMBDA: float = 0.95
         EPSILON: float = 0.2
-        C1: float = 1
+        C1: float = 1.0
         C2: float = 0.01
         MEMORY_SIZE: int = 128
         BATCH_SIZE: int = 32
-        EPOCHS: int = 4     # Number of times to train on a given memory batch
+        EPOCHS: int = 8     # Number of times to train on a given memory batch
 
         @staticmethod
         def get_hyperparameters():

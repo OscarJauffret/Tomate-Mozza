@@ -203,20 +203,25 @@ class Interface:
         self.on_close()
 
     def embed_trackmania(self, frame):
-        windows = gw.getWindowsWithTitle(Config.Game.WINDOW_NAME)
+        windows = gw.getWindowsWithTitle(Config.Game.TMI_WINDOW_NAME)
 
         if windows:
-            window = windows[0]
-            hwnd = window._hWnd
-
-            win32gui.SetParent(hwnd, frame.winfo_id())
-
-            width, height = frame.winfo_width(), frame.winfo_height()
-
-            win32gui.SetWindowLong(hwnd, win32con.GWL_STYLE, win32con.WS_VISIBLE)
-            win32gui.MoveWindow(hwnd, 0, 0, width, height, True)
-            if width != self.game_geometry[0] or height != self.game_geometry[1]:
-                win32gui.MoveWindow(hwnd, 0, 0, self.game_geometry[0], self.game_geometry[1], True)
-            win32gui.SetForegroundWindow(hwnd)
+            self._move_window(frame, windows)
         else:
-            print(f"Aucune fenêtre trouvée avec le titre: {Config.Game.WINDOW_NAME}")
+            print(f"No window with title {Config.Game.TMI_WINDOW_NAME} found, trying {Config.Game.WINDOW_NAME}")
+            windows = gw.getWindowsWithTitle(Config.Game.WINDOW_NAME)
+            if windows:
+                self._move_window(frame, windows)
+            else:
+                print(f"No window with title {Config.Game.WINDOW_NAME} found")
+
+    def _move_window(self, frame, windows):
+        window = windows[0]
+        hwnd = window._hWnd
+        win32gui.SetParent(hwnd, frame.winfo_id())
+        width, height = frame.winfo_width(), frame.winfo_height()
+        win32gui.SetWindowLong(hwnd, win32con.GWL_STYLE, win32con.WS_VISIBLE)
+        win32gui.MoveWindow(hwnd, 0, 0, width, height, True)
+        if width != self.game_geometry[0] or height != self.game_geometry[1]:
+            win32gui.MoveWindow(hwnd, 0, 0, self.game_geometry[0], self.game_geometry[1], True)
+        win32gui.SetForegroundWindow(hwnd)

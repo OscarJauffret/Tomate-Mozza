@@ -1,14 +1,13 @@
-import numpy as np
 import torch
 from torch import Tensor
 
-from ..config import Config
+from src.config import Config
 
 class RolloutBuffer:
     def __init__(self, device):
         self.device = device
 
-        self.states = torch.zeros((Config.PPO.MEMORY_SIZE, Config.PPO.Arch.INPUT_SIZE), dtype=torch.float, device=self.device)
+        self.states = torch.zeros((Config.PPO.MEMORY_SIZE, Config.Arch.INPUT_SIZE), dtype=torch.float, device=self.device)
         self.actions = torch.zeros(Config.PPO.MEMORY_SIZE, dtype=torch.int64, device=self.device)
         self.probs = torch.zeros(Config.PPO.MEMORY_SIZE, dtype=torch.float, device=self.device)
         self.rewards = torch.zeros(Config.PPO.MEMORY_SIZE, dtype=torch.float, device=self.device)

@@ -6,11 +6,11 @@ from torch.distributions import Categorical
 from itertools import repeat
 
 from .rollout_buffer import RolloutBuffer
-from ..config import Config
+from src.config import Config
 
-class PPOActor(nn.Module):
+class Actor(nn.Module):
     def __init__(self):
-        super(PPOActor, self).__init__()
+        super(Actor, self).__init__()
         self.actor = nn.Sequential(
             nn.Linear(Config.Arch.INPUT_SIZE, Config.Arch.LAYER_SIZES[0]),
             nn.ReLU(),
@@ -32,9 +32,9 @@ class PPOActor(nn.Module):
         self.load_state_dict(torch.load(file))
 
 
-class PPOCritic(nn.Module):
+class Critic(nn.Module):
     def __init__(self):
-        super(PPOCritic, self).__init__()
+        super(Critic, self).__init__()
         self.critic = nn.Sequential(
             nn.Linear(Config.Arch.INPUT_SIZE, Config.Arch.LAYER_SIZES[0]),
             nn.ReLU(),
@@ -53,8 +53,8 @@ class PPOCritic(nn.Module):
         self.load_state_dict(torch.load(file))
 
 
-class PPOTrainer:
-    def __init__(self, actor: PPOActor, critic: PPOCritic, device: torch.device):
+class Trainer:
+    def __init__(self, actor: Actor, critic: Critic, device: torch.device):
         self.actor = actor
         self.critic = critic
         self.actor_optimizer = optim.Adam(self.actor.parameters(), lr=Config.PPO.LEARNING_RATE)

@@ -1,11 +1,11 @@
 import torch
 import torch.nn as nn
 import copy
-from ..config import Config
+from src.config import Config
 
-class DQNModel(nn.Module):
+class Model(nn.Module):
     def __init__(self):
-        super(DQNModel, self).__init__()
+        super(Model, self).__init__()
         self.model = nn.Sequential(
             nn.Linear(Config.Arch.INPUT_SIZE, Config.Arch.LAYER_SIZES[0]),
             nn.ReLU(),
@@ -17,7 +17,7 @@ class DQNModel(nn.Module):
     def forward(self, x):
         return self.model(x)
 
-class QTrainer:
+class Trainer:
     def __init__(self, model, device, lr, gamma):
         self.lr = lr
         self.gamma = gamma
@@ -73,4 +73,4 @@ class QTrainer:
     def update_target(self):
         # Soft update of target model
         for target_param, main_param in zip(self.target_model.parameters(), self.main_model.parameters()):
-            target_param.data.copy_(Config.NN.TAU * main_param.data + (1 - Config.NN.TAU) * target_param.data)
+            target_param.data.copy_(Config.DQN.TAU * main_param.data + (1 - Config.DQN.TAU) * target_param.data)

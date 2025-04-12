@@ -21,13 +21,13 @@ class ActionKeys:
         self.create_actions()
 
     def create_actions(self):
-        for i in range(Config.NN.Arch.OUTPUT_SIZE):
+        for i in range(Config.Arch.OUTPUT_SIZE):
             action = ZQSDKeys(self.action_frame, i//3, i%3, i, self.key_size, self.padding)
             self.zqsd_keys.append(action)
 
     def update_keys(self, q_values):
         is_random = q_values["is_random"]
-        q_values = np.array([q_values[action] for action in Config.NN.Arch.OUTPUTS_DESC])
+        q_values = np.array([q_values[action] for action in Config.Arch.OUTPUTS_DESC])
         off_color = "gray"
         if is_random:
             on_color = "orange"
@@ -71,7 +71,7 @@ class ZQSDKeys:
         self.padding = padding
         self.frame_size = (3 * self.key_size + 2 * self.padding, 2 * self.key_size + self.padding)
 
-        self.activated_keys = Config.NN.Arch.ACTIVATED_KEYS_PER_OUTPUT[index]
+        self.activated_keys = Config.Arch.ACTIVATED_KEYS_PER_OUTPUT[index]
         self.key_colors = ["green" if key == 1 else "gray" for key in self.activated_keys]
 
         self.up = None

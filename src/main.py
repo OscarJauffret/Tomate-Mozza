@@ -6,14 +6,20 @@ from .horizon.worker import Worker
 from .utils.tm_launcher import TMLauncher
 from .app.interface import Interface
 
+from argparse import ArgumentParser
+
 choose_map_event = multiprocessing.Event()
 print_state_event = multiprocessing.Event()
 load_model_event = multiprocessing.Event()
 save_model_event = multiprocessing.Event()
 quit_event = multiprocessing.Event()
 
+argparser = ArgumentParser(description="Horizon - A reinforcement learning framework for TM")
+argparser.add_argument("--alg", type=str, default="ppo", help="Algorithm to use (ppo, dqn)")
+
 
 if __name__ == "__main__":
+    args = argparser.parse_args()
     launcher = TMLauncher(Config.Game.NUMBER_OF_CLIENTS)
     launcher.launch_games()
     sleep(1)
@@ -35,8 +41,8 @@ if __name__ == "__main__":
     # Create processes
     workers = []
     for server in servers:
-        worker = Worker(server, choose_map_event, print_state_event, load_model_event, save_model_event, quit_event,
-                        shared_dict)
+        worker = Worker(server, args.alg.upper() ,choose_map_event, print_state_event, load_model_event,
+                        save_model_event, quit_event, shared_dict)
         workers.append(worker)
         worker.start()
 

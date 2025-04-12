@@ -6,17 +6,23 @@ import numpy as np
 from ..config import Config
 
 class TMLogger:
-    def __init__(self, device):
+    def __init__(self, device: str , algorithm: str):
         """
         Constructor for TMLogger class
         :param device: The device used for training
+        :param algorithm: The algorithm used for training
         """
         self.log_id: str = datetime.now().strftime(Config.DATETIME_FORMAT)
         self.map_info: dict = Config.Paths.get_map()
-        self.hyperparameters: dict = Config.NN().get_hyperparameters()  #TODO
-        self.architecture: dict = Config.NN.Arch().get_architecture_description()
+        self.algorithm: str = algorithm
+        self.architecture: dict = Config.Arch().get_architecture_description()
         self.training_device: str = device
         self.run_stats: list[_RunStats] = []
+
+        if self.algorithm == "DQN":
+            self.hyperparameters: dict = Config.DQN().get_hyperparameters()
+        elif self.algorithm == "PPO":
+            self.hyperparameters: dict = Config.PPO().get_hyperparameters()
 
     def update_log_id(self):
         """
@@ -153,6 +159,7 @@ class TMLogger:
 
         with open(file_path, "w") as f:
             log ={
+                "algorithm": self.algorithm,
                 "map_info": self.map_info,
                 "hyperparameters": self.hyperparameters,
                 "device": self.training_device,

@@ -2,11 +2,14 @@ import os
 import torch
 import time
 import functools
+import shutil
 
 from dotenv import load_dotenv
 from time import sleep
+from tminterface.interface import TMInterface
 
 from .tm_launcher import TMLauncher
+from ..config import Config
 
 load_dotenv()
 profile_times = {}
@@ -20,11 +23,33 @@ def get_default_map() -> str:
 def get_states_path() -> str:
     return os.getenv("STATES_PATH")
 
+def get_random_states() -> list[str]:
+    """
+    Get the random states from the TMInterface directory
+    :return: the random states
+    """
+    if not os.path.exists(os.path.join(get_states_path(), Config.Paths.MAP)):
+        print(f"Map directory not found at {os.path.join(get_states_path(), Config.Paths.MAP)}")
+        return []
+    else:
+        return [os.path.join(Config.Paths.MAP, state) for state in
+                os.listdir(os.path.join(get_states_path(), Config.Paths.MAP))
+                if state.endswith(".bin")]
+
 def trigger_map_event(event):
     event.set()
     sleep(2)
     TMLauncher.remove_fps_cap()
     TMLauncher.focus_windows()
+
+def copy_model_to_latest(directory: str) -> None:
+    """
+    Copy the model to the latest directory
+    :return: None
+    """
+    for file in os.listdir(directory):
+        shutil.copy(os.path.join(directory, file), Config.Paths.LATEST_MODEL_PATH)
+
 
 def get_device_info(device: str):
     """
