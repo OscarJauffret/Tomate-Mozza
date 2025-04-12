@@ -14,9 +14,22 @@ class AgentPosition:
             # Convert lists to tuples for nodes and turns
             self.nodes: List[Tuple[int, int]] = [(node[0] + 0.5, node[1] + 0.5) for node in data["nodes"]]
             self.turns: List[int] = data["turns"]
+        
+        self.closest_edge = self.nodes[0], self.nodes[1]
+        self.prev_closest_edge = self.nodes[0], self.nodes[1]
 
 
-    def _get_closest_edge(self, agent_block_position: Tuple[float, float]) -> Tuple[Tuple[int, int], Tuple[int, int]]:
+    def update(self, agent_absolute_position: Tuple[float, float]) -> None:
+        """
+        Update the closest edge to the agent
+        :param agent_absolute_position: the absolute position of the agent
+        """
+        agent_block_position = self._absolute_position_to_block_position(agent_absolute_position)
+        self.prev_closest_edge = self.closest_edge
+        self._update_closest_edge(agent_block_position)
+
+    
+    def _update_closest_edge(self, agent_block_position: Tuple[float, float]) -> Tuple[Tuple[int, int], Tuple[int, int]]:
         """
         Get the closest edge to the agent
         :param agent_block_position: the block position of the agent
@@ -68,7 +81,7 @@ class AgentPosition:
                 closest_edge = (self.nodes[i], self.nodes[i + 1])
 
 
-        return closest_edge
+        self.closest_edge = closest_edge
 
 
     @staticmethod
@@ -146,41 +159,40 @@ class AgentPosition:
 
         """
         agent_block_position = self._absolute_position_to_block_position(agent_absolute_position)
-        closest_edge = self._get_closest_edge(agent_block_position)
-        section_relative_position = self._block_to_relative_position(agent_block_position, closest_edge)
+        section_relative_position = self._block_to_relative_position(agent_block_position, self.closest_edge)
 
         if section_relative_position == (-1, -1):
             return (-1, -1), 0, 0.0, 0, 0.0, 0
 
         # Get the next turn
-        if closest_edge[1] == self.nodes[-1]:  # Last edge
+        if self.closest_edge[1] == self.nodes[-1]:  # Last edge
             turn = 0
             second_turn = 0
             third_turn = 0
             second_edge_length = 0
             third_edge_length = 0
-        elif closest_edge[1] == self.nodes[-2]:  # Second to last edge
+        elif self.closest_edge[1] == self.nodes[-2]:  # Second to last edge
             turn = self.turns[-1]
             second_turn = 0
             third_turn = 0
-            second_edge = [closest_edge[1], self.nodes[self.nodes.index(closest_edge[1]) + 1]]
+            second_edge = [self.closest_edge[1], self.nodes[self.nodes.index(self.closest_edge[1]) + 1]]
             second_edge_length = self._get_edge_length(tuple(second_edge)) / (Config.Game.BLOCK_SIZE * 4)
             third_edge_length = 0
-        elif closest_edge[1] == self.nodes[-3]:  # Third to last edge
+        elif self.closest_edge[1] == self.nodes[-3]:  # Third to last edge
             turn = self.turns[-2]
             second_turn = self.turns[-1]
             third_turn = 0
-            second_edge = [closest_edge[1], self.nodes[self.nodes.index(closest_edge[1]) + 1]]
+            second_edge = [self.closest_edge[1], self.nodes[self.nodes.index(self.closest_edge[1]) + 1]]
             second_edge_length = self._get_edge_length(tuple(second_edge)) / (Config.Game.BLOCK_SIZE * 4)
 
             third_edge = [second_edge[1], self.nodes[self.nodes.index(second_edge[1]) + 1]]
             third_edge_length = self._get_edge_length(tuple(third_edge)) / (Config.Game.BLOCK_SIZE * 4)
         else:
-            turn = self.turns[self.nodes.index(closest_edge[1]) - 1]
-            second_turn = self.turns[self.nodes.index(closest_edge[1])]
-            third_turn = self.turns[self.nodes.index(closest_edge[1]) + 1]
+            turn = self.turns[self.nodes.index(self.closest_edge[1]) - 1]
+            second_turn = self.turns[self.nodes.index(self.closest_edge[1])]
+            third_turn = self.turns[self.nodes.index(self.closest_edge[1]) + 1]
 
-            second_edge = [closest_edge[1], self.nodes[self.nodes.index(closest_edge[1]) + 1]]
+            second_edge = [self.closest_edge[1], self.nodes[self.nodes.index(self.closest_edge[1]) + 1]]
             second_edge_length = self._get_edge_length(tuple(second_edge)) / (Config.Game.BLOCK_SIZE * 4)
 
             third_edge = [second_edge[1], self.nodes[self.nodes.index(second_edge[1]) + 1]]
@@ -205,6 +217,7 @@ class AgentPosition:
 
         return length * Config.Game.BLOCK_SIZE
 
+    
     def _car_out_of_track(self, agent_relative_position: Tuple[float, float]) -> bool:
         """
         Check if the car is out of the track
@@ -234,14 +247,11 @@ class AgentPosition:
         prev_agent_block_position = self._absolute_position_to_block_position(previous_absolute_pos)
         cur_agent_block_position = self._absolute_position_to_block_position(current_absolute_pos)
         
-        prev_closest_edge = self._get_closest_edge(prev_agent_block_position)
-        cur_closest_edge = self._get_closest_edge(cur_agent_block_position)
-        
-        prev_relative_pos = self._block_to_relative_position(prev_agent_block_position, prev_closest_edge)
-        cur_relative_pos = self._block_to_relative_position(cur_agent_block_position, cur_closest_edge)
+        prev_relative_pos = self._block_to_relative_position(prev_agent_block_position, self.prev_closest_edge)
+        cur_relative_pos = self._block_to_relative_position(cur_agent_block_position, self.closest_edge)
 
-        prev_edge_length = self._get_edge_length(prev_closest_edge)
-        cur_edge_length = self._get_edge_length(cur_closest_edge)
+        prev_edge_length = self._get_edge_length(self.prev_closest_edge)
+        cur_edge_length = self._get_edge_length(self.closest_edge)
 
         if prev_relative_pos == (-1, -1) or cur_relative_pos == (-1, -1):
             return 0
@@ -250,20 +260,20 @@ class AgentPosition:
         cur_x, _ = cur_relative_pos
 
         # Calculate the distance reward
-        if prev_closest_edge == cur_closest_edge:  # Same edge
+        if self.prev_closest_edge == self.closest_edge:  # Same edge
             if self._car_out_of_track(cur_relative_pos):
                 return 0
             return (cur_x - prev_x) * prev_edge_length
         else:
             # Different edge - handle corner cases
-            if prev_closest_edge[1] == cur_closest_edge[0]:  # Normal corner transition
-                edge_1_second_node_rel_pos = self._block_to_relative_position(prev_closest_edge[1], prev_closest_edge)
-                edge_2_first_node_rel_pos = self._block_to_relative_position(cur_closest_edge[0], cur_closest_edge)
+            if self.prev_closest_edge[1] == self.closest_edge[0]:  # Normal corner transition
+                edge_1_second_node_rel_pos = self._block_to_relative_position(self.prev_closest_edge[1], self.prev_closest_edge)
+                edge_2_first_node_rel_pos = self._block_to_relative_position(self.closest_edge[0], self.closest_edge)
                 return ((edge_1_second_node_rel_pos[0] - prev_x) * prev_edge_length) + ((cur_x - edge_2_first_node_rel_pos[0]) * cur_edge_length)
 
-            elif prev_closest_edge[0] == cur_closest_edge[1]:  # Backward corner transition
-                edge_1_first_node_rel_pos = self._block_to_relative_position(prev_closest_edge[0], prev_closest_edge)
-                edge_2_second_node_rel_pos = self._block_to_relative_position(cur_closest_edge[1], cur_closest_edge)
+            elif self.prev_closest_edge[0] == self.closest_edge[1]:  # Backward corner transition
+                edge_1_first_node_rel_pos = self._block_to_relative_position(self.prev_closest_edge[0], self.prev_closest_edge)
+                edge_2_second_node_rel_pos = self._block_to_relative_position(self.closest_edge[1], self.closest_edge)
                 return ((edge_1_first_node_rel_pos[0] - prev_x) * prev_edge_length) + ((cur_x - edge_2_second_node_rel_pos[0]) * cur_edge_length)
 
             else:
@@ -299,13 +309,11 @@ class AgentPosition:
         :return: The orientation of the car relative to the section it is in.
         """
         direction_to_angle = {(0, -1): np.pi, (-1, 0): -np.pi / 2, (0, 1): 0, (1, 0): np.pi / 2}
-        agent_block_position = self._absolute_position_to_block_position(agent_absolute_position)
-        closest_edge = self._get_closest_edge(agent_block_position)
 
-        if closest_edge == ((-1, -1), (-1, -1)):
+        if self.closest_edge == ((-1, -1), (-1, -1)):
             return 0
 
-        direction = self._get_edge_direction(closest_edge)
+        direction = self._get_edge_direction(self.closest_edge)
         section_angle = direction_to_angle[direction]
         theta = (section_angle - yaw)
         return ((theta + np.pi) % (2 * np.pi) - np.pi) / np.pi

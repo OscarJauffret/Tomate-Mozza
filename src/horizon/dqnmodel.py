@@ -6,15 +6,16 @@ from ..config import Config
 class DQNModel(nn.Module):
     def __init__(self):
         super(DQNModel, self).__init__()
-        self.layer1 = nn.Linear(Config.NN.Arch.INPUT_SIZE, Config.NN.Arch.LAYER_SIZES[0])
-        self.layer2 = nn.Linear(Config.NN.Arch.LAYER_SIZES[0], Config.NN.Arch.LAYER_SIZES[1])
-        self.output = nn.Linear(Config.NN.Arch.LAYER_SIZES[1], Config.NN.Arch.OUTPUT_SIZE)
+        self.model = nn.Sequential(
+            nn.Linear(Config.Arch.INPUT_SIZE, Config.Arch.LAYER_SIZES[0]),
+            nn.ReLU(),
+            nn.Linear(Config.Arch.LAYER_SIZES[0], Config.Arch.LAYER_SIZES[1]),
+            nn.ReLU(),
+            nn.Linear(Config.Arch.LAYER_SIZES[1], Config.Arch.OUTPUT_SIZE),
+        )
 
     def forward(self, x):
-        x = torch.relu(self.layer1(x))
-        x = torch.relu(self.layer2(x))
-        x = self.output(x)
-        return x
+        return self.model(x)
 
 class QTrainer:
     def __init__(self, model, device, lr, gamma):

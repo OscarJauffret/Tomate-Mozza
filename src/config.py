@@ -12,7 +12,7 @@ class Config:
         MODELS_PATH: str = "models/"
         LATEST_MODEL_PATH: str = os.path.join(MODELS_PATH, "latest")
         STAT_FILE_NAME: str = "stats.json"
-        # MODEL_FILE_NAME: str = "model.pth"
+        DQN_MODEL_FILE_NAME: str = "model.pth"
         ACTOR_FILE_NAME: str = "actor.pth"
         CRITIC_FILE_NAME: str = "critic.pth"
 
@@ -34,7 +34,7 @@ class Config:
 
         RANDOM_SPAWN: bool = False
 
-    class NN:
+    class PPO:
         LEARNING_RATE: float = 0.0003
         GAMMA: float = 0.99
         LAMBDA: float = 0.95
@@ -48,37 +48,79 @@ class Config:
         @staticmethod
         def get_hyperparameters():
             return {
-                "learning_rate": Config.NN.LEARNING_RATE,
-                "gamma": Config.NN.GAMMA,
-                "lambda": Config.NN.LAMBDA,
-                "epsilon": Config.NN.EPSILON,
-                "c1": Config.NN.C1,
-                "c2": Config.NN.C2,
-                "memory_size": Config.NN.MEMORY_SIZE,
-                "batch_size": Config.NN.BATCH_SIZE,
-                "epochs": Config.NN.EPOCHS,
+                "learning_rate": Config.PPO.LEARNING_RATE,
+                "gamma": Config.PPO.GAMMA,
+                "lambda": Config.PPO.LAMBDA,
+                "epsilon": Config.PPO.EPSILON,
+                "c1": Config.PPO.C1,
+                "c2": Config.PPO.C2,
+                "memory_size": Config.PPO.MEMORY_SIZE,
+                "batch_size": Config.PPO.BATCH_SIZE,
+                "epochs": Config.PPO.EPOCHS,
             }
 
-        class Arch:
-            INPUTS_DESC: list[str] = ["section_rel_x", "section_rel_y", "next_turn" ,"velocity", "acceleration", "relative_yaw", "second_edge_length", "second_turn", "third_edge_length", "third_turn"]
-            OUTPUTS_DESC: list[str] = ["release", "forward", "right", "left", "forward_right", "forward_left"]
-            ACTIVATED_KEYS_PER_OUTPUT: list[tuple[int]] = [(1, 1, 1, 1), (1, 0, 0, 0), (0, 0, 0, 1), (0, 1, 0, 0), (1, 0, 0, 1), (1, 1, 0, 0)]
-            REWARD_DESC: str = "distance travelled projected on the section's x axis (progression on the track)"
+    class DQN:
+        LEARNING_RATE: float = 0.001
+        GAMMA: float = 0.97
 
-            INPUT_SIZE: int = len(INPUTS_DESC)
-            OUTPUT_SIZE: int = len(OUTPUTS_DESC)
+        MAX_MEMORY: int = 100_000
+        MIN_MEMORY: int = 10_000
+        BATCH_SIZE: int = 128
 
-            LAYER_SIZES: list[int] = [256, 128]
-            NUMBER_OF_HIDDEN_LAYERS: int = len(LAYER_SIZES)
+        EPSILON_START: float = 0.9
+        EPSILON_END: float = 0.05
+        EPSILON_DECAY: int = 10000
 
-            @staticmethod
-            def get_architecture_description():
-                return {
-                    "inputs": Config.NN.Arch.INPUTS_DESC,
-                    "outputs": Config.NN.Arch.OUTPUTS_DESC,
-                    "input_size": Config.NN.Arch.INPUT_SIZE,
-                    "output_size": Config.NN.Arch.OUTPUT_SIZE,
-                    "layer_sizes": Config.NN.Arch.LAYER_SIZES,
-                    "number_of_hidden_layers": Config.NN.Arch.NUMBER_OF_HIDDEN_LAYERS,
-                    "reward_description": Config.NN.Arch.REWARD_DESC
-                }
+        UPDATE_TARGET_EVERY: int = 1
+        TAU: float = 0.02
+
+        ALPHA: float = 0.7
+        BETA_START: float = 0.4
+        BETA_MAX: float = 1.0
+        BETA_INCREMENT_STEPS: int = 40000
+
+        N_STEPS: int = 25 # 2.5 Seconds
+
+        @staticmethod
+        def get_hyperparameters():
+            return {
+                "learning_rate": Config.DQN.LEARNING_RATE,
+                "gamma": Config.DQN.GAMMA,
+                "max_memory": Config.DQN.MAX_MEMORY,
+                "min_memory": Config.DQN.MIN_MEMORY,
+                "batch_size": Config.DQN.BATCH_SIZE,
+                "epsilon_start": Config.DQN.EPSILON_START,
+                "epsilon_end": Config.DQN.EPSILON_END,
+                "epsilon_decay": Config.DQN.EPSILON_DECAY,
+                "update_target_every": Config.DQN.UPDATE_TARGET_EVERY,
+                "tau": Config.DQN.TAU,
+                "alpha": Config.DQN.ALPHA,
+                "beta_start": Config.DQN.BETA_START,
+                "beta_max": Config.DQN.BETA_MAX,
+                "beta_increment_steps": Config.DQN.BETA_INCREMENT_STEPS,
+                "n_steps": Config.DQN.N_STEPS
+            }
+
+    class Arch:
+        INPUTS_DESC: list[str] = ["section_rel_x", "section_rel_y", "next_turn" ,"velocity", "acceleration", "relative_yaw", "second_edge_length", "second_turn", "third_edge_length", "third_turn"]
+        OUTPUTS_DESC: list[str] = ["release", "forward", "right", "left", "forward_right", "forward_left"]
+        ACTIVATED_KEYS_PER_OUTPUT: list[tuple[int]] = [(1, 1, 1, 1), (1, 0, 0, 0), (0, 0, 0, 1), (0, 1, 0, 0), (1, 0, 0, 1), (1, 1, 0, 0)]
+        REWARD_DESC: str = "distance travelled projected on the section's x axis (progression on the track)"
+
+        INPUT_SIZE: int = len(INPUTS_DESC)
+        OUTPUT_SIZE: int = len(OUTPUTS_DESC)
+
+        LAYER_SIZES: list[int] = [256, 128]
+        NUMBER_OF_HIDDEN_LAYERS: int = len(LAYER_SIZES)
+
+        @staticmethod
+        def get_architecture_description():
+            return {
+                "inputs": Config.Arch.INPUTS_DESC,
+                "outputs": Config.Arch.OUTPUTS_DESC,
+                "input_size": Config.Arch.INPUT_SIZE,
+                "output_size": Config.Arch.OUTPUT_SIZE,
+                "layer_sizes": Config.Arch.LAYER_SIZES,
+                "number_of_hidden_layers": Config.Arch.NUMBER_OF_HIDDEN_LAYERS,
+                "reward_description": Config.Arch.REWARD_DESC
+            }

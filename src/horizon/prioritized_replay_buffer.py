@@ -1,5 +1,6 @@
 import numpy as np
 from ..config import Config
+from ..utils.utils import profile_time
 
 class PrioritizedReplayBuffer:
 
