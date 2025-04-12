@@ -34,11 +34,15 @@ class Plot:
 
         self.iterations = 0
 
-    def add_point(self, y):
-        self.iterations += 1
+    def add_points(self, y_values):
+        """Add multiple points at once to avoid multiple redraws"""
+        if not y_values:  # If empty list, do nothing
+            return
 
-        self.x_data = np.append(self.x_data, self.iterations)
-        self.y_data = np.append(self.y_data, y)
+        for y in y_values:
+            self.iterations += 1
+            self.x_data = np.append(self.x_data, self.iterations)
+            self.y_data = np.append(self.y_data, y)
 
         # Keep only the most recent plot_size points
         if len(self.x_data) > self.plot_size:
@@ -46,11 +50,11 @@ class Plot:
             self.y_data = self.y_data[-self.plot_size:]
 
         if len(self.y_data) >= self.avg_plot_size:
-            self.avg_y_data = np.append(self.avg_y_data, np.convolve(self.y_data[-self.avg_plot_size:], np.ones(self.avg_plot_size)/self.avg_plot_size, mode='valid'))
+            self.avg_y_data = np.append(self.avg_y_data, np.convolve(self.y_data[-self.avg_plot_size:],np.ones(self.avg_plot_size) / self.avg_plot_size, mode='valid'))
             self.avg_y_data = self.avg_y_data[-self.plot_size:]
             self.avg_x_data = self.x_data[-len(self.avg_y_data):]
 
-        # Always clear and redraw bars (ensures proper positioning)
+        # Redraw everything once
         self.ax.clear()
         self.ax.set_title(self.title)
         self.ax.set_xlabel(self.xlabel)
@@ -99,6 +103,10 @@ class Plot:
             )
 
         self.canvas.draw()
+
+    def add_point(self, y):
+        """Compatibility method for adding a single point"""
+        self.add_points([y])
 
     def clear(self):
         self.x_data = np.array([], dtype=int)

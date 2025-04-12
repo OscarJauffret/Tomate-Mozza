@@ -125,13 +125,20 @@ class Interface:
         self.shared_dict["game_speed"] = int(float(value))
 
     def update_interface(self):
+        rewards = []
+        # Collect all rewards before processing
         while not self.shared_dict["reward"].empty():
             reward = self.shared_dict["reward"].get()
             if reward > self.best_reward:
                 self.best_reward = reward
                 self.best_reward_label["text"] = f"Best Reward: {self.best_reward:.2f}"
+
+            # Only collect for graph if not in evaluation mode
             if not self.shared_dict["eval"]:
-                self.graph.add_point(reward)
+                rewards.append(reward)
+        # Update graph only once with all collected points
+        if rewards:
+            self.graph.add_points(rewards)
 
         self.action_keys.update_keys(self.shared_dict["q_values"])
         self.after_id = self.root.after(100, self.update_interface)

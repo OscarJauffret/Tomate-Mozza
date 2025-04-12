@@ -207,7 +207,8 @@ class Agent(Client, ABC):
             self.shared_dict["reward"].put(self.reward)
             self.logger.add_run(self.iterations, time, self.reward)
 
-        print(f"Iteration: {self.iterations:<8} reward: {self.reward:<8.2f}")
+        if self.iterations % 10 ==  0:
+            print(f"Iteration: {self.iterations:<8} reward: {self.reward:<8.2f}")
         self.reward = 0.0
         self.prev_positions.clear()
         self.prev_velocity = None
@@ -215,10 +216,8 @@ class Agent(Client, ABC):
         self.refresh_shared_dict()
         if self.has_finished:
             self.has_finished = False
-            launch_map(iface)
-        else:
-            iface.horn()
-            iface.execute_command(f"load_state {self.random_states[0]}")
+        iface.horn()
+        iface.execute_command(f"load_state {self.random_states[0]}")
 
     def refresh_shared_dict(self) -> None:
         """

@@ -33,7 +33,7 @@ class Config:
         INTERVAL_BETWEEN_ACTIONS: int = 1000 // NUMBER_OF_ACTIONS_PER_SECOND
         GAME_SPEED: int = 8
 
-        RANDOM_SPAWN: bool = False
+        RANDOM_SPAWN: bool = True
 
     class PPO:
         LEARNING_RATE: float = 0.0003
