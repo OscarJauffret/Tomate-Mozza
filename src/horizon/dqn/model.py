@@ -51,7 +51,7 @@ class Trainer:
         with torch.no_grad():
             next_action = self.main_model(next_state).argmax(dim=1)  # This gives us the action that gives us the maximum reward in the next state as a 1D tensor (ex: if batch of size 1, tensor([0]), if batch of size 2, tensor([0, 1]))
             next_q_target = self.target_model(next_state).gather(1, next_action.unsqueeze(1)).squeeze(1)
-        target[range(len(action)), action] = (reward + self.gamma ** Config.NN.N_STEPS * next_q_target * (1 - done)).type(torch.float)  #TODO: right now we use the Config.NN.N_STEPS, but if the transition is smaller, we should pass the n_steps as a parameter
+        target[range(len(action)), action] = (reward + self.gamma ** Config.DQN.N_STEPS * next_q_target * (1 - done)).type(torch.float)
 
         if torch.any(target > 1000):
             print("Target values are too high")
