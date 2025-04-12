@@ -195,14 +195,6 @@ class Agent(Client, ABC):
 
         return torch.tensor(0.0, device=self.device, dtype=torch.float)
 
-    def refresh_shared_dict(self) -> None:
-        """
-        Refresh the shared dictionary
-        :return: None
-        """
-        self.eval = self.shared_dict["eval"]
-        self.game_speed = self.shared_dict["game_speed"]
-
     def reset(self, iface: TMInterface, time: int) -> None:
         """
         Reset the agent
@@ -227,3 +219,11 @@ class Agent(Client, ABC):
         else:
             iface.horn()
             iface.execute_command(f"load_state {self.random_states[0]}")
+
+    def refresh_shared_dict(self) -> None:
+        """
+        Refresh the shared dictionary
+        :return: None
+        """
+        self.eval = self.shared_dict["eval"]
+        self.game_speed = self.shared_dict["game_speed"]

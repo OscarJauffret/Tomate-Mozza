@@ -180,6 +180,8 @@ class DQNAgent(Agent):
             if done:
                 self.ready = False
 
+                iface.set_speed(self.game_speed)
+
                 if not self.eval:
                     while not self.n_step_buffer.is_empty():
                         state, action, reward = self.n_step_buffer.get_transition()
