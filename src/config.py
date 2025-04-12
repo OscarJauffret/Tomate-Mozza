@@ -79,7 +79,7 @@ class Config:
         BETA_MAX: float = 1.0
         BETA_INCREMENT_STEPS: int = 40000
 
-        N_STEPS: int = 25 # 2.5 Seconds
+        N_STEPS: int = 25  # 2.5 Seconds
 
         @staticmethod
         def get_hyperparameters():

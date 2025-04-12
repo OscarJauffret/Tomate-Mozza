@@ -12,11 +12,11 @@ class PPOActor(nn.Module):
     def __init__(self):
         super(PPOActor, self).__init__()
         self.actor = nn.Sequential(
-            nn.Linear(Config.NN.Arch.INPUT_SIZE, Config.NN.Arch.LAYER_SIZES[0]),
+            nn.Linear(Config.Arch.INPUT_SIZE, Config.Arch.LAYER_SIZES[0]),
             nn.ReLU(),
-            nn.Linear(Config.NN.Arch.LAYER_SIZES[0], Config.NN.Arch.LAYER_SIZES[1]),
+            nn.Linear(Config.Arch.LAYER_SIZES[0], Config.Arch.LAYER_SIZES[1]),
             nn.ReLU(),
-            nn.Linear(Config.NN.Arch.LAYER_SIZES[1], Config.NN.Arch.OUTPUT_SIZE),
+            nn.Linear(Config.Arch.LAYER_SIZES[1], Config.Arch.OUTPUT_SIZE),
             nn.Softmax(dim=-1)  # Softmax for action probabilities
         )
 
@@ -36,11 +36,11 @@ class PPOCritic(nn.Module):
     def __init__(self):
         super(PPOCritic, self).__init__()
         self.critic = nn.Sequential(
-            nn.Linear(Config.NN.Arch.INPUT_SIZE, Config.NN.Arch.LAYER_SIZES[0]),
+            nn.Linear(Config.Arch.INPUT_SIZE, Config.Arch.LAYER_SIZES[0]),
             nn.ReLU(),
-            nn.Linear(Config.NN.Arch.LAYER_SIZES[0], Config.NN.Arch.LAYER_SIZES[1]),
+            nn.Linear(Config.Arch.LAYER_SIZES[0], Config.Arch.LAYER_SIZES[1]),
             nn.ReLU(),
-            nn.Linear(Config.NN.Arch.LAYER_SIZES[1], 1)  # Output a single value (state value)
+            nn.Linear(Config.Arch.LAYER_SIZES[1], 1)  # Output a single value (state value)
         )
 
     def forward(self, state):
@@ -57,13 +57,13 @@ class PPOTrainer:
     def __init__(self, actor: PPOActor, critic: PPOCritic, device: torch.device):
         self.actor = actor
         self.critic = critic
-        self.actor_optimizer = optim.Adam(self.actor.parameters(), lr=Config.NN.LEARNING_RATE)
-        self.critic_optimizer = optim.Adam(self.critic.parameters(), lr=Config.NN.LEARNING_RATE)
+        self.actor_optimizer = optim.Adam(self.actor.parameters(), lr=Config.PPO.LEARNING_RATE)
+        self.critic_optimizer = optim.Adam(self.critic.parameters(), lr=Config.PPO.LEARNING_RATE)
         self.device = device
         self.mse = nn.MSELoss()
 
-        self.gamma = Config.NN.GAMMA
-        self.gae_lambda = Config.NN.LAMBDA
+        self.gamma = Config.PPO.GAMMA
+        self.gae_lambda = Config.PPO.LAMBDA
 
     def compute_gae(self, rewards, values, dones):
         """
@@ -102,7 +102,7 @@ class PPOTrainer:
         states, actions, probs, values, rewards, dones = memory.get_buffer()
         advantages = self.compute_gae(rewards, values, dones)   # Shape [memory_size]
         returns = self.compute_returns(advantages, values)
-        for _ in repeat(None, Config.NN.EPOCHS):
+        for _ in repeat(None, Config.PPO.EPOCHS):
             batches = memory.generate_batches()
             for batch in batches:
                 batch_states = states[batch]  # Shape: [batch_size, state_size]
@@ -115,17 +115,17 @@ class PPOTrainer:
                 new_probs = dist.log_prob(batch_actions)    # Shape: [batch_size]
                 prob_ratio = torch.exp(new_probs - batch_old_probs)
                 weighted_probs = prob_ratio * advantages[batch] # Shape: [batch_size]
-                clipped_probs = torch.clamp(prob_ratio, 1 - Config.NN.EPSILON, 1 + Config.NN.EPSILON) * advantages[batch]   # Shape: [batch_size]
+                clipped_probs = torch.clamp(prob_ratio, 1 - Config.PPO.EPSILON, 1 + Config.PPO.EPSILON) * advantages[batch]   # Shape: [batch_size]
                 actor_loss = (-torch.min(weighted_probs, clipped_probs)).mean()   # Shape: [1]
 
                 critic_loss = self.mse(critic_value, returns[batch])
 
                 entropy = dist.entropy().mean()  # Shape: [1]
 
-                total_loss = actor_loss + Config.NN.C1 * critic_loss - Config.NN.C2 * entropy
-                # In the original paper, the objective is to maximize the expected return (actor_loss - Config.NN.C1 * critic_loss + Config.NN.C2 * entropy).
+                total_loss = actor_loss + Config.PPO.C1 * critic_loss - Config.PPO.C2 * entropy
+                # In the original paper, the objective is to maximize the expected return (actor_loss - Config.PPO.C1 * critic_loss + Config.PPO.C2 * entropy).
                 # However, in PyTorch, we minimize the loss.
-                # This means that we need to minimize the negative of the expected return.(-actor_loss + Config.NN.C1 * critic_loss - Config.NN.C2 * entropy)
+                # This means that we need to minimize the negative of the expected return.(-actor_loss + Config.PPO.C1 * critic_loss - Config.PPO.C2 * entropy)
 
                 self.actor_optimizer.zero_grad()
                 self.critic_optimizer.zero_grad()

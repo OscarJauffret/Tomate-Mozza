@@ -13,7 +13,7 @@ class TMLogger:
         """
         self.log_id: str = datetime.now().strftime(Config.DATETIME_FORMAT)
         self.map_info: dict = Config.Paths.get_map()
-        self.hyperparameters: dict = Config.NN().get_hyperparameters()
+        self.hyperparameters: dict = Config.NN().get_hyperparameters()  #TODO
         self.architecture: dict = Config.NN.Arch().get_architecture_description()
         self.training_device: str = device
         self.run_stats: list[_RunStats] = []

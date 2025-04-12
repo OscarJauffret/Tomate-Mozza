@@ -22,7 +22,7 @@ if __name__ == "__main__":
     servers = [i for i in range(Config.Game.NUMBER_OF_CLIENTS)]
 
     manager = multiprocessing.Manager()
-    outputs = Config.NN.Arch.OUTPUTS_DESC
+    outputs = Config.Arch.OUTPUTS_DESC
     shared_dict = manager.dict({
                                 "eval": False,
                                 "reward": manager.Queue(),

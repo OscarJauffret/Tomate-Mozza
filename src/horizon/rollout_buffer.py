@@ -8,18 +8,18 @@ class RolloutBuffer:
     def __init__(self, device):
         self.device = device
 
-        self.states = torch.zeros((Config.NN.MEMORY_SIZE, Config.NN.Arch.INPUT_SIZE), dtype=torch.float, device=self.device)
-        self.actions = torch.zeros(Config.NN.MEMORY_SIZE, dtype=torch.int64, device=self.device)
-        self.probs = torch.zeros(Config.NN.MEMORY_SIZE, dtype=torch.float, device=self.device)
-        self.rewards = torch.zeros(Config.NN.MEMORY_SIZE, dtype=torch.float, device=self.device)
-        self.dones = torch.zeros(Config.NN.MEMORY_SIZE, dtype=torch.int, device=self.device)
-        self.values = torch.zeros(Config.NN.MEMORY_SIZE, dtype=torch.float, device=self.device)
+        self.states = torch.zeros((Config.PPO.MEMORY_SIZE, Config.PPO.Arch.INPUT_SIZE), dtype=torch.float, device=self.device)
+        self.actions = torch.zeros(Config.PPO.MEMORY_SIZE, dtype=torch.int64, device=self.device)
+        self.probs = torch.zeros(Config.PPO.MEMORY_SIZE, dtype=torch.float, device=self.device)
+        self.rewards = torch.zeros(Config.PPO.MEMORY_SIZE, dtype=torch.float, device=self.device)
+        self.dones = torch.zeros(Config.PPO.MEMORY_SIZE, dtype=torch.int, device=self.device)
+        self.values = torch.zeros(Config.PPO.MEMORY_SIZE, dtype=torch.float, device=self.device)
 
-        self.batch_size = Config.NN.BATCH_SIZE
+        self.batch_size = Config.PPO.BATCH_SIZE
         self.position = 0
 
     def is_full(self):
-        return self.position >= Config.NN.MEMORY_SIZE
+        return self.position >= Config.PPO.MEMORY_SIZE
 
     def clear(self):
         self.states.zero_()
@@ -32,7 +32,7 @@ class RolloutBuffer:
         self.position = 0
 
     def add(self, state, action, log_prob, reward, done, value):
-        assert self.position < Config.NN.MEMORY_SIZE, "Rollout buffer is full. Please clear it before adding new data."
+        assert self.position < Config.PPO.MEMORY_SIZE, "Rollout buffer is full. Please clear it before adding new data."
 
         self.states[self.position] = state
         self.actions[self.position] = action

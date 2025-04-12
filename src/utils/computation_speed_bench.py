@@ -17,10 +17,10 @@ def benchmark_model_performance(num_iterations=1000):
 
     # Initialize model
     model = DQNModel().to(device)
-    trainer = QTrainer(model, device, Config.NN.LEARNING_RATE, Config.NN.GAMMA)
+    trainer = QTrainer(model, device, Config.DQN.LEARNING_RATE, Config.DQN.GAMMA)
 
     # Create random input for inference benchmark
-    single_input = torch.rand((1, Config.NN.Arch.INPUT_SIZE), device=device)
+    single_input = torch.rand((1, Config.Arch.INPUT_SIZE), device=device)
 
     # Benchmark inference speed
     print("\n=== Inference Speed Benchmark ===")
@@ -41,10 +41,10 @@ def benchmark_model_performance(num_iterations=1000):
     start_time = time.time()
 
     for i in range(num_iterations):
-        state = torch.rand(Config.NN.Arch.INPUT_SIZE, device=device)
+        state = torch.rand(Config.Arch.INPUT_SIZE, device=device)
         action = model(state)
         reward = torch.rand(1, device=device)
-        next_state = torch.rand(Config.NN.Arch.INPUT_SIZE, device=device)
+        next_state = torch.rand(Config.Arch.INPUT_SIZE, device=device)
         done = False
         trainer.train_step(state, action, reward, next_state, done)
 
