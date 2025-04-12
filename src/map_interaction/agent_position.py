@@ -198,6 +198,8 @@ class AgentPosition:
             third_edge = [second_edge[1], self.nodes[self.nodes.index(second_edge[1]) + 1]]
             third_edge_length = self._get_edge_length(tuple(third_edge)) / (Config.Game.BLOCK_SIZE * 4)
 
+        second_edge_length = min(second_edge_length, 1)
+        third_edge_length = min(third_edge_length, 1)
         return section_relative_position, turn, second_edge_length, second_turn, third_edge_length, third_turn
 
 
