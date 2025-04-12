@@ -125,7 +125,7 @@ class Interface:
         self.shared_dict["game_speed"] = int(float(value))
 
     def update_interface(self):
-        if not self.shared_dict["reward"].empty():
+        while not self.shared_dict["reward"].empty():
             reward = self.shared_dict["reward"].get()
             if reward > self.best_reward:
                 self.best_reward = reward
