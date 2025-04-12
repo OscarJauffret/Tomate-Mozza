@@ -123,6 +123,14 @@ class Trainer:
                 clipped_probs = torch.clamp(prob_ratio, 1 - self.epsilon, 1 + self.epsilon) * advantages[batch]   # Shape: [batch_size]
                 actor_loss = (-torch.min(weighted_probs, clipped_probs)).mean()   # Shape: [1]
 
+
+                # CLAMPED
+                #value_pred_clipped = critic_value + (critic_value - returns[batch]).clamp(-Config.NN.EPSILON, Config.NN.EPSILON)
+                #value_losses = (critic_value - returns[batch]) ** 2
+                #value_losses_clipped = (value_pred_clipped - returns[batch]) ** 2
+                #critic_loss = 0.5 * torch.max(value_losses, value_losses_clipped)
+                #critic_loss = critic_loss.mean()
+                # NO CLAMPED
                 critic_loss = self.mse(critic_value, returns[batch])
 
                 entropy = dist.entropy().mean()  # Shape: [1]
