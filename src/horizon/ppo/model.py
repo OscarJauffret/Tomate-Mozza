@@ -54,16 +54,21 @@ class Critic(nn.Module):
 
 
 class Trainer:
-    def __init__(self, actor: Actor, critic: Critic, device: torch.device):
+    def __init__(self, actor: Actor, critic: Critic, device: torch.device, lr: float, gamma: float, gae_lambda: float, epochs: int,
+                 epsilon: float, c1: float, c2: float):
         self.actor = actor
         self.critic = critic
-        self.actor_optimizer = optim.Adam(self.actor.parameters(), lr=Config.PPO.LEARNING_RATE)
-        self.critic_optimizer = optim.Adam(self.critic.parameters(), lr=Config.PPO.LEARNING_RATE)
+        self.actor_optimizer = optim.Adam(self.actor.parameters(), lr=lr)
+        self.critic_optimizer = optim.Adam(self.critic.parameters(), lr=lr)
         self.device = device
         self.mse = nn.MSELoss()
 
-        self.gamma = Config.PPO.GAMMA
-        self.gae_lambda = Config.PPO.LAMBDA
+        self.gamma = gamma
+        self.gae_lambda = gae_lambda
+        self.epochs = epochs
+        self.epsilon = epsilon
+        self.c1 = c1
+        self.c2 = c2
 
     def compute_gae(self, rewards, values, dones):
         """
@@ -102,7 +107,7 @@ class Trainer:
         states, actions, probs, values, rewards, dones = memory.get_buffer()
         advantages = self.compute_gae(rewards, values, dones)   # Shape [memory_size]
         returns = self.compute_returns(advantages, values)
-        for _ in repeat(None, Config.PPO.EPOCHS):
+        for _ in repeat(None, self.epochs):
             batches = memory.generate_batches()
             for batch in batches:
                 batch_states = states[batch]  # Shape: [batch_size, state_size]
@@ -115,14 +120,14 @@ class Trainer:
                 new_probs = dist.log_prob(batch_actions)    # Shape: [batch_size]
                 prob_ratio = torch.exp(new_probs - batch_old_probs)
                 weighted_probs = prob_ratio * advantages[batch] # Shape: [batch_size]
-                clipped_probs = torch.clamp(prob_ratio, 1 - Config.PPO.EPSILON, 1 + Config.PPO.EPSILON) * advantages[batch]   # Shape: [batch_size]
+                clipped_probs = torch.clamp(prob_ratio, 1 - self.epsilon, 1 + self.epsilon) * advantages[batch]   # Shape: [batch_size]
                 actor_loss = (-torch.min(weighted_probs, clipped_probs)).mean()   # Shape: [1]
 
                 critic_loss = self.mse(critic_value, returns[batch])
 
                 entropy = dist.entropy().mean()  # Shape: [1]
 
-                total_loss = actor_loss + Config.PPO.C1 * critic_loss - Config.PPO.C2 * entropy
+                total_loss = actor_loss + self.c1 * critic_loss - self.c2 * entropy
                 # In the original paper, the objective is to maximize the expected return (actor_loss - Config.PPO.C1 * critic_loss + Config.PPO.C2 * entropy).
                 # However, in PyTorch, we minimize the loss.
                 # This means that we need to minimize the negative of the expected return.(-actor_loss + Config.PPO.C1 * critic_loss - Config.PPO.C2 * entropy)

@@ -23,7 +23,10 @@ class PPOAgent(Agent):
         self.hyperparameters = Config.PPO.get_hyperparameters()
         self.actor: Actor = Actor().to(self.device)
         self.critic: Critic = Critic().to(self.device)
-        self.trainer: Trainer = Trainer(self.actor, self.critic, self.device)
+        self.trainer: Trainer = Trainer(self.actor, self.critic, self.device, self.hyperparameters["learning_rate"],
+                                        self.hyperparameters["gamma"], self.hyperparameters["gae_lambda"],
+                                        self.hyperparameters["epochs"], self.hyperparameters["epsilon"],
+                                        self.hyperparameters["c1"], self.hyperparameters["c2"])
 
         self.memory: RolloutBuffer = RolloutBuffer(self.device)
 
@@ -43,7 +46,10 @@ class PPOAgent(Agent):
                 self.hyperparameters = self.load_hyperparameters(path)
                 self.actor.load_state_dict(torch.load(actor_pth, map_location=self.device))
                 self.critic.load_state_dict(torch.load(critic_pth, map_location=self.device))
-                self.trainer: Trainer = Trainer(self.actor, self.critic, self.device) # TODO: allow to load hyperparameters
+                self.trainer: Trainer = Trainer(self.actor, self.critic, self.device, self.hyperparameters["learning_rate"],
+                                                self.hyperparameters["gamma"], self.hyperparameters["gae_lambda"],
+                                                self.hyperparameters["epochs"], self.hyperparameters["epsilon"],
+                                                self.hyperparameters["c1"], self.hyperparameters["c2"])
                 self.logger.load(os.path.join(path, Config.Paths.STAT_FILE_NAME))
                 print(f"Model loaded from {path}")
             else:
@@ -53,7 +59,10 @@ class PPOAgent(Agent):
             self.hyperparameters = Config.PPO.get_hyperparameters()
             self.actor: Actor = Actor().to(self.device)
             self.critic: Critic = Critic().to(self.device)
-            self.trainer: Trainer = Trainer(self.actor, self.critic, self.device)
+            self.trainer: Trainer = Trainer(self.actor, self.critic, self.device, self.hyperparameters["learning_rate"],
+                                            self.hyperparameters["gamma"], self.hyperparameters["gae_lambda"],
+                                            self.hyperparameters["epochs"], self.hyperparameters["epsilon"],
+                                            self.hyperparameters["c1"], self.hyperparameters["c2"])
             print("Loaded a fresh model with random weights")
 
     def save_model(self, directory) -> None:
