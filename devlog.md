@@ -174,3 +174,10 @@ Launch multiple clients at the same time, logging in, launching the map and focu
 - Removed some detach() from the RolloutBuffer
 - Added multiple epochs to the train step
 - Trained the agent when running with multiple epochs and suddenly it is the best performance we ever had, completely dominating the DQN in terms of speed of learning.
+
+---
+
+### 12 April 2025, 5h
+- Merged the PPO and DQN agents, now we can select which one to use when launching the training.
+- Allowed to modify the game speed for the DQN agent.
+- Fixed a bug when the game was running at high speeds that would cause the interface and the terminal to be out of sync.
