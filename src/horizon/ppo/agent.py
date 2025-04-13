@@ -88,6 +88,15 @@ class PPOAgent(Agent):
 
         log_prob = dist.log_prob(action)
 
+        if self.eval:
+            with torch.no_grad():
+                probs = dist.probs.detach().cpu().numpy().tolist()
+
+                for key, prob in zip(self.shared_dict["q_values"].keys(), probs):
+                    if key != "is_random":
+                        self.shared_dict["q_values"][key] = prob
+                self.shared_dict["q_values"]["is_random"] = False
+
         return action, log_prob, value
 
     def remember(self, state: Tensor, action: Tensor, log_prob: Tensor, reward: Tensor, done: Tensor, value: Tensor) -> None:
