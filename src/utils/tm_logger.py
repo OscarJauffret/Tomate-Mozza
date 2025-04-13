@@ -31,14 +31,16 @@ class TMLogger:
         """
         self.log_id = datetime.now().strftime(Config.DATETIME_FORMAT)
 
-    def add_run(self, iteration, run_time, reward):
+    def add_run(self, iteration, run_time, reward, spawn_point, has_finished):
         """
         Add a run to the logger
         :param iteration: The iteration of the run
         :param run_time: The time taken for the run
         :param reward: The reward obtained from the run
+        :param spawn_point: The spawn point of the run
+        :param has_finished: Whether the run has finished
         """
-        self.run_stats.append(_RunStats(iteration, run_time, reward))
+        self.run_stats.append(_RunStats(iteration, run_time, reward, spawn_point, has_finished))
 
     def _compute_stats(self):
         """
@@ -183,20 +185,25 @@ class TMLogger:
             self.hyperparameters = log["hyperparameters"]
             self.training_device = log["device"]
             self.architecture = log["architecture"]
-            self.run_stats = [_RunStats(run["iteration"], run["run_time"], run["reward"]) for run in log["runs"]]
+            self.run_stats = [_RunStats(run["iteration"], run["run_time"], run["reward"],
+                                        run["spawn_point"], run["has_finished"]) for run in log["runs"]]
 
 
 class _RunStats:
-    def __init__(self, iteration, run_time, reward):
+    def __init__(self, iteration, run_time, reward, spawn_point, has_finished):
         """
         Constructor for RunStats class
         :param iteration: The iteration of the run
         :param run_time: The time taken for the run
         :param reward: The reward obtained from the run
+        :param spawn_point: The spawn point of the run
+        :param has_finished: Whether the run has finished
         """
         self.iteration = iteration
         self.run_time = run_time
         self.reward = reward
+        self.spawn_point = spawn_point
+        self.has_finished = has_finished
 
     def get_stats(self):
         """
@@ -206,5 +213,7 @@ class _RunStats:
         return {
             "iteration": self.iteration,
             "run_time": self.run_time,
-            "reward": self.reward
+            "reward": self.reward,
+            "spawn_point": self.spawn_point,
+            "has_finished": self.has_finished
         }

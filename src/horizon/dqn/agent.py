@@ -142,7 +142,8 @@ class DQNAgent(Agent):
     def on_run_step(self, iface: TMInterface, _time: int) -> None:
         if _time == 20:
             if Config.Game.RANDOM_SPAWN:
-                iface.execute_command(f"load_state {random.choice(self.random_states)}")
+                self.spawn_point = random.randint(0, len(self.random_states) - 1)
+                iface.execute_command(f"load_state {self.random_states[self.spawn_point]}")
             self.ready = True
             if self.epsilon == 0.0:
                 random_steering_value = np.random.randint(-10000, 10000)

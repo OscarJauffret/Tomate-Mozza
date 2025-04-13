@@ -106,7 +106,8 @@ class PPOAgent(Agent):
     def on_run_step(self, iface: TMInterface, _time: int) -> None:
         if _time == 20:
             if Config.Game.RANDOM_SPAWN:
-                iface.execute_command(f"load_state {random.choice(self.random_states)}")
+                self.spawn_point = random.randint(0, len(self.random_states) - 1)
+                iface.execute_command(f"load_state {self.random_states[self.spawn_point]}")
             self.ready = True
 
         if _time >= 0 and _time % Config.Game.INTERVAL_BETWEEN_ACTIONS == 0 and self.ready:

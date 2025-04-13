@@ -40,6 +40,7 @@ class Agent(Client, ABC):
         self.has_finished = False
         self.iterations = 0
         self.ready = False
+        self.spawn_point = 0
 
         self.thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=3)
         self.shared_dict = shared_dict
@@ -205,7 +206,7 @@ class Agent(Client, ABC):
         if not self.eval:
             self.iterations += 1
             self.shared_dict["reward"].put(self.reward)
-            self.logger.add_run(self.iterations, time, self.reward)
+            self.logger.add_run(self.iterations, time, self.reward, self.spawn_point, self.has_finished)
 
         if self.iterations % 10 ==  0:
             print(f"Iteration: {self.iterations:<8} reward: {self.reward:<8.2f}")
@@ -216,8 +217,9 @@ class Agent(Client, ABC):
         self.refresh_shared_dict()
         if self.has_finished:
             self.has_finished = False
+        self.spawn_point = 0
         iface.horn()
-        iface.execute_command(f"load_state {self.random_states[0]}")
+        iface.execute_command(f"load_state {self.random_states[self.spawn_point]}")
 
     def refresh_shared_dict(self) -> None:
         """
