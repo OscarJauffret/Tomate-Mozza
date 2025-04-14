@@ -102,9 +102,10 @@ class DQNAgent(Agent):
         else:
             with torch.no_grad():
                 prediction = self.model(state)
-                # for i, action in enumerate(Config.Arch.OUTPUTS_DESC):
-                #     self.q_values_dict[action] = prediction[i].item()
-                # self.q_values_dict["is_random"] = False
+                if self.eval:
+                    for i, action in enumerate(Config.Arch.OUTPUTS_DESC):
+                        self.shared_dict["q_values"][action] = prediction[i].item()
+                    self.shared_dict["q_values"]["is_random"] = False
                 return torch.argmax(prediction)
 
     def remember(self, state, action, reward, next_state, done) -> None:
