@@ -87,12 +87,6 @@ class PPOAgent(Agent):
 
         if self.eval:
             action = dist.probs.argmax(dim=-1)  # Get the action with the highest probability
-        else:
-            action = dist.sample()  # Sample an action from the distribution
-
-        log_prob = dist.log_prob(action)
-
-        if self.eval:
             with torch.no_grad():
                 probs = dist.probs.detach().cpu().numpy().tolist()
 
@@ -100,6 +94,10 @@ class PPOAgent(Agent):
                     if key != "is_random":
                         self.shared_dict["q_values"][key] = prob
                 self.shared_dict["q_values"]["is_random"] = False
+        else:
+            action = dist.sample()  # Sample an action from the distribution
+
+        log_prob = dist.log_prob(action)
 
         return action, log_prob, value
 
