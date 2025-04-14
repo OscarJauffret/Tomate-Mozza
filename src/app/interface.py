@@ -139,8 +139,8 @@ class Interface:
         # Update graph only once with all collected points
         if rewards:
             self.graph.add_points(rewards)
-
-        self.action_keys.update_keys(self.shared_dict["q_values"])
+        if self.evaluation_toggle_variable.get() == 1:
+            self.action_keys.update_keys(self.shared_dict["q_values"])
         self.after_id = self.root.after(100, self.update_interface)
 
     def load_map(self):
