@@ -115,14 +115,8 @@ class DQNAgent(Agent):
         batch = self.memory.sample(self.hyperparameters["batch_size"])
         if batch is None:
             return
-        else:
-            sample, indices, weights = batch
-        states, actions, rewards, next_states, dones = zip(*sample)
-        states = torch.stack(states).to(self.device)
-        actions = torch.stack(actions).to(self.device)
-        rewards = torch.stack(rewards).to(self.device)
-        next_states = torch.stack(next_states).to(self.device)
-        dones = torch.stack(dones).to(self.device)
+
+        (states, actions, rewards, next_states, dones), indices, weights = batch
 
         td_sample = self.trainer.train_step(states, actions, rewards, next_states, dones, weights)
         self.memory.update_priorities(indices, td_sample)
