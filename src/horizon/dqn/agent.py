@@ -22,9 +22,8 @@ class DQNAgent(Agent):
         self.trainer: Trainer = Trainer(self.model, self.device, self.hyperparameters["learning_rate"], self.hyperparameters["gamma"])
         self.memory: PrioritizedReplayBuffer = PrioritizedReplayBuffer(self.hyperparameters["max_memory"], alpha=self.hyperparameters["alpha"],
                                                                        beta=self.hyperparameters["beta_start"])
-        self.epsilon = self.hyperparameters["epsilon_start"]
+        self.temperature = self.hyperparameters["initial_temperature"]
         self.n_step_buffer: NStepBuffer = NStepBuffer(self.hyperparameters["n_steps"], self.device)
-        self.manual_epsilon = None
 
         self.model.train()
 
@@ -72,41 +71,29 @@ class DQNAgent(Agent):
         self.memory = PrioritizedReplayBuffer(self.hyperparameters["max_memory"], alpha=self.hyperparameters["alpha"],
                                               beta=self.hyperparameters["beta_start"])
 
-    def update_epsilon(self) -> None:
+    def update_temperature(self):
         """
-        Update the epsilon value for the epsilon-greedy policy
-        :return: None
-        """
-        if self.eval:
-            self.epsilon = 0
-        else:
-            self.epsilon = self.hyperparameters["epsilon_end"] + \
-                           (self.hyperparameters["epsilon_start"] - self.hyperparameters["epsilon_end"]) \
-                           * np.exp(-1. * self.iterations / self.hyperparameters["epsilon_decay"])
+        Update the temperature value for the epsilon-boltzmann policy
+        :return: None"""
+        self.temperature = max(self.hyperparameters["min_temperature"], self.temperature * self.hyperparameters["temperature_decay"])
+
 
     def get_action(self, state: torch.Tensor) -> torch.Tensor:
         """
-        Get the action from the model using epsilon-greedy policy
+        Get the action from the model using epsilon-boltzmann policy
         :param state: the state of the environment
         :return: the action
         """
-        self.update_epsilon()
+        self.update_temperature()
 
-        if random.random() < self.epsilon:
-            move = torch.randint(0, Config.Arch.OUTPUT_SIZE, (), device=self.device)
-            # for i, action in enumerate(Config.Arch.OUTPUTS_DESC):
-            #     self.q_values_dict[action] = 0.0
-            # self.q_values_dict[Config.Arch.OUTPUTS_DESC[move]] = 1.0
-            # self.q_values_dict["is_random"] = True
-            return move
-        else:
-            with torch.no_grad():
-                prediction = self.model(state)
-                if self.eval:
-                    for i, action in enumerate(Config.Arch.OUTPUTS_DESC):
-                        self.shared_dict["q_values"][action] = prediction[i].item()
-                    self.shared_dict["q_values"]["is_random"] = False
-                return torch.argmax(prediction)
+        with torch.no_grad():
+            prediction = self.model(state)
+            action_idx= self.epsilon_boltzmann_action_selection(prediction, self.temperature)
+            if self.eval:
+                for i, action in enumerate(Config.Arch.OUTPUTS_DESC):
+                    self.shared_dict["q_values"][action] = prediction[i].item()
+                self.shared_dict["q_values"]["is_random"] = False
+            return torch.tensor(action_idx).to(self.device)
 
     def remember(self, state, action, reward, next_state, done) -> None:
         """
@@ -140,16 +127,18 @@ class DQNAgent(Agent):
         td_sample = self.trainer.train_step(states, actions, rewards, next_states, dones, weights)
         self.memory.update_priorities(indices, td_sample)
 
+    def epsilon_boltzmann_action_selection(q_values,  temperature) -> int:
+        probs = torch.softmax(q_values / temperature, dim=0).cpu().numpy()
+        action_index = np.random.choice(len(q_values), p=probs)
+
+        return action_index 
+
     def on_run_step(self, iface: TMInterface, _time: int) -> None:
         if _time == 20:
             if Config.Game.RANDOM_SPAWN:
                 self.spawn_point = random.randint(0, len(self.random_states) - 1)
                 iface.execute_command(f"load_state {self.random_states[self.spawn_point]}")
             self.ready = True
-            if self.epsilon == 0.0:
-                random_steering_value = np.random.randint(-10000, 10000)
-                iface.execute_command(f"steer {random_steering_value}; press up")
-                return
 
         if _time >= 0 and _time % Config.Game.INTERVAL_BETWEEN_ACTIONS == 0 and self.ready:
             start_time = time.time()

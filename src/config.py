@@ -68,10 +68,6 @@ class Config:
         MIN_MEMORY: int = 10_000
         BATCH_SIZE: int = 128
 
-        EPSILON_START: float = 0.9
-        EPSILON_END: float = 0.05
-        EPSILON_DECAY: int = 10000
-
         UPDATE_TARGET_EVERY: int = 1
         TAU: float = 0.02
 
@@ -79,6 +75,10 @@ class Config:
         BETA_START: float = 0.4
         BETA_MAX: float = 1.0
         BETA_INCREMENT_STEPS: int = 40000
+
+        TEMPERATURE: float = 0.15
+        MIN_TEMPERATURE: float = 0.03
+        TEMPERATURE_DECAY: float = 0.995
 
         N_STEPS: int = 25  # 2.5 Seconds
 
@@ -90,16 +90,16 @@ class Config:
                 "max_memory": Config.DQN.MAX_MEMORY,
                 "min_memory": Config.DQN.MIN_MEMORY,
                 "batch_size": Config.DQN.BATCH_SIZE,
-                "epsilon_start": Config.DQN.EPSILON_START,
-                "epsilon_end": Config.DQN.EPSILON_END,
-                "epsilon_decay": Config.DQN.EPSILON_DECAY,
                 "update_target_every": Config.DQN.UPDATE_TARGET_EVERY,
                 "tau": Config.DQN.TAU,
                 "alpha": Config.DQN.ALPHA,
                 "beta_start": Config.DQN.BETA_START,
                 "beta_max": Config.DQN.BETA_MAX,
                 "beta_increment_steps": Config.DQN.BETA_INCREMENT_STEPS,
-                "n_steps": Config.DQN.N_STEPS
+                "n_steps": Config.DQN.N_STEPS,
+                "initial_temperature": Config.DQN.TEMPERATURE,
+                "min_temperature": Config.DQN.MIN_TEMPERATURE,
+                "temperature_decay": Config.DQN.TEMPERATURE_DECAY,
             }
 
     class Arch:
