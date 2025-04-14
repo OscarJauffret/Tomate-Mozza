@@ -40,10 +40,10 @@ class Config:
         GAMMA: float = 0.99
         LAMBDA: float = 0.95
         EPSILON: float = 0.2
-        C1: float = 0.5
+        C1: float = 1.0
         C2: float = 0.01
-        MEMORY_SIZE: int = 512
-        BATCH_SIZE: int = 128
+        MEMORY_SIZE: int = 128
+        BATCH_SIZE: int = 32
         EPOCHS: int = 4     # Number of times to train on a given memory batch
 
         @staticmethod
@@ -111,7 +111,7 @@ class Config:
         INPUT_SIZE: int = len(INPUTS_DESC)
         OUTPUT_SIZE: int = len(OUTPUTS_DESC)
 
-        LAYER_SIZES: list[int] = [256, 256, 64]
+        LAYER_SIZES: list[int] = [256, 128]
         NUMBER_OF_HIDDEN_LAYERS: int = len(LAYER_SIZES)
 
         @staticmethod
