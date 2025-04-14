@@ -16,7 +16,9 @@ class Actor(nn.Module):
             nn.ReLU(),
             nn.Linear(Config.Arch.LAYER_SIZES[0], Config.Arch.LAYER_SIZES[1]),
             nn.ReLU(),
-            nn.Linear(Config.Arch.LAYER_SIZES[1], Config.Arch.OUTPUT_SIZE),
+            nn.Linear(Config.Arch.LAYER_SIZES[1], Config.Arch.LAYER_SIZES[2]),
+            nn.ReLU(),
+            nn.Linear(Config.Arch.LAYER_SIZES[2], Config.Arch.OUTPUT_SIZE),
             nn.Softmax(dim=-1)  # Softmax for action probabilities
         )
 
@@ -40,7 +42,9 @@ class Critic(nn.Module):
             nn.ReLU(),
             nn.Linear(Config.Arch.LAYER_SIZES[0], Config.Arch.LAYER_SIZES[1]),
             nn.ReLU(),
-            nn.Linear(Config.Arch.LAYER_SIZES[1], 1)  # Output a single value (state value)
+            nn.Linear(Config.Arch.LAYER_SIZES[1], Config.Arch.LAYER_SIZES[2]),
+            nn.ReLU(),
+            nn.Linear(Config.Arch.LAYER_SIZES[2], 1),
         )
 
     def forward(self, state):
@@ -125,13 +129,13 @@ class Trainer:
 
 
                 # CLAMPED
-                #value_pred_clipped = critic_value + (critic_value - returns[batch]).clamp(-Config.NN.EPSILON, Config.NN.EPSILON)
-                #value_losses = (critic_value - returns[batch]) ** 2
-                #value_losses_clipped = (value_pred_clipped - returns[batch]) ** 2
-                #critic_loss = 0.5 * torch.max(value_losses, value_losses_clipped)
-                #critic_loss = critic_loss.mean()
+                value_pred_clipped = critic_value + (critic_value - returns[batch]).clamp(-Config.PPO.EPSILON, Config.PPO.EPSILON)
+                value_losses = (critic_value - returns[batch]) ** 2
+                value_losses_clipped = (value_pred_clipped - returns[batch]) ** 2
+                critic_loss = 0.5 * torch.max(value_losses, value_losses_clipped)
+                critic_loss = critic_loss.mean()
                 # NO CLAMPED
-                critic_loss = self.mse(critic_value, returns[batch])
+                # critic_loss = self.mse(critic_value, returns[batch])
 
                 entropy = dist.entropy().mean()  # Shape: [1]
 
