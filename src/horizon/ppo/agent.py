@@ -84,7 +84,11 @@ class PPOAgent(Agent):
         """
         dist = self.actor(state)
         value = self.critic(state)
-        action = dist.sample()
+
+        if self.eval:
+            action = dist.probs.argmax(dim=-1)  # Get the action with the highest probability
+        else:
+            action = dist.sample()  # Sample an action from the distribution
 
         log_prob = dist.log_prob(action)
 
@@ -134,14 +138,15 @@ class PPOAgent(Agent):
             self.reward += current_reward.item()
 
             action, log_probs, value = self.get_action(self.current_state)
-            self.remember(self.current_state, action, log_probs, current_reward, done, value)
+            if not self.eval:
+                self.remember(self.current_state, action, log_probs, current_reward, done, value)
 
             self.prev_positions.append((simulation_state.position[0], simulation_state.position[2]))
 
             send_input(iface, action.item())                # Send the action to the game
 
             warn = True
-            if self.memory.is_full():
+            if self.memory.is_full() and not self.eval:
                 warn = False
                 iface.set_speed(0)
                 self.trainer.train_step(self.memory)
