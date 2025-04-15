@@ -102,8 +102,8 @@ class DQNAgent(Agent):
                 expected_q = torch.mean(prediction, dim=1)  # Shape: (1, n_actions)
                 action = torch.argmax(expected_q, dim=1)
                 if self.eval:
-                    for i, action in enumerate(Config.Arch.OUTPUTS_DESC):
-                        self.shared_dict["q_values"][action] = prediction[i].item() # FIXME: .item()
+                    for i, output in enumerate(Config.Arch.OUTPUTS_DESC):
+                        self.shared_dict["q_values"][output] = expected_q.squeeze(0)[i].item()
                     self.shared_dict["q_values"]["is_random"] = False
                 return action
 
@@ -153,7 +153,8 @@ class DQNAgent(Agent):
                 self.reward += current_reward.item()
 
             action = self.get_action(self.current_state)
-            self.n_step_buffer.add(self.current_state, action, current_reward)
+            if not self.eval:
+                self.n_step_buffer.add(self.current_state, action, current_reward)
             self.prev_positions.append((simulation_state.position[0], simulation_state.position[2]))
 
             send_input(iface, action.item())  # Send the action to the game
