@@ -82,6 +82,7 @@ class Agent(Client, ABC):
         :param iface: the TMInterface instance
         :return: None
         """
+        iface.set_timeout(-1)
         print(f"Registered to {iface.server_name}")
         iface.log(f"Loaded a {self.algorithm} agent")
 

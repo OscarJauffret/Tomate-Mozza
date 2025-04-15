@@ -15,7 +15,7 @@ def benchmark_model_performance(num_iterations=1000):
     print(f"Benchmarking on: {device}")
 
     # Initialize model
-    model = Model().to(device)
+    model = Model(device, Config.DQN.NUMBER_OF_QUANTILES, Config.DQN.N_COS).to(device)
     trainer = Trainer(model, device, Config.DQN.LEARNING_RATE, Config.DQN.GAMMA)
 
     # Create random input for inference benchmark

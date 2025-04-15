@@ -18,12 +18,13 @@ class DQNAgent(Agent):
         super(DQNAgent, self).__init__(shared_dict, "DQN")
 
         self.hyperparameters = Config.DQN.get_hyperparameters()
-        self.model: Model = Model().to(self.device)
+        self.model: Model = Model(self.device, Config.DQN.NUMBER_OF_QUANTILES, Config.DQN.N_COS).to(self.device)
         self.trainer: Trainer = Trainer(self.model, self.device, self.hyperparameters["learning_rate"], self.hyperparameters["gamma"])
         self.memory: PrioritizedReplayBuffer = PrioritizedReplayBuffer(self.hyperparameters["max_memory"], alpha=self.hyperparameters["alpha"],
-                                                                       beta=self.hyperparameters["beta_start"])
-        self.temperature = self.hyperparameters["initial_temperature"]
+                                                                       beta=self.hyperparameters["beta_start"], device=self.device)
+
         self.n_step_buffer: NStepBuffer = NStepBuffer(self.hyperparameters["n_steps"], self.device)
+        self.epsilon = self.hyperparameters["epsilon_start"]
 
         self.model.train()
 
@@ -47,7 +48,7 @@ class DQNAgent(Agent):
         else:
             # Load fresh model with random weights
             self.hyperparameters = Config.DQN.get_hyperparameters()
-            self.model = Model().to(self.device)
+            self.model = Model(self.device, Config.DQN.NUMBER_OF_QUANTILES, Config.DQN.N_COS).to(self.device)
             self.setup_training()
             print("Loaded a fresh model with random weights")
 
@@ -69,14 +70,19 @@ class DQNAgent(Agent):
                                self.hyperparameters["gamma"])
         self.n_step_buffer = NStepBuffer(self.hyperparameters["n_steps"], self.device)
         self.memory = PrioritizedReplayBuffer(self.hyperparameters["max_memory"], alpha=self.hyperparameters["alpha"],
-                                              beta=self.hyperparameters["beta_start"])
+                                              beta=self.hyperparameters["beta_start"], device=self.device)
 
-    def update_temperature(self):
+    def update_epsilon(self) -> None:
         """
-        Update the temperature value for the epsilon-boltzmann policy
-        :return: None"""
-        self.temperature = max(self.hyperparameters["min_temperature"], self.temperature * self.hyperparameters["temperature_decay"])
-
+        Update the epsilon value for the epsilon-greedy policy
+        :return: None
+        """
+        if self.eval:
+            self.epsilon = 0
+        else:
+            self.epsilon = self.hyperparameters["epsilon_end"] + \
+                           (self.hyperparameters["epsilon_start"] - self.hyperparameters["epsilon_end"]) \
+                           * np.exp(-1. * self.iterations / self.hyperparameters["epsilon_decay"])
 
     def get_action(self, state: torch.Tensor) -> torch.Tensor:
         """
@@ -84,16 +90,22 @@ class DQNAgent(Agent):
         :param state: the state of the environment
         :return: the action
         """
-        self.update_temperature()
+        self.update_epsilon()
 
-        with torch.no_grad():
-            prediction = self.model(state)
-            action_idx= self.epsilon_boltzmann_action_selection(prediction, self.temperature)
-            if self.eval:
-                for i, action in enumerate(Config.Arch.OUTPUTS_DESC):
-                    self.shared_dict["q_values"][action] = prediction[i].item()
-                self.shared_dict["q_values"]["is_random"] = False
-            return torch.tensor(action_idx).to(self.device)
+        if random.random() < self.epsilon:
+            # Epsilon-greedy policy
+            action = torch.randint(0, Config.Arch.OUTPUT_SIZE, (), device=self.device)
+            return action
+        else:
+            with torch.no_grad():
+                prediction = self.model(state.unsqueeze(0)) # Shape: (1, n_quantiles, n_actions)
+                expected_q = torch.mean(prediction, dim=1)  # Shape: (1, n_actions)
+                action = torch.argmax(expected_q, dim=1)
+                if self.eval:
+                    for i, action in enumerate(Config.Arch.OUTPUTS_DESC):
+                        self.shared_dict["q_values"][action] = prediction[i].item() # FIXME: .item()
+                    self.shared_dict["q_values"]["is_random"] = False
+                return action
 
     def remember(self, state, action, reward, next_state, done) -> None:
         """
@@ -121,11 +133,6 @@ class DQNAgent(Agent):
         td_sample = self.trainer.train_step(states, actions, rewards, next_states, dones, weights)
         self.memory.update_priorities(indices, td_sample)
 
-    def epsilon_boltzmann_action_selection(q_values,  temperature) -> int:
-        probs = torch.softmax(q_values / temperature, dim=0).cpu().numpy()
-        action_index = np.random.choice(len(q_values), p=probs)
-
-        return action_index 
 
     def on_run_step(self, iface: TMInterface, _time: int) -> None:
         if _time == 20:

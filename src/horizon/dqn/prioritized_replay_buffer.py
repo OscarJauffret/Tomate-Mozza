@@ -13,7 +13,7 @@ class PrioritizedReplayBuffer:
         self.next_states = torch.zeros((capacity, Config.Arch.INPUT_SIZE), dtype=torch.float32, device=device)
         self.dones = torch.zeros(capacity, dtype=torch.float32, device=device)
 
-        self.priorities = torch.zeros(self.capacity, dtype=torch.float32)
+        self.priorities = torch.zeros(self.capacity, dtype=torch.float32, device=device)
         self.pos = 0
         self.fill_level = 0
 

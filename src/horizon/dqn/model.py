@@ -4,18 +4,62 @@ import copy
 from src.config import Config
 
 class Model(nn.Module):
-    def __init__(self):
+    def __init__(self, device, n_quantiles, cosine_embedding_dim):
+        # IQN implementation
+        self.device = device
+        self.n_quantiles = n_quantiles
+        self.cosine_embedding_dim = cosine_embedding_dim
+
         super(Model, self).__init__()
-        self.model = nn.Sequential(
+        self.feature = nn.Sequential(
             nn.Linear(Config.Arch.INPUT_SIZE, Config.Arch.LAYER_SIZES[0]),
             nn.ReLU(),
             nn.Linear(Config.Arch.LAYER_SIZES[0], Config.Arch.LAYER_SIZES[1]),
             nn.ReLU(),
-            nn.Linear(Config.Arch.LAYER_SIZES[1], Config.Arch.OUTPUT_SIZE),
         )
 
-    def forward(self, x):
-        return self.model(x)
+        self.phi = nn.Sequential(
+            nn.Linear(self.cosine_embedding_dim, Config.Arch.LAYER_SIZES[1]),
+            nn.ReLU(),
+        )
+
+        self.final = nn.Linear(Config.Arch.LAYER_SIZES[1], Config.Arch.OUTPUT_SIZE)
+
+    def forward(self, state, taus=None):
+        """
+        Forward pass of the model
+        :param state: The input tensor. It should be of shape (batch_size, Config.Arch.INPUT_SIZE)
+        :param taus: The quantile values. It should be of shape (batch_size, n_quantiles). If None, it will be generated.
+        :return: The output tensor
+        """
+        if taus is None:
+            taus = self.generate_taus(state.shape[0], uniform=True)
+            # Taus are uniformly distributed between 0 and 1 ([[1/n_quantiles, 2/n_quantiles, ..., (n_quantiles-1)/n_quantiles], same, same, ...]) for each batch
+            # Shape: (batch_size, n_quantiles)
+
+        assert state.shape[0] == taus.shape[0], "Use same batch sizes for state and tau tensors."
+        batch_size, n_quantiles = taus.shape
+        assert n_quantiles == self.n_quantiles, f"Expected {self.n_quantiles} quantiles, but got {n_quantiles}."
+
+        state = self.feature(state) # Shape: (batch_size, hidden)
+        state = state.unsqueeze(1)  # Shape: (batch_size, 1, hidden)
+        # The idea is that each feature vector will be replicated n_quantiles times. Each copy will be multiplied by a different tau value.
+        state = state.expand(-1, n_quantiles, -1)   # Shape: (batch_size, n_quantiles, hidden)
+
+        i_pi = torch.arange(1, self.cosine_embedding_dim + 1, device=self.device).float() * torch.pi #  Shape: (cosine_embedding_dim,). This is just [pi, 2*pi, 3*pi, ..., cosine_embedding_dim*pi]
+        cos_embedding = torch.cos(i_pi * taus.unsqueeze(-1))  # Shape: (batch_size, n_quantiles, cosine_embedding_dim). This is just the cosine of the tau values multiplied by pi
+        cos_embedding = self.phi(cos_embedding)  # Shape: (batch_size, n_quantiles, hidden)
+
+        combined = state * cos_embedding
+        q = self.final(combined)  # Shape: (batch_size, n_quantiles, output_size)
+
+        return q
+
+    def generate_taus(self, batch_size=1, uniform=False):
+        if uniform:
+            return torch.linspace(0, 1, self.n_quantiles + 2, device=self.device)[1:-1].expand((batch_size, self.n_quantiles))
+        return torch.rand((batch_size, self.n_quantiles), device=self.device)
+
 
 class Trainer:
     def __init__(self, model, device, lr, gamma):
@@ -27,48 +71,67 @@ class Trainer:
 
         self.criterion = nn.SmoothL1Loss(reduction="none")  # Huber loss
 
+        self.n_quantiles = model.n_quantiles
+        self.n_target_quantiles = model.n_quantiles
+        self.kappa = Config.DQN.KAPPA
+
         self.target_model = copy.deepcopy(self.main_model).to(self.device)
         self.target_model.eval()
 
     def train_step(self, state, action, reward, next_state, done, weights=None):
-        state = state.to(self.device) if state.device != self.device else state
-        next_state = next_state.to(self.device) if next_state.device != self.device else next_state
-        action = action.to(self.device) if action.device != self.device else action
-        reward = reward.to(self.device) if reward.device != self.device else reward
-        done = done.to(self.device) if done.device != self.device else done
+        """
+        Train the model using the given state, action, reward, next state and done flag
+        :param state: The state of the environment: Shape: (batch_size, Config.Arch.INPUT_SIZE)
+        :param action: The actions taken: Shape: (batch_size)
+        :param reward: The rewards received: Shape: (batch_size)
+        :param next_state: The next state of the environment: Shape: (batch_size, Config.Arch.INPUT_SIZE)
+        :param done: The done flag: Shape: (batch_size)
+        :param weights: The weights for the loss function: Shape: (batch_size)
+        :return: The td_error
+        """
 
-        if state.dim() == 1:
-            state = state.unsqueeze(0)
-            next_state = next_state.unsqueeze(0)
-            action = action.unsqueeze(0)
-            reward = reward.unsqueeze(0)
-            done = done.unsqueeze(0)
+        batch_size = state.size(0)
+        taus = self.main_model.generate_taus(batch_size)            # Shape: (batch_size, n_quantiles)
+        taus_target = self.target_model.generate_taus(batch_size)   # Shape: (batch_size, n_quantiles)
 
-        # Predicted Q values
-        pred = self.main_model(state)        # Predicted Q values
-        target = pred.clone()
+        all_quantiles = self.main_model(state, taus)                # Shape: (batch_size, n_quantiles, n_actions)
+        # We just want the quantiles corresponding to the actions taken, so we gather them
+        pred = all_quantiles.gather(2, action.unsqueeze(1).unsqueeze(2).expand(-1, self.n_quantiles, 1))  # (batch_size, n_quantiles, 1)
 
         with torch.no_grad():
-            next_action = self.main_model(next_state).argmax(dim=1)  # This gives us the action that gives us the maximum reward in the next state as a 1D tensor (ex: if batch of size 1, tensor([0]), if batch of size 2, tensor([0, 1]))
-            next_q_target = self.target_model(next_state).gather(1, next_action.unsqueeze(1)).squeeze(1)
-        target[range(len(action)), action] = (reward + self.gamma ** Config.DQN.N_STEPS * next_q_target * (1 - done)).type(torch.float)
+            next_q = self.main_model(next_state, taus_target).mean(dim=1)     # Shape: (batch_size, n_actions)
+            best_action = torch.argmax(next_q, dim=1, keepdim=True)     # Shape: (batch_size, 1)
 
-        if torch.any(target > 1000):
-            print("Target values are too high")
+            target_quantiles = self.target_model(next_state, taus_target)     # Shape: (batch_size, n_quantiles, n_actions)
+            next_q_values = target_quantiles.gather(2, best_action.unsqueeze(1).expand(-1, self.n_target_quantiles, 1)).transpose(1, 2) # (batch_size, 1, n_target_quantiles)
 
-        td_errors = (pred[range(len(action)), action] - target[range(len(action)), action]).abs().detach()
+            target = reward.unsqueeze(1).unsqueeze(2) + (1 - done.unsqueeze(1).unsqueeze(2)) * (self.gamma ** Config.DQN.N_STEPS) * next_q_values  # Shape: (batch_size, 1, n_quantiles)
+            target = target.detach()
 
-        self.optimizer.zero_grad(set_to_none=True)
-        loss = self.criterion(pred, target)
+        # Compute pairwise TD error between pred and target quantiles
+        td_error = target - pred  # Shape: (batch_size, n_quantiles, target_n_quantiles)
+        huber_loss = self.huber_loss(td_error)  # Shape: (batch_size, n_quantiles, target_n_quantiles)
+        quantile_loss = (torch.abs(taus.unsqueeze(2) - (td_error.detach() < 0).float()) * huber_loss)  # (batch_size, n_quantiles, target_n_quantiles)
+
+        per_sample_loss = quantile_loss.mean(dim=(1, 2))
         if weights is not None:
-            weights = torch.tensor(weights).to(self.device)
-            per_sample_loss = loss[range(len(action)), action]
-            loss = (per_sample_loss * weights).mean()
+            per_sample_loss *= weights
 
+        loss = per_sample_loss.mean()  # Mean loss over the batch
+
+        # Update
+        self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
 
-        return td_errors.cpu().numpy()
+
+        td_errors_mean = td_error.abs().mean(dim=(1, 2))  # one TD error per sample for PER
+        return td_errors_mean
+
+    def huber_loss(self, td_error):
+        return torch.where(td_error.abs() <= self.kappa, 0.5 * td_error.pow(2), self.kappa * (td_error.abs() - 0.5 * self.kappa))
+
+
 
     def update_target(self):
         # Soft update of target model

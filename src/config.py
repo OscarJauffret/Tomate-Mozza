@@ -33,7 +33,7 @@ class Config:
         INTERVAL_BETWEEN_ACTIONS: int = 1000 // NUMBER_OF_ACTIONS_PER_SECOND
         GAME_SPEED: int = 8
 
-        RANDOM_SPAWN: bool = True
+        RANDOM_SPAWN: bool = False
 
     class PPO:
         LEARNING_RATE: float = 0.0003
@@ -61,12 +61,19 @@ class Config:
             }
 
     class DQN:
-        LEARNING_RATE: float = 0.001
-        GAMMA: float = 0.97
+        LEARNING_RATE: float = 0.0005
+        GAMMA: float = 0.99
+        NUMBER_OF_QUANTILES: int = 16
+        N_COS: int = 64 # Number of cosine embedding dimensions
+        KAPPA: float = 1.0
 
         MAX_MEMORY: int = 100_000
         MIN_MEMORY: int = 10_000
         BATCH_SIZE: int = 128
+
+        EPSILON_START: float = 0.9
+        EPSILON_END: float = 0.05
+        EPSILON_DECAY: int = 10000
 
         UPDATE_TARGET_EVERY: int = 1
         TAU: float = 0.02
@@ -76,9 +83,6 @@ class Config:
         BETA_MAX: float = 1.0
         BETA_INCREMENT_STEPS: int = 40000
 
-        TEMPERATURE: float = 0.15
-        MIN_TEMPERATURE: float = 0.03
-        TEMPERATURE_DECAY: float = 0.995
 
         N_STEPS: int = 25  # 2.5 Seconds
 
@@ -87,9 +91,15 @@ class Config:
             return {
                 "learning_rate": Config.DQN.LEARNING_RATE,
                 "gamma": Config.DQN.GAMMA,
+                "number_of_quantiles": Config.DQN.NUMBER_OF_QUANTILES,
+                "n_cos": Config.DQN.N_COS,
+                "kappa": Config.DQN.KAPPA,
                 "max_memory": Config.DQN.MAX_MEMORY,
                 "min_memory": Config.DQN.MIN_MEMORY,
                 "batch_size": Config.DQN.BATCH_SIZE,
+                "epsilon_start": Config.DQN.EPSILON_START,
+                "epsilon_end": Config.DQN.EPSILON_END,
+                "epsilon_decay": Config.DQN.EPSILON_DECAY,
                 "update_target_every": Config.DQN.UPDATE_TARGET_EVERY,
                 "tau": Config.DQN.TAU,
                 "alpha": Config.DQN.ALPHA,
@@ -97,9 +107,6 @@ class Config:
                 "beta_max": Config.DQN.BETA_MAX,
                 "beta_increment_steps": Config.DQN.BETA_INCREMENT_STEPS,
                 "n_steps": Config.DQN.N_STEPS,
-                "initial_temperature": Config.DQN.TEMPERATURE,
-                "min_temperature": Config.DQN.MIN_TEMPERATURE,
-                "temperature_decay": Config.DQN.TEMPERATURE_DECAY,
             }
 
     class Arch:
