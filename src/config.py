@@ -63,13 +63,13 @@ class Config:
     class DQN:
         LEARNING_RATE: float = 0.0005
         GAMMA: float = 0.99
-        NUMBER_OF_QUANTILES: int = 16
+        NUMBER_OF_QUANTILES: int = 8
         N_COS: int = 64 # Number of cosine embedding dimensions
         KAPPA: float = 1.0
 
         MAX_MEMORY: int = 100_000
         MIN_MEMORY: int = 10_000
-        BATCH_SIZE: int = 128
+        BATCH_SIZE: int = 512
 
         EPSILON_START: float = 0.9
         EPSILON_END: float = 0.05
@@ -78,7 +78,7 @@ class Config:
         UPDATE_TARGET_EVERY: int = 1
         TAU: float = 0.02
 
-        ALPHA: float = 0.7
+        ALPHA: float = 0.6
         BETA_START: float = 0.4
         BETA_MAX: float = 1.0
         BETA_INCREMENT_STEPS: int = 40000
@@ -110,7 +110,7 @@ class Config:
             }
 
     class Arch:
-        INPUTS_DESC: list[str] = ["section_rel_x", "section_rel_y", "next_turn" ,"velocity", "acceleration", "relative_yaw", "second_edge_length", "second_turn", "third_edge_length", "third_turn"]
+        INPUTS_DESC: list[str] = ["distance_to_corner_x", "section_rel_y", "next_turn" ,"velocity", "acceleration", "relative_yaw", "second_edge_length", "second_turn", "third_edge_length", "third_turn"]
         OUTPUTS_DESC: list[str] = ["release", "forward", "right", "left", "forward_right", "forward_left"]
         ACTIVATED_KEYS_PER_OUTPUT: list[tuple[int]] = [(1, 1, 1, 1), (1, 0, 0, 0), (0, 0, 0, 1), (0, 1, 0, 0), (1, 0, 0, 1), (1, 1, 0, 0)]
         REWARD_DESC: str = "distance travelled projected on the section's x axis (progression on the track)"

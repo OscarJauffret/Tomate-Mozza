@@ -141,14 +141,13 @@ class Agent(Client, ABC):
         self.prev_velocity = current_velocity
 
         agent_absolute_position = (simulation_state.position[0], simulation_state.position[2])
-        section_relative_position, next_turn, second_edge_length, second_turn, third_edge_length, third_turn = self.agent_position.get_relative_position_and_next_turns(
+        distance_to_corner, section_relative_y, next_turn, second_edge_length, second_turn, third_edge_length, third_turn = self.agent_position.get_relative_position_and_next_turns(
             agent_absolute_position)
         relative_yaw = self.agent_position.get_car_orientation(simulation_state.yaw_pitch_roll[0],
                                                                agent_absolute_position)
-
         self.current_state = torch.tensor([
-            section_relative_position[0],
-            section_relative_position[1],
+            distance_to_corner,
+            section_relative_y,
             next_turn,
             velocity_norm / 50,
             acceleration_scalar / 15,
