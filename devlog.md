@@ -181,3 +181,26 @@ Launch multiple clients at the same time, logging in, launching the map and focu
 - Merged the PPO and DQN agents, now we can select which one to use when launching the training.
 - Allowed to modify the game speed for the DQN agent.
 - Fixed a bug when the game was running at high speeds that would cause the interface and the terminal to be out of sync.
+
+###  14 April 2025, 7h
+- Following Yosh's advice, we implemented IQN. Still not working properly, but we are getting there.
+- Maybe we should use curriculum learning to train the agent.
+- Optimized priority replay buffer with tensors
+- Tried epsilon boltzmann policy but didn't keep it because it was too exploitative for now.
+- Added an evaluation mode for the PPO agent
+
+---
+### 15 April 2025, 5h
+- Finished the IQN implementation.
+- Changed the input to the network to be the distance to the next corner, normalized by 10 because the maximum section length is 10 blocks.
+- [ ] We should implement a function to determine the largest section because right now we are hardcoding it.
+- Fixed a bug in the reward function that would give the agent a negative reward when it was crossing the corner on the exterior side. This was the reason why the agent didn't want to cross the corner when it lander on the exterior side.
+- Completely removed any reward when the agent is on the exterior side of the corner. This should help the agent learn to cross the corner on the interior side. It should also avoid suboptimal strategies where the agent would go on the exterior side of the corner to get a reward.
+- Started a run for the night
+
+---
+### 16 April 2025, 3h30
+- This run was incredible! For the first time, the agent completed the map, and we didn't even need to use random spawn or curriculum learning.
+- It managed to improve its time from 8:00 at first to 5:00 right now (450h of training).
+- Changed the mechanism to save a model, now we save in the same directory, instead of creating a new one each time. This will be easier to manage.
+- Added tracking of personal best time.
