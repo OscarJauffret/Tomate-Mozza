@@ -6,7 +6,6 @@ import shutil
 
 from dotenv import load_dotenv
 from time import sleep
-from tminterface.interface import TMInterface
 
 from .tm_launcher import TMLauncher
 from ..config import Config
@@ -23,8 +22,8 @@ def get_default_map() -> str:
 def get_states_path() -> str:
     return os.getenv("STATES_PATH")
 
-def get_scripts_path() -> str:
-    return os.getenv("SCRIPTS_PATH")
+def get_replays_path() -> str:
+    return os.getenv("REPLAYS_PATH")
 
 def get_random_states() -> list[str]:
     """
@@ -51,18 +50,30 @@ def copy_model_to_latest(directory: str) -> None:
     :return: None
     """
     for file in os.listdir(directory):
+        if file.endswith(".gbx"):
+            continue
         shutil.copy(os.path.join(directory, file), Config.Paths.LATEST_MODEL_PATH)
 
-def save_pbs(directory: str) -> None:
+def save_pb(directory: str, time: str) -> bool:
     """
-    Move the pbs (personal bests) to the directory provided
-    :param directory: The directory to save the pbs to
-    :return: None
+    Save the pb to the directory and rename it to the time
+    :param directory: The directory to save the pb
+    :param time: The duration of the pb
+    :return: True if the pb was saved, False otherwise
     """
-    scripts_path = get_scripts_path()
-    for file in os.listdir(scripts_path):
-        shutil.move(os.path.join(scripts_path, file), os.path.join(directory, file))
+    map_path = get_default_map()
+    map_name =  os.path.basename(map_path).split(".")[0]
+    replay_name_suffix = f"{map_name}.Replay.gbx"
+    replays_path = get_replays_path()
+    for file in os.listdir(replays_path):
+        if file.endswith(replay_name_suffix):
+            source_path = os.path.join(replays_path, file)
+            target_path = os.path.join(directory, f"{time}.Replay.gbx")
+            shutil.copy2(source_path, target_path)
+            os.remove(source_path)
+            return True
 
+    return False
 
 def get_device_info(device: str):
     """

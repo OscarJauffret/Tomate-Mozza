@@ -9,9 +9,10 @@ from tminterface.interface import TMInterface
 from .model import Model, Trainer
 from .n_step_buffer import NStepBuffer
 from .prioritized_replay_buffer import PrioritizedReplayBuffer
-from ..game_interaction import send_input
+from ..game_interaction import send_input, launch_map
 from ..agent import Agent
 from ...config import Config
+from ...utils.utils import save_pb
 
 class DQNAgent(Agent):
     def __init__(self, shared_dict) -> None:
@@ -137,11 +138,16 @@ class DQNAgent(Agent):
 
 
     def on_run_step(self, iface: TMInterface, _time: int) -> None:
-        if _time == 20:
+        if _time == 0:
             if Config.Game.RANDOM_SPAWN:
                 self.spawn_point = random.randint(0, len(self.random_states) - 1)
                 iface.execute_command(f"load_state {self.random_states[self.spawn_point]}")
             self.ready = True
+            if self.save_pb:
+                self.save_pb = False
+                save_pb(self.shared_dict["model_path"].value, self.previous_finish_time)
+                launch_map(iface)
+
 
         if _time >= 0 and _time % Config.Game.INTERVAL_BETWEEN_ACTIONS == 0 and self.ready:
             start_time = time.time()
@@ -174,8 +180,6 @@ class DQNAgent(Agent):
             if done:
                 self.ready = False
 
-                iface.set_speed(self.game_speed)
-
                 if not self.eval:
                     while not self.n_step_buffer.is_empty():
                         state, action, reward = self.n_step_buffer.get_transition()
@@ -188,6 +192,7 @@ class DQNAgent(Agent):
 
                 self.n_step_buffer.clear()
                 self.reset(iface, _time)
+                iface.set_speed(self.game_speed)
 
 
 

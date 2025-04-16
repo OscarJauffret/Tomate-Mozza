@@ -9,8 +9,9 @@ from torch import Tensor
 from .model import Actor, Critic, Trainer
 from .rollout_buffer import RolloutBuffer
 from ..agent import Agent
+from ..game_interaction import send_input, launch_map
 from ...config import Config
-from ..game_interaction import send_input
+from ...utils.utils import save_pb
 
 class PPOAgent(Agent):
     def __init__(self, shared_dict) -> None:
@@ -117,11 +118,15 @@ class PPOAgent(Agent):
         self.memory.add(state, action, log_prob, reward, done, value)
 
     def on_run_step(self, iface: TMInterface, _time: int) -> None:
-        if _time == 20:
+        if _time == 0:
             if Config.Game.RANDOM_SPAWN:
                 self.spawn_point = random.randint(0, len(self.random_states) - 1)
                 iface.execute_command(f"load_state {self.random_states[self.spawn_point]}")
             self.ready = True
+            if self.save_pb:
+                self.save_pb = False
+                save_pb(self.shared_dict["model_path"].value, self.previous_finish_time)
+                launch_map(iface)
 
         if _time >= 0 and _time % Config.Game.INTERVAL_BETWEEN_ACTIONS == 0 and self.ready:
             start_time = time.time()

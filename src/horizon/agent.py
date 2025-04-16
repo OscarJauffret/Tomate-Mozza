@@ -9,11 +9,13 @@ from tminterface.interface import TMInterface
 from tminterface.structs import SimStateData
 from collections import deque
 from abc import ABC, abstractmethod
+from time import sleep
 
+from .game_interaction import launch_map
 from ..map_interaction.agent_position import AgentPosition
 from ..config import Config
 from ..utils.tm_logger import TMLogger
-from ..utils.utils import get_device_info, get_random_states, copy_model_to_latest, save_pbs
+from ..utils.utils import get_device_info, get_random_states, copy_model_to_latest
 
 class Agent(Client, ABC):
     def __init__(self, shared_dict, algorithm: str) -> None:
@@ -42,6 +44,8 @@ class Agent(Client, ABC):
         self.spawn_point = 0
 
         self.personal_best = float("inf")
+        self.save_pb = False
+        self.previous_finish_time: str = ""
 
         self.thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=3)
         self.shared_dict = shared_dict
@@ -127,7 +131,6 @@ class Agent(Client, ABC):
 
         self.save_model(directory)
         copy_model_to_latest(directory)
-        save_pbs(directory)
         print(f"Model saved to {directory} and in the latest model directory")
 
     def update_state(self, simulation_state: SimStateData) -> None:
@@ -223,18 +226,25 @@ class Agent(Client, ABC):
         self.current_state = torch.zeros(Config.Arch.INPUT_SIZE, dtype=torch.float, device=self.device)
         self.refresh_shared_dict()
         if self.has_finished:
+            minutes = time // (1000 * 60)
+            seconds = (time % (1000 * 60)) / 1000
+            formatted_time = f"{int(minutes):02}.{seconds:05.2f}"
+
             if time < self.personal_best:
                 self.personal_best = time
                 self.shared_dict["personal_best"] = self.personal_best
-                iface.execute_command(f"recover_inputs pb_{time}.txt")
-                print(f"New personal best: {self.personal_best / (1000 * 60):.2f} minutes")
+                print(f"New personal best: {formatted_time}")
+
             self.has_finished = False
             self.spawn_point = 0
-            iface.execute_command(f"press enter")
+
+            self.save_pb = True
+            self.previous_finish_time = formatted_time
+            launch_map(iface)
         else:
             self.spawn_point = 0
             iface.horn()
-            iface.execute_command(f"load_state {self.random_states[self.spawn_point]}")
+            iface.execute_command(f"press enter")
 
     def refresh_shared_dict(self) -> None:
         """
