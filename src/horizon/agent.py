@@ -41,6 +41,8 @@ class Agent(Client, ABC):
         self.ready = False
         self.spawn_point = 0
 
+        self.personal_best = float("inf")
+
         self.thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=3)
         self.shared_dict = shared_dict
         self.eval: bool = shared_dict["eval"]
@@ -221,10 +223,18 @@ class Agent(Client, ABC):
         self.current_state = torch.zeros(Config.Arch.INPUT_SIZE, dtype=torch.float, device=self.device)
         self.refresh_shared_dict()
         if self.has_finished:
+            if time < self.personal_best:
+                self.personal_best = time
+                self.shared_dict["personal_best"] = self.personal_best
+                iface.execute_command(f"recover_inputs pb_{time}.txt")
+                print(f"New personal best: {self.personal_best / (1000 * 60):.2f} minutes")
             self.has_finished = False
-        self.spawn_point = 0
-        iface.horn()
-        iface.execute_command(f"load_state {self.random_states[self.spawn_point]}")
+            self.spawn_point = 0
+            iface.execute_command(f"press enter")
+        else:
+            self.spawn_point = 0
+            iface.horn()
+            iface.execute_command(f"load_state {self.random_states[self.spawn_point]}")
 
     def refresh_shared_dict(self) -> None:
         """
