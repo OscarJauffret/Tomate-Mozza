@@ -6,13 +6,14 @@ import numpy as np
 from ..config import Config
 
 class TMLogger:
-    def __init__(self, device: str , algorithm: str):
+    def __init__(self, algorithm: str, device: str, directory: str = ""):
         """
         Constructor for TMLogger class
+        :param directory: The directory where the log file will be saved
         :param device: The device used for training
         :param algorithm: The algorithm used for training
         """
-        self.log_id: str = datetime.now().strftime(Config.DATETIME_FORMAT)
+        self.directory: str = directory
         self.map_info: dict = Config.Paths.get_map()
         self.algorithm: str = algorithm
         self.architecture: dict = Config.Arch().get_architecture_description()
@@ -24,12 +25,12 @@ class TMLogger:
         elif self.algorithm == "PPO":
             self.hyperparameters: dict = Config.PPO().get_hyperparameters()
 
-    def update_log_id(self):
+    def set_directory(self, directory: str):
         """
-        Update the log id to the current time
-        :return: None
+        Set the directory where the log file will be saved
+        :param directory: The directory where the log file will be saved
         """
-        self.log_id = datetime.now().strftime(Config.DATETIME_FORMAT)
+        self.directory = directory
 
     def add_run(self, iteration, run_time, reward, spawn_point, has_finished):
         """
@@ -150,14 +151,12 @@ class TMLogger:
         :return: The directory where the log file is saved
         """
         if not self.run_stats:
-            return None
+            return False
 
-        directory = os.path.join(Config.Paths().MODELS_PATH, self.log_id)
+        if not os.path.exists(self.directory):
+            os.makedirs(self.directory)
 
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-
-        file_path = os.path.join(directory, Config.Paths.STAT_FILE_NAME)
+        file_path = os.path.join(self.directory, Config.Paths.STAT_FILE_NAME)
 
         with open(file_path, "w") as f:
             log ={
@@ -171,15 +170,24 @@ class TMLogger:
             }
             json.dump(log, f, indent=4)
 
-        return directory
+        return True
 
-    def load(self, log_path: str) -> None:
+
+    def load(self, directory: str) -> None:
         """
-        Load the log from a log file
-        :param log_path: The path to the log file
+        Load the log from a directory
+        :param directory: The path to the log file
         :return: None
         """
-        with open(log_path, "r") as f:
+        self.directory = directory  # Set the directory to the one passed in so that the next call to dump() will save to the same directory
+        if not os.path.exists(directory):
+            raise FileNotFoundError(f"File not found: {directory}")
+        if not os.path.exists(os.path.join(directory, Config.Paths.STAT_FILE_NAME)):
+            raise FileNotFoundError(f"Log file not found in {directory}")
+
+        stats_file = os.path.join(directory, Config.Paths.STAT_FILE_NAME)
+
+        with open(stats_file, "r") as f:
             log = json.load(f)
             self.map_info = log["map_info"]
             self.hyperparameters = log["hyperparameters"]
@@ -187,6 +195,7 @@ class TMLogger:
             self.architecture = log["architecture"]
             self.run_stats = [_RunStats(run["iteration"], run["run_time"], run["reward"],
                                         run["spawn_point"], run["has_finished"]) for run in log["runs"]]
+
 
 
 class _RunStats:

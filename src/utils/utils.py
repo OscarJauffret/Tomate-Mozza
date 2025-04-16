@@ -23,6 +23,9 @@ def get_default_map() -> str:
 def get_states_path() -> str:
     return os.getenv("STATES_PATH")
 
+def get_scripts_path() -> str:
+    return os.getenv("SCRIPTS_PATH")
+
 def get_random_states() -> list[str]:
     """
     Get the random states from the TMInterface directory
@@ -49,6 +52,16 @@ def copy_model_to_latest(directory: str) -> None:
     """
     for file in os.listdir(directory):
         shutil.copy(os.path.join(directory, file), Config.Paths.LATEST_MODEL_PATH)
+
+def save_pbs(directory: str) -> None:
+    """
+    Move the pbs (personal bests) to the directory provided
+    :param directory: The directory to save the pbs to
+    :return: None
+    """
+    scripts_path = get_scripts_path()
+    for file in os.listdir(scripts_path):
+        shutil.move(os.path.join(scripts_path, file), os.path.join(directory, file))
 
 
 def get_device_info(device: str):

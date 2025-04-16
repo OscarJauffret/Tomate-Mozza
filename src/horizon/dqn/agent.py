@@ -34,18 +34,20 @@ class DQNAgent(Agent):
         Load the model from the path chosen by the user
         :return: None
         """
-        if self.shared_dict["model_path"].qsize() > 0:
-            path = self.shared_dict["model_path"].get()
+        if self.shared_dict["model_path"].value:
+            path = self.shared_dict["model_path"].value
+            self.logger.set_directory(path)
             model_pth = os.path.join(path, Config.Paths.DQN_MODEL_FILE_NAME)
             if os.path.exists(model_pth):
                 self.hyperparameters = self.load_hyperparameters(path)
                 self.model.load_state_dict(torch.load(model_pth, map_location=self.device))
                 self.setup_training()
-                self.logger.load(os.path.join(path, Config.Paths.STAT_FILE_NAME))
+                self.logger.load(path)
                 print(f"Model loaded from {model_pth}")
             else:
                 print(f"Model not found at {model_pth}")
         else:
+            self.logger.set_directory(None)
             # Load fresh model with random weights
             self.hyperparameters = Config.DQN.get_hyperparameters()
             self.model = Model(self.device, Config.DQN.NUMBER_OF_QUANTILES, Config.DQN.N_COS).to(self.device)

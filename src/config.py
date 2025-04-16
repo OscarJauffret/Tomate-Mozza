@@ -9,7 +9,7 @@ class Config:
         MAP_BLOCKS_PATH: str = os.path.join(MAP_PREFIX, MAP, "ordered_blocks.json")
         MAP_LAYOUT_PATH: str = os.path.join(MAP_PREFIX, MAP, "layout.txt")
 
-        MODELS_PATH: str = "models/"
+        MODELS_PATH: str = "models"
         LATEST_MODEL_PATH: str = os.path.join(MODELS_PATH, "latest")
         STAT_FILE_NAME: str = "stats.json"
         DQN_MODEL_FILE_NAME: str = "model.pth"

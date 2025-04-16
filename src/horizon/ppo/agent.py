@@ -38,8 +38,9 @@ class PPOAgent(Agent):
         Load the model from the path chosen by the user
         :return: None
         """
-        if self.shared_dict["model_path"].qsize() > 0:
-            path = self.shared_dict["model_path"].get()
+        if self.shared_dict["model_path"].value:
+            path = self.shared_dict["model_path"].value
+            self.logger.set_directory(path)
             actor_pth = os.path.join(path, Config.Paths.ACTOR_FILE_NAME)
             critic_pth = os.path.join(path, Config.Paths.CRITIC_FILE_NAME)
             if os.path.exists(actor_pth) and os.path.exists(critic_pth):
@@ -50,11 +51,12 @@ class PPOAgent(Agent):
                                                 self.hyperparameters["gamma"], self.hyperparameters["lambda"],
                                                 self.hyperparameters["epochs"], self.hyperparameters["epsilon"],
                                                 self.hyperparameters["c1"], self.hyperparameters["c2"])
-                self.logger.load(os.path.join(path, Config.Paths.STAT_FILE_NAME))
+                self.logger.load(path)
                 print(f"Model loaded from {path}")
             else:
                 print(f"Model not found at {path}")
         else:
+            self.logger.set_directory(None)
             # Load fresh model with random weights
             self.hyperparameters = Config.PPO.get_hyperparameters()
             self.actor: Actor = Actor().to(self.device)

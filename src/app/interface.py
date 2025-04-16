@@ -1,6 +1,8 @@
 import tkinter as tk
+import re
 from tkinter import ttk
 from tkinter import messagebox
+import tkinter.filedialog
 import os
 
 from src.app.plot import Plot
@@ -88,7 +90,7 @@ class Interface:
         self.load_model_button = ttk.Button(self.button_frame, text="Load a model", command=self.load_model)
         self.load_model_button.grid(row=0, column=2, padx=5, sticky="nsew")
 
-        self.save_model_button = ttk.Button(self.button_frame, text="Save the model", command=self.save_model_event.set)
+        self.save_model_button = ttk.Button(self.button_frame, text="Save the model", command=self.save_model)
         self.save_model_button.grid(row=0, column=3, padx=5, sticky="nsew")
 
         self.quit_button = ttk.Button(self.button_frame, text="Quit", command=self.close_window)
@@ -100,6 +102,51 @@ class Interface:
 
         self.root.grid_columnconfigure(0, weight=1)
         self.root.grid_rowconfigure(0, weight=1)
+
+    def save_model(self):
+        """Ask for a new model name using a popup instead of askdirectory"""
+        if self.shared_dict["model_path"].value:
+            self.save_model_event.set()
+            return
+
+        def validate():
+            name = entry.get().strip()
+            if not name:
+                messagebox.showerror("Invalid name", "Please enter a model name.")
+                return
+
+            if not re.match(r'^[\w\-]+$', name):
+                messagebox.showerror("Invalid name", "Use only letters, numbers, underscores and dashes.")
+                return
+
+            path = os.path.join(Config.Paths.MODELS_PATH, name)
+            if os.path.exists(path):
+                messagebox.showerror("Already exists", f"The model '{name}' already exists.")
+                return
+
+            os.makedirs(path)
+            self.shared_dict["model_path"].value = path
+            top.destroy()
+            self.save_model_event.set()
+
+        top = tk.Toplevel(self.root)
+        top.title("Create new model")
+        top.geometry("300x150")
+        top.transient(self.root)
+        top.grab_set()
+
+        label = ttk.Label(top, text="Enter a model name:")
+        label.pack(pady=10)
+
+        entry = ttk.Entry(top)
+        entry.pack(pady=5)
+        entry.focus()
+
+        confirm_button = ttk.Button(top, text="Save", command=validate)
+        confirm_button.pack(pady=10)
+
+        top.protocol("WM_DELETE_WINDOW", top.destroy)
+
 
     def create_reward_label(self):
         """Create the reward label"""
@@ -184,7 +231,7 @@ class Interface:
         if selected_model == "New model":
             self.load_model_event.set()
         else:
-            self.shared_dict["model_path"].put(os.path.join(Config.Paths.MODELS_PATH, selected_model))
+            self.shared_dict["model_path"].value = os.path.join(Config.Paths.MODELS_PATH, selected_model)
             self.load_model_event.set()
         top.destroy()
 

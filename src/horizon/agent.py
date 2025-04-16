@@ -10,11 +10,10 @@ from tminterface.structs import SimStateData
 from collections import deque
 from abc import ABC, abstractmethod
 
-from .game_interaction import launch_map
 from ..map_interaction.agent_position import AgentPosition
 from ..config import Config
 from ..utils.tm_logger import TMLogger
-from ..utils.utils import get_device_info, get_random_states, copy_model_to_latest
+from ..utils.utils import get_device_info, get_random_states, copy_model_to_latest, save_pbs
 
 class Agent(Client, ABC):
     def __init__(self, shared_dict, algorithm: str) -> None:
@@ -46,7 +45,7 @@ class Agent(Client, ABC):
         self.shared_dict = shared_dict
         self.eval: bool = shared_dict["eval"]
         self.game_speed: int = shared_dict["game_speed"]
-        self.logger = TMLogger(get_device_info(self.device.type), self.algorithm)
+        self.logger: TMLogger = TMLogger(self.algorithm, get_device_info(self.device.type))
         self.random_states = get_random_states()
 
     def __str__(self) -> str:
@@ -91,14 +90,14 @@ class Agent(Client, ABC):
         Save the statistics to a file
         :return: None
         """
-        self.logger.update_log_id()
-        directory = self.logger.dump()
+        # Before dumping, if the directory is not set, ask the user for a directory
+        result = self.logger.dump()
 
-        if not directory:
+        if not result:
             print("Failed to save the model")
             return ""
 
-        return directory
+        return result
 
     @abstractmethod
     def save_model(self, directory: str) -> None:
@@ -114,13 +113,19 @@ class Agent(Client, ABC):
         Save the model and the statistics
         :return: None
         """
-        directory = self._save_stats()
+        directory = self.shared_dict["model_path"].value
         if not directory:
+            print("Model path not set")
+            return
+        self.logger.set_directory(directory)
+        result = self._save_stats()
+        if not result:
             print("Failed to save the model")
             return
 
         self.save_model(directory)
         copy_model_to_latest(directory)
+        save_pbs(directory)
         print(f"Model saved to {directory} and in the latest model directory")
 
     def update_state(self, simulation_state: SimStateData) -> None:

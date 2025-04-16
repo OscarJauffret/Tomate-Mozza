@@ -33,8 +33,9 @@ if __name__ == "__main__":
                                 "eval": False,
                                 "reward": manager.Queue(),
                                 "q_values": manager.dict({outputs[0]: 0, outputs[1]: 0, outputs[2]: 0, outputs[3]: 0, outputs[4]: 0, outputs[5]: 0, "is_random": False}),
-                                "model_path": manager.Queue(),
+                                "model_path": manager.Value("u", ""),
                                 "game_speed": Config.Game.GAME_SPEED,
+                                "personal_best": float("inf"),
                                 })
     app = Interface(choose_map_event, print_state_event, load_model_event, save_model_event, quit_event, shared_dict)
 
