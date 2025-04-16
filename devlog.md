@@ -182,6 +182,8 @@ Launch multiple clients at the same time, logging in, launching the map and focu
 - Allowed to modify the game speed for the DQN agent.
 - Fixed a bug when the game was running at high speeds that would cause the interface and the terminal to be out of sync.
 
+---
+
 ###  14 April 2025, 7h
 - Following Yosh's advice, we implemented IQN. Still not working properly, but we are getting there.
 - Maybe we should use curriculum learning to train the agent.
@@ -190,6 +192,7 @@ Launch multiple clients at the same time, logging in, launching the map and focu
 - Added an evaluation mode for the PPO agent
 
 ---
+
 ### 15 April 2025, 5h
 - Finished the IQN implementation.
 - Changed the input to the network to be the distance to the next corner, normalized by 10 because the maximum section length is 10 blocks.
@@ -199,6 +202,7 @@ Launch multiple clients at the same time, logging in, launching the map and focu
 - Started a run for the night
 
 ---
+
 ### 16 April 2025, 3h30
 - This run was incredible! For the first time, the agent completed the map, and we didn't even need to use random spawn or curriculum learning.
 - It managed to improve its time from 8:00 at first to 5:00 right now (450h of training).
