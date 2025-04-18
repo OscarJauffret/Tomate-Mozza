@@ -117,6 +117,13 @@ class PPOAgent(Agent):
         """
         self.memory.add(state, action, log_prob, reward, done, value)
 
+    def get_lr(self):
+        """
+        Get the learning rate of the model
+        :return: the learning rate
+        """
+        return self.trainer.get_lr()
+
     def on_run_step(self, iface: TMInterface, _time: int) -> None:
         if _time == 0:
             if Config.Game.RANDOM_SPAWN:
@@ -165,5 +172,6 @@ class PPOAgent(Agent):
 
             if done:
                 self.ready = False
+                self.trainer.update_lr()
                 self.reset(iface, _time)
 

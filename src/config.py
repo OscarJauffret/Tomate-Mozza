@@ -37,6 +37,7 @@ class Config:
 
     class PPO:
         LEARNING_RATE: float = 0.0003
+        NUMBER_OF_LR_UPDATES: int = 45000
         GAMMA: float = 0.99
         LAMBDA: float = 0.95
         EPSILON: float = 0.2
@@ -62,6 +63,7 @@ class Config:
 
     class DQN:
         LEARNING_RATE: float = 0.0005
+        LEARNING_RATE_DECAY: float = 0.9999
         GAMMA: float = 0.99
         NUMBER_OF_QUANTILES: int = 8
         N_COS: int = 64 # Number of cosine embedding dimensions

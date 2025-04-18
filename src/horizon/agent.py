@@ -91,12 +91,13 @@ class Agent(Client, ABC):
         print(f"Registered to {iface.server_name}")
         iface.log(f"Loaded a {self.algorithm} agent")
 
-    def _save_stats(self) -> str:
+    def _save_stats(self, lr) -> str:
         """
         Save the statistics to a file
+        :param lr: the learning rate of the model
         :return: None
         """
-        # Before dumping, if the directory is not set, ask the user for a directory
+        self.logger.update_lr(lr)
         result = self.logger.dump()
 
         if not result:
@@ -114,6 +115,14 @@ class Agent(Client, ABC):
         """
         pass
 
+    @abstractmethod
+    def get_lr(self):
+        """
+        Get the learning rate of the model
+        :return: the learning rate
+        """
+        pass
+
     def save(self) -> None:
         """
         Save the model and the statistics
@@ -124,7 +133,7 @@ class Agent(Client, ABC):
             print("Model path not set")
             return
         self.logger.set_directory(directory)
-        result = self._save_stats()
+        result = self._save_stats(self.get_lr())
         if not result:
             print("Failed to save the model")
             return

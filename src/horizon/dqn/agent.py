@@ -64,6 +64,13 @@ class DQNAgent(Agent):
         model_path = os.path.join(directory, Config.Paths.DQN_MODEL_FILE_NAME)
         torch.save(self.model.state_dict(), model_path)
 
+    def get_lr(self):
+        """
+        Get the learning rate of the model
+        :return: the learning rate
+        """
+        return self.trainer.get_lr()
+
     def setup_training(self) -> None:
         """
         Setup the training parameters: Trainer, n_step_buffer, and memory
@@ -191,6 +198,7 @@ class DQNAgent(Agent):
                         self.trainer.update_target()
 
                 self.n_step_buffer.clear()
+                self.trainer.update_lr()
                 self.reset(iface, _time)
                 iface.set_speed(self.game_speed)
 

@@ -208,3 +208,12 @@ Launch multiple clients at the same time, logging in, launching the map and focu
 - It managed to improve its time from 8:00 at first to 5:00 right now (450h of training).
 - Changed the mechanism to save a model, now we save in the same directory, instead of creating a new one each time. This will be easier to manage.
 - Added tracking of personal best time.
+
+---
+### 18 April 2025
+- We ran the DQN agent for a long time, but it struggles to get past 4:50. My (Oscar) personal best is 3:30, so there is still a lot of room for improvement.
+- We will try to experiment with a LR scheduler to see if it helps the agent learn better.
+- We implemented a Linear scheduler for PPO, and an exponential one for DQN.
+- Maybe we should also experiment with the n_steps parameter for DQN.
+- Maybe we should also multiply the current reward by the velocity of the car. This way, the agent will be rewarded for going faster.
+- Right now though, we will just try with the LR scheduler and see if it helps the agent learn better.

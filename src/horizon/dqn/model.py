@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 import copy
 from src.config import Config
+from torch.optim.lr_scheduler import ExponentialLR
+
 
 class Model(nn.Module):
     def __init__(self, device, n_quantiles, cosine_embedding_dim):
@@ -75,6 +77,8 @@ class Trainer:
         self.n_target_quantiles = model.n_quantiles
         self.kappa = Config.DQN.KAPPA
 
+        self.scheduler =  ExponentialLR(self.optimizer, gamma=Config.DQN.LEARNING_RATE_DECAY)
+
         self.target_model = copy.deepcopy(self.main_model).to(self.device)
         self.target_model.eval()
 
@@ -131,9 +135,21 @@ class Trainer:
     def huber_loss(self, td_error):
         return torch.where(td_error.abs() <= self.kappa, 0.5 * td_error.pow(2), self.kappa * (td_error.abs() - 0.5 * self.kappa))
 
-
-
     def update_target(self):
         # Soft update of target model
         for target_param, main_param in zip(self.target_model.parameters(), self.main_model.parameters()):
             target_param.data.copy_(Config.DQN.TAU * main_param.data + (1 - Config.DQN.TAU) * target_param.data)
+
+    def update_lr(self) -> None:
+        """
+        Update the learning rate of the model
+        :return: None
+        """
+        self.scheduler.step()
+
+    def get_lr(self) -> float:
+        """
+        Get the learning rate of the model
+        :return: The learning rate
+        """
+        return self.optimizer.param_groups[0]['lr']
