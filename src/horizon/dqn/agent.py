@@ -135,13 +135,14 @@ class DQNAgent(Agent):
         :return: None
         """
         batch = self.memory.sample(self.hyperparameters["batch_size"])
-        if batch is None:
+        if batch is None:   # Memory not full enough
             return
 
         (states, actions, rewards, next_states, dones), indices, weights = batch
 
         td_sample = self.trainer.train_step(states, actions, rewards, next_states, dones, weights)
         self.memory.update_priorities(indices, td_sample)
+        self.trainer.update_lr()
 
 
     def on_run_step(self, iface: TMInterface, _time: int) -> None:
@@ -198,7 +199,6 @@ class DQNAgent(Agent):
                         self.trainer.update_target()
 
                 self.n_step_buffer.clear()
-                self.trainer.update_lr()
                 self.reset(iface, _time)
                 iface.set_speed(self.game_speed)
 

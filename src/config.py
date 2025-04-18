@@ -51,6 +51,7 @@ class Config:
         def get_hyperparameters():
             return {
                 "learning_rate": Config.PPO.LEARNING_RATE,
+                "number_of_lr_updates": Config.PPO.NUMBER_OF_LR_UPDATES,
                 "gamma": Config.PPO.GAMMA,
                 "lambda": Config.PPO.LAMBDA,
                 "epsilon": Config.PPO.EPSILON,
@@ -92,6 +93,7 @@ class Config:
         def get_hyperparameters():
             return {
                 "learning_rate": Config.DQN.LEARNING_RATE,
+                "learning_rate_decay": Config.DQN.LEARNING_RATE_DECAY,
                 "gamma": Config.DQN.GAMMA,
                 "number_of_quantiles": Config.DQN.NUMBER_OF_QUANTILES,
                 "n_cos": Config.DQN.N_COS,
