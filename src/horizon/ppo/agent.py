@@ -133,13 +133,10 @@ class PPOAgent(Agent):
             simulation_state = iface.get_simulation_state()
             self.agent_position.update((simulation_state.position[0], simulation_state.position[2]))
 
-            future_state = self.thread_pool.submit(self.update_state, simulation_state)
-            future_done = self.thread_pool.submit(self.determine_done, simulation_state)
-            future_reward = self.thread_pool.submit(self.get_reward, simulation_state)
+            self.update_state(simulation_state)
+            done = self.determine_done(simulation_state)
+            current_reward = self.get_reward(simulation_state, self.hyperparameters["gamma"])
 
-            future_state.result()
-            done = future_done.result()
-            current_reward = future_reward.result()
             self.reward += current_reward.item()
 
             action, log_probs, value = self.get_action(self.current_state)
@@ -162,6 +159,8 @@ class PPOAgent(Agent):
             total_time = end_time - start_time
             if warn and total_time * 1000 > Config.Game.INTERVAL_BETWEEN_ACTIONS / self.game_speed:
                 print(f"Warning: the action took {total_time * 1000:.2f}ms to execute, it should've taken less than {Config.Game.INTERVAL_BETWEEN_ACTIONS / self.game_speed:.2f}ms")
+
+            self.prev_velocity = self.current_velocity
 
             if done:
                 self.ready = False

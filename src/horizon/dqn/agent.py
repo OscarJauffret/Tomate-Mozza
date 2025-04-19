@@ -85,7 +85,7 @@ class DQNAgent(Agent):
         else:
             self.epsilon = self.hyperparameters["epsilon_end"] + \
                            (self.hyperparameters["epsilon_start"] - self.hyperparameters["epsilon_end"]) \
-                           * np.exp(-1. * self.iterations / self.hyperparameters["epsilon_decay"])
+                           * np.exp(-1. * (self.iterations - 10000) / self.hyperparameters["epsilon_decay"])
 
     def get_action(self, state: torch.Tensor) -> torch.Tensor:
         """
@@ -147,6 +147,7 @@ class DQNAgent(Agent):
                 self.save_pb = False
                 save_pb(self.shared_dict["model_path"].value, self.previous_finish_time)
                 launch_map(iface)
+                return
 
 
         if _time >= 0 and _time % Config.Game.INTERVAL_BETWEEN_ACTIONS == 0 and self.ready:
@@ -155,9 +156,9 @@ class DQNAgent(Agent):
             self.agent_position.update((simulation_state.position[0], simulation_state.position[2]))
             self.update_state(simulation_state)  # Get the current state
             done = self.determine_done(simulation_state)
-            current_reward = 0
+            current_reward = torch.tensor(0, device=self.device)
             if len(self.n_step_buffer) > 0:
-                current_reward = self.get_reward(simulation_state)
+                current_reward = self.get_reward(simulation_state, self.hyperparameters["gamma"])
                 self.reward += current_reward.item()
 
             action = self.get_action(self.current_state)
@@ -176,6 +177,8 @@ class DQNAgent(Agent):
             total_time = end_time - start_time
             if total_time * 1000 > Config.Game.INTERVAL_BETWEEN_ACTIONS / self.game_speed:
                 print(f"Warning: the action took {total_time * 1000:.2f}ms to execute, it should've taken less than {Config.Game.INTERVAL_BETWEEN_ACTIONS / self.game_speed:.2f}ms")
+
+            self.prev_velocity = self.current_velocity
 
             if done:
                 self.ready = False

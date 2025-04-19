@@ -9,7 +9,7 @@ from tminterface.interface import TMInterface
 from tminterface.structs import SimStateData
 from collections import deque
 from abc import ABC, abstractmethod
-from time import sleep
+from statistics import mean
 
 from .game_interaction import launch_map
 from ..map_interaction.agent_position import AgentPosition
@@ -33,10 +33,13 @@ class Agent(Client, ABC):
         print(f"Using device: {self.device}")
 
         self.reward = 0.0
+        self.last_rewards = deque(maxlen=5 * Config.Game.NUMBER_OF_ACTIONS_PER_SECOND)
+        self.last_shaped_rewards = deque(maxlen=5 * Config.Game.NUMBER_OF_ACTIONS_PER_SECOND)
 
         self.prev_positions = deque(maxlen=5 * Config.Game.NUMBER_OF_ACTIONS_PER_SECOND)  # 5-second long memory
         self.current_state: torch.Tensor = torch.zeros(Config.Arch.INPUT_SIZE, dtype=torch.float, device=self.device)
 
+        self.current_velocity = None
         self.prev_velocity = None
         self.has_finished = False
         self.iterations = 0
@@ -91,6 +94,14 @@ class Agent(Client, ABC):
         print(f"Registered to {iface.server_name}")
         iface.log(f"Loaded a {self.algorithm} agent")
 
+    def on_deregistered(self, iface):
+        """
+        Called when the agent is deregistered from the TMInterface
+        :param iface: the TMInterface instance
+        :return: None
+        """
+        print("bye")
+
     def _save_stats(self) -> str:
         """
         Save the statistics to a file
@@ -139,16 +150,15 @@ class Agent(Client, ABC):
         :param simulation_state: the simulation state
         :return: None
         """
-        current_velocity = np.array(simulation_state.velocity)
+        self.current_velocity = np.array(simulation_state.velocity)
         acceleration_scalar = 0
         velocity_norm = 0
         if self.prev_velocity is not None:
-            delta_v = current_velocity - self.prev_velocity
-            velocity_norm = np.linalg.norm(current_velocity)
+            delta_v = self.current_velocity - self.prev_velocity
+            velocity_norm = np.linalg.norm(self.current_velocity)
             if velocity_norm > 1e-5:
-                direction = current_velocity / velocity_norm
+                direction = self.current_velocity / velocity_norm
                 acceleration_scalar = np.dot(delta_v, direction) / (Config.Game.INTERVAL_BETWEEN_ACTIONS / 1000)
-        self.prev_velocity = current_velocity
 
         agent_absolute_position = (simulation_state.position[0], simulation_state.position[2])
         distance_to_corner, section_relative_y, next_turn, second_edge_length, second_turn, third_edge_length, third_turn = self.agent_position.get_relative_position_and_next_turns(
@@ -168,10 +178,11 @@ class Agent(Client, ABC):
             third_turn
         ], dtype=torch.float, device=self.device)
 
-    def get_reward(self, simulation_state: SimStateData) -> torch.Tensor:
+    def get_reward(self, simulation_state: SimStateData, gamma: float) -> torch.Tensor:
         """
         Get the reward for the current state
         :param simulation_state: the simulation state
+        :param gamma: the discount factor (used for potential reward)
         :return: the reward
         """
         if not self.prev_positions:
@@ -184,7 +195,31 @@ class Agent(Client, ABC):
         if self.has_finished:
             current_reward += Config.Game.BLOCK_SIZE
 
-        return torch.tensor(current_reward, device=self.device)
+        # self.last_rewards.append(current_reward)
+        current_reward = torch.tensor(current_reward, device=self.device, dtype=torch.float)
+        current_reward += self.potential_reward(simulation_state, gamma)
+
+        return current_reward
+
+    def potential_reward(self, simulation_state: SimStateData, gamma: float) -> torch.Tensor:
+        """
+        Get the potential reward for the current state
+        :param simulation_state: the simulation state
+        :param gamma: the discount factor
+        :return: the potential reward
+        """
+        # Potential function: Phi = velocity
+        current_speed = np.linalg.norm(self.current_velocity)
+        if self.prev_velocity is not None:
+            previous_speed = np.linalg.norm(self.prev_velocity)
+            shaped = gamma * current_speed - previous_speed
+        else:
+            shaped = 0.0
+        # self.last_shaped_rewards.append(shaped)
+        # alpha = abs(mean(self.last_rewards) / mean(self.last_shaped_rewards))
+        # shaped *= alpha      # Scale the potential reward, otherwise it is too small compared to the distance reward
+        return torch.tensor(shaped, device=self.device, dtype=torch.float)
+
 
     def determine_done(self, simulation_state: SimStateData) -> torch.Tensor:
         """
@@ -222,6 +257,7 @@ class Agent(Client, ABC):
             print(f"Iteration: {self.iterations:<8} reward: {self.reward:<8.2f}")
         self.reward = 0.0
         self.prev_positions.clear()
+        self.current_velocity = None
         self.prev_velocity = None
         self.current_state = torch.zeros(Config.Arch.INPUT_SIZE, dtype=torch.float, device=self.device)
         self.refresh_shared_dict()

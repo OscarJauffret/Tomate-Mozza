@@ -260,6 +260,22 @@ class AgentPosition:
             return True
 
         return False
+
+    @property
+    def is_on_first_edge(self) -> bool:
+        """
+        Check if the agent is on the first edge
+        :return: True if the agent is on the first edge, False otherwise
+        """
+        return self.closest_edge == (self.nodes[0], self.nodes[1])
+
+    @property
+    def is_on_last_edge(self) -> bool:
+        """
+        Check if the agent is on the last edge
+        :return: True if the agent is on the last edge, False otherwise
+        """
+        return self.closest_edge == (self.nodes[-2], self.nodes[-1])
     
     def get_distance_reward(self, previous_absolute_pos: Tuple[float, float], 
                            current_absolute_pos: Tuple[float, float]) -> float:
@@ -294,8 +310,9 @@ class AgentPosition:
         if self.prev_closest_edge == self.closest_edge:  # Same edge
             if self._car_out_of_track(cur_relative_pos):
                 return 0
-            if cur_relative_pos[0] > edge_1_second_node_rel_pos[0] or cur_relative_pos[0] < edge_1_first_node_rel_pos[0]:
-                return 0
+            if not (self.is_on_first_edge or self.is_on_last_edge):
+                if cur_relative_pos[0] > edge_1_second_node_rel_pos[0] or cur_relative_pos[0] < edge_1_first_node_rel_pos[0]:
+                    return 0
             return (cur_x - prev_x) * prev_edge_length
         else:
             # Different edge - handle corner cases
