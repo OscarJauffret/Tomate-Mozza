@@ -24,7 +24,9 @@ class Model(nn.Module):
             nn.ReLU(),
         )
 
-        self.final = NoisyLinear(Config.Arch.LAYER_SIZES[1], Config.Arch.OUTPUT_SIZE)
+        self.advantage = NoisyLinear(Config.Arch.LAYER_SIZES[1], Config.Arch.OUTPUT_SIZE)
+        self.value = NoisyLinear(Config.Arch.LAYER_SIZES[1], 1)
+
 
     def forward(self, state, taus=None):
         """
@@ -52,7 +54,9 @@ class Model(nn.Module):
         cos_embedding = self.phi(cos_embedding)  # Shape: (batch_size, n_quantiles, hidden)
 
         combined = state * cos_embedding
-        q = self.final(combined)  # Shape: (batch_size, n_quantiles, output_size)
+        adv = self.advantage(combined)  # Shape: (batch_size, n_quantiles, n_actions)
+        val = self.value(combined)  # Shape: (batch_size, n_quantiles, 1)
+        q = val + adv - adv.mean(dim=-1, keepdim=True)  # Shape: (batch_size, n_quantiles, n_actions)
 
         return q
 
