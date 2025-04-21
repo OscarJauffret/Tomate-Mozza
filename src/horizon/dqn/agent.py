@@ -25,7 +25,6 @@ class DQNAgent(Agent):
                                                                        beta=self.hyperparameters["beta_start"], device=self.device)
 
         self.n_step_buffer: NStepBuffer = NStepBuffer(self.hyperparameters["n_steps"], self.device)
-        self.epsilon = self.hyperparameters["epsilon_start"]
 
         self.model.train()
 
