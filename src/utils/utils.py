@@ -54,11 +54,12 @@ def copy_model_to_latest(directory: str) -> None:
             continue
         shutil.copy(os.path.join(directory, file), Config.Paths.LATEST_MODEL_PATH)
 
-def save_pb(directory: str, time: str) -> bool:
+def save_pb(directory: str, time: str, discard) -> bool:
     """
     Save the pb to the directory and rename it to the time
     :param directory: The directory to save the pb
     :param time: The duration of the pb
+    :param discard: If True, don't save this pb, just delete it
     :return: True if the pb was saved, False otherwise
     """
     map_path = get_default_map()
@@ -69,7 +70,8 @@ def save_pb(directory: str, time: str) -> bool:
         if file.endswith(replay_name_suffix):
             source_path = os.path.join(replays_path, file)
             target_path = os.path.join(directory, f"{time}.Replay.gbx")
-            shutil.copy2(source_path, target_path)
+            if not discard:
+                shutil.copy2(source_path, target_path)
             os.remove(source_path)
             return True
 

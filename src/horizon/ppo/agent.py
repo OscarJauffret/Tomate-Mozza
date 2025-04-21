@@ -125,8 +125,9 @@ class PPOAgent(Agent):
             self.ready = True
             if self.save_pb:
                 self.save_pb = False
-                save_pb(self.shared_dict["model_path"].value, self.previous_finish_time)
+                save_pb(self.shared_dict["model_path"].value, self.previous_finish_time, self.spawn_point != 0) # Save the pb only if not random spawn
                 launch_map(iface)
+                return
 
         if _time >= 0 and _time % Config.Game.INTERVAL_BETWEEN_ACTIONS == 0 and self.ready:
             start_time = time.time()

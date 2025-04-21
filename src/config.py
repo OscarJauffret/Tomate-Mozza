@@ -84,7 +84,7 @@ class Config:
         BETA_INCREMENT_STEPS: int = 40000
 
 
-        N_STEPS: int = 25  # 2.5 Seconds
+        N_STEPS: int = 3    # 5 is commonly used
 
         @staticmethod
         def get_hyperparameters():
@@ -110,7 +110,10 @@ class Config:
             }
 
     class Arch:
-        INPUTS_DESC: list[str] = ["distance_to_corner_x", "section_rel_y", "next_turn" ,"velocity", "acceleration", "relative_yaw", "second_edge_length", "second_turn", "third_edge_length", "third_turn"]
+        INPUTS_DESC: list[str] = ["distance_to_corner_x", "section_rel_y" ,"velocity", "acceleration", "relative_yaw", "turning_rate",
+                                  "next_turn", "second_edge_length", "second_turn", "third_edge_length", "third_turn",
+                                  "pitch", "roll", "wheel_0_contact", "wheel_1_contact", "wheel_2_contact", "wheel_3_contact",
+                                  "wheel_0_sliding", "wheel_1_sliding", "wheel_2_sliding", "wheel_3_sliding",]
         OUTPUTS_DESC: list[str] = ["release", "forward", "right", "left", "forward_right", "forward_left"]
         ACTIVATED_KEYS_PER_OUTPUT: list[tuple[int]] = [(1, 1, 1, 1), (1, 0, 0, 0), (0, 0, 0, 1), (0, 1, 0, 0), (1, 0, 0, 1), (1, 1, 0, 0)]
         REWARD_DESC: str = "distance travelled projected on the section's x axis (progression on the track)"
@@ -118,7 +121,7 @@ class Config:
         INPUT_SIZE: int = len(INPUTS_DESC)
         OUTPUT_SIZE: int = len(OUTPUTS_DESC)
 
-        LAYER_SIZES: list[int] = [256, 128]
+        LAYER_SIZES: list[int] = [384, 256]
         NUMBER_OF_HIDDEN_LAYERS: int = len(LAYER_SIZES)
 
         @staticmethod

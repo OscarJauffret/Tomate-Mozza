@@ -59,12 +59,13 @@ class Agent(Client, ABC):
         Print the current state of the agent
         :return: the current state
         """
-        return (
-            f"x position: {self.current_state[0].item():<8.2f} y position: {self.current_state[1].item():<8.2f} next turn: {self.current_state[2].item():<8} "
-            f"velocity: {self.current_state[3].item():<8.2f} acceleration: {self.current_state[4].item():<8.2f} relative yaw: {self.current_state[5].item():<8.2f} "
-            f"next edge length: {self.current_state[6].item():<8.2f} second turn: {self.current_state[7].item():<8} third edge length: {self.current_state[8].item():<8.2f} "
-            f"third turn: {self.current_state[9].item():<8}"
-        )
+        if self.current_state is None:
+            return "No state available"
+        state = ""
+        for name, value in zip(Config.Arch.INPUTS_DESC, self.current_state):
+            state += f"{name}: {value:.2f}\n"
+
+        return state
 
     def load_hyperparameters(self, path: str) -> dict:
         """
@@ -155,17 +156,31 @@ class Agent(Client, ABC):
             agent_absolute_position)
         relative_yaw = self.agent_position.get_car_orientation(simulation_state.yaw_pitch_roll[0],
                                                                agent_absolute_position)
+        wheels = simulation_state.simulation_wheels
+        turning_rate = simulation_state.scene_mobil.turning_rate
+        pitch, roll = simulation_state.yaw_pitch_roll[1:3]
         self.current_state = torch.tensor([
             distance_to_corner,
             section_relative_y,
-            next_turn,
             velocity_norm / 50,
             acceleration_scalar / 15,
             relative_yaw,
+            turning_rate,
+            next_turn,
             second_edge_length,
             second_turn,
             third_edge_length,
-            third_turn
+            third_turn,
+            pitch,
+            roll,
+            wheels[0].real_time_state.has_ground_contact,
+            wheels[1].real_time_state.has_ground_contact,
+            wheels[2].real_time_state.has_ground_contact,
+            wheels[3].real_time_state.has_ground_contact,
+            wheels[0].real_time_state.is_sliding,
+            wheels[1].real_time_state.is_sliding,
+            wheels[2].real_time_state.is_sliding,
+            wheels[3].real_time_state.is_sliding,
         ], dtype=torch.float, device=self.device)
 
     def get_reward(self, simulation_state: SimStateData) -> torch.Tensor:
@@ -230,7 +245,7 @@ class Agent(Client, ABC):
             seconds = (time % (1000 * 60)) / 1000
             formatted_time = f"{int(minutes):02}.{seconds:05.2f}"
 
-            if time < self.personal_best:
+            if time < self.personal_best and self.spawn_point == 0:
                 self.personal_best = time
                 self.shared_dict["personal_best"] = self.personal_best
                 print(f"New personal best: {formatted_time}")
