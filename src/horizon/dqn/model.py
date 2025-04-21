@@ -66,8 +66,9 @@ class Model(nn.Module):
         return torch.rand((batch_size, self.n_quantiles), device=self.device)
 
     def reset_noise(self):
-        if hasattr(self.final, "reset_noise"):
-            self.final.reset_noise()
+        for layer in [self.advantage, self.value]:
+            if hasattr(layer, "reset_noise"):
+                layer.reset_noise()
 
 class Trainer:
     def __init__(self, model, device, lr, gamma):
