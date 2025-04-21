@@ -71,9 +71,7 @@ class Config:
         MIN_MEMORY: int = 10_000
         BATCH_SIZE: int = 512
 
-        EPSILON_START: float = 0.9
-        EPSILON_END: float = 0.05
-        EPSILON_DECAY: int = 10000
+        NOISY_NETWORK_SIGMA_START: float = 0.5
 
         UPDATE_TARGET_EVERY: int = 1
         TAU: float = 0.02
@@ -83,8 +81,7 @@ class Config:
         BETA_MAX: float = 1.0
         BETA_INCREMENT_STEPS: int = 40000
 
-
-        N_STEPS: int = 3    # 5 is commonly used
+        N_STEPS: int = 3
 
         @staticmethod
         def get_hyperparameters():
@@ -97,9 +94,6 @@ class Config:
                 "max_memory": Config.DQN.MAX_MEMORY,
                 "min_memory": Config.DQN.MIN_MEMORY,
                 "batch_size": Config.DQN.BATCH_SIZE,
-                "epsilon_start": Config.DQN.EPSILON_START,
-                "epsilon_end": Config.DQN.EPSILON_END,
-                "epsilon_decay": Config.DQN.EPSILON_DECAY,
                 "update_target_every": Config.DQN.UPDATE_TARGET_EVERY,
                 "tau": Config.DQN.TAU,
                 "alpha": Config.DQN.ALPHA,

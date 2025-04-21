@@ -75,40 +75,23 @@ class DQNAgent(Agent):
         self.memory = PrioritizedReplayBuffer(self.hyperparameters["max_memory"], alpha=self.hyperparameters["alpha"],
                                               beta=self.hyperparameters["beta_start"], device=self.device)
 
-    def update_epsilon(self) -> None:
-        """
-        Update the epsilon value for the epsilon-greedy policy
-        :return: None
-        """
-        if self.eval:
-            self.epsilon = 0
-        else:
-            self.epsilon = self.hyperparameters["epsilon_end"] + \
-                           (self.hyperparameters["epsilon_start"] - self.hyperparameters["epsilon_end"]) \
-                           * np.exp(-1. * self.iterations / self.hyperparameters["epsilon_decay"])
-
     def get_action(self, state: torch.Tensor) -> torch.Tensor:
         """
         Get the action from the model using epsilon-boltzmann policy
         :param state: the state of the environment
         :return: the action
         """
-        self.update_epsilon()
+        with torch.no_grad():
+            prediction = self.model(state.unsqueeze(0)) # Shape: (1, n_quantiles, n_actions)
+            expected_q = torch.mean(prediction, dim=1)  # Shape: (1, n_actions)
+            action = torch.argmax(expected_q, dim=1)
+            if self.eval:
+                for i, output in enumerate(Config.Arch.OUTPUTS_DESC):
+                    self.shared_dict["q_values"][output] = expected_q.squeeze(0)[i].item()
+                self.shared_dict["q_values"]["is_random"] = False
 
-        if random.random() < self.epsilon:
-            # Epsilon-greedy policy
-            action = torch.randint(0, Config.Arch.OUTPUT_SIZE, (), device=self.device)
+            self.model.reset_noise()
             return action
-        else:
-            with torch.no_grad():
-                prediction = self.model(state.unsqueeze(0)) # Shape: (1, n_quantiles, n_actions)
-                expected_q = torch.mean(prediction, dim=1)  # Shape: (1, n_actions)
-                action = torch.argmax(expected_q, dim=1)
-                if self.eval:
-                    for i, output in enumerate(Config.Arch.OUTPUTS_DESC):
-                        self.shared_dict["q_values"][output] = expected_q.squeeze(0)[i].item()
-                    self.shared_dict["q_values"]["is_random"] = False
-                return action
 
     def remember(self, state, action, reward, next_state, done) -> None:
         """

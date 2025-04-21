@@ -1,7 +1,8 @@
 import torch
 import torch.nn as nn
 import copy
-from src.config import Config
+from .noisy_linear import NoisyLinear
+from ...config import Config
 
 class Model(nn.Module):
     def __init__(self, device, n_quantiles, cosine_embedding_dim):
@@ -23,7 +24,7 @@ class Model(nn.Module):
             nn.ReLU(),
         )
 
-        self.final = nn.Linear(Config.Arch.LAYER_SIZES[1], Config.Arch.OUTPUT_SIZE)
+        self.final = NoisyLinear(Config.Arch.LAYER_SIZES[1], Config.Arch.OUTPUT_SIZE)
 
     def forward(self, state, taus=None):
         """
@@ -60,6 +61,9 @@ class Model(nn.Module):
             return torch.linspace(0, 1, self.n_quantiles + 2, device=self.device)[1:-1].expand((batch_size, self.n_quantiles))
         return torch.rand((batch_size, self.n_quantiles), device=self.device)
 
+    def reset_noise(self):
+        if hasattr(self.final, "reset_noise"):
+            self.final.reset_noise()
 
 class Trainer:
     def __init__(self, model, device, lr, gamma):
