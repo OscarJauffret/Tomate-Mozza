@@ -91,6 +91,7 @@ class Worker(multiprocessing.Process):
                     if self.events.quit_event.is_set():
                         self.close_signal_handler(None, None)
                         self.events.quit_event.clear()
+                        return
 
                     sleep(0)
 
