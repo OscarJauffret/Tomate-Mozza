@@ -63,6 +63,7 @@ class Config:
     class DQN:
         LEARNING_RATE: float = 0.0005
         GAMMA: float = 0.99
+
         NUMBER_OF_QUANTILES: int = 8
         N_COS: int = 64 # Number of cosine embedding dimensions
         KAPPA: float = 1.0
@@ -71,7 +72,9 @@ class Config:
         MIN_MEMORY: int = 10_000
         BATCH_SIZE: int = 512
 
-        NOISY_NETWORK_SIGMA_START: float = 0.5
+        EPSILON_START: float = 0.8
+        EPSILON_END: float = 0.05
+        EPSILON_DECAY: int = 5000
 
         UPDATE_TARGET_EVERY: int = 1
         TAU: float = 0.02
@@ -82,6 +85,10 @@ class Config:
         BETA_INCREMENT_STEPS: int = 40000
 
         N_STEPS: int = 3
+
+        ENABLE_NOISY_NETWORK: bool = False
+        ENABLE_DUELING_NETWORK: bool = True
+        NOISY_NETWORK_SIGMA_START: float = 0.5
 
         @staticmethod
         def get_hyperparameters():
@@ -94,6 +101,9 @@ class Config:
                 "max_memory": Config.DQN.MAX_MEMORY,
                 "min_memory": Config.DQN.MIN_MEMORY,
                 "batch_size": Config.DQN.BATCH_SIZE,
+                "epsilon_start": Config.DQN.EPSILON_START,
+                "epsilon_end": Config.DQN.EPSILON_END,
+                "epsilon_decay": Config.DQN.EPSILON_DECAY,
                 "update_target_every": Config.DQN.UPDATE_TARGET_EVERY,
                 "tau": Config.DQN.TAU,
                 "alpha": Config.DQN.ALPHA,
@@ -101,6 +111,9 @@ class Config:
                 "beta_max": Config.DQN.BETA_MAX,
                 "beta_increment_steps": Config.DQN.BETA_INCREMENT_STEPS,
                 "n_steps": Config.DQN.N_STEPS,
+                "enable_noisy_network": Config.DQN.ENABLE_NOISY_NETWORK,
+                "enable_dueling_network": Config.DQN.ENABLE_DUELING_NETWORK,
+                "noisy_network_sigma_start": Config.DQN.NOISY_NETWORK_SIGMA_START,
             }
 
     class Arch:
@@ -115,8 +128,15 @@ class Config:
         INPUT_SIZE: int = len(INPUTS_DESC)
         OUTPUT_SIZE: int = len(OUTPUTS_DESC)
 
-        LAYER_SIZES: list[int] = [384, 256]
-        NUMBER_OF_HIDDEN_LAYERS: int = len(LAYER_SIZES)
+        LAYER_SIZES: list[int] = [256, 256]
+        VALUE_ADVANTAGE_LAYER_SIZE: int = 128
+
+        @staticmethod
+        def get_number_of_hidden_layers():
+            base_layers = len(Config.Arch.LAYER_SIZES)
+            if Config.DQN.ENABLE_DUELING_NETWORK:
+                return base_layers + 1
+            return base_layers
 
         @staticmethod
         def get_architecture_description():
@@ -126,6 +146,6 @@ class Config:
                 "input_size": Config.Arch.INPUT_SIZE,
                 "output_size": Config.Arch.OUTPUT_SIZE,
                 "layer_sizes": Config.Arch.LAYER_SIZES,
-                "number_of_hidden_layers": Config.Arch.NUMBER_OF_HIDDEN_LAYERS,
+                "number_of_hidden_layers": Config.Arch.get_number_of_hidden_layers(),
                 "reward_description": Config.Arch.REWARD_DESC
             }

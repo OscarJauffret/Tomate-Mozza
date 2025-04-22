@@ -19,12 +19,14 @@ class DQNAgent(Agent):
         super(DQNAgent, self).__init__(shared_dict, "DQN")
 
         self.hyperparameters = Config.DQN.get_hyperparameters()
-        self.model: Model = Model(self.device, Config.DQN.NUMBER_OF_QUANTILES, Config.DQN.N_COS).to(self.device)
+        self.model: Model = Model(self.device, Config.DQN.NUMBER_OF_QUANTILES, Config.DQN.N_COS, Config.DQN.ENABLE_NOISY_NETWORK,
+                                  Config.DQN.ENABLE_DUELING_NETWORK).to(self.device)
         self.trainer: Trainer = Trainer(self.model, self.device, self.hyperparameters["learning_rate"], self.hyperparameters["gamma"])
         self.memory: PrioritizedReplayBuffer = PrioritizedReplayBuffer(self.hyperparameters["max_memory"], alpha=self.hyperparameters["alpha"],
                                                                        beta=self.hyperparameters["beta_start"], device=self.device)
 
         self.n_step_buffer: NStepBuffer = NStepBuffer(self.hyperparameters["n_steps"], self.device)
+        self.epsilon = self.hyperparameters["epsilon_start"]
 
         self.model.train()
 
@@ -40,6 +42,8 @@ class DQNAgent(Agent):
             model_pth = os.path.join(path, Config.Paths.DQN_MODEL_FILE_NAME)
             if os.path.exists(model_pth):
                 self.hyperparameters = self.load_hyperparameters(path)
+                self.model = Model(self.device, self.hyperparameters["number_of_quantiles"], self.hyperparameters["n_cos"],
+                                  self.hyperparameters["enable_noisy_network"], self.hyperparameters["enable_dueling_network"]).to(self.device)
                 self.model.load_state_dict(torch.load(model_pth, map_location=self.device))
                 self.setup_training()
                 self.logger.load(path)
@@ -50,7 +54,8 @@ class DQNAgent(Agent):
             self.logger.set_directory(None)
             # Load fresh model with random weights
             self.hyperparameters = Config.DQN.get_hyperparameters()
-            self.model = Model(self.device, Config.DQN.NUMBER_OF_QUANTILES, Config.DQN.N_COS).to(self.device)
+            self.model = Model(self.device, Config.DQN.NUMBER_OF_QUANTILES, Config.DQN.N_COS, Config.DQN.ENABLE_NOISY_NETWORK,
+                                  Config.DQN.ENABLE_DUELING_NETWORK).to(self.device)
             self.setup_training()
             print("Loaded a fresh model with random weights")
 
@@ -74,23 +79,41 @@ class DQNAgent(Agent):
         self.memory = PrioritizedReplayBuffer(self.hyperparameters["max_memory"], alpha=self.hyperparameters["alpha"],
                                               beta=self.hyperparameters["beta_start"], device=self.device)
 
+    def update_epsilon(self) -> None:
+        """
+        Update the epsilon value for the epsilon-greedy policy
+        :return: None
+        """
+        if self.eval:
+            self.epsilon = 0
+        else:
+            self.epsilon = self.hyperparameters["epsilon_end"] + \
+                           (self.hyperparameters["epsilon_start"] - self.hyperparameters["epsilon_end"]) \
+                           * np.exp(-1. * self.iterations / self.hyperparameters["epsilon_decay"])
+
     def get_action(self, state: torch.Tensor) -> torch.Tensor:
         """
         Get the action from the model using epsilon-boltzmann policy
         :param state: the state of the environment
         :return: the action
         """
-        with torch.no_grad():
-            prediction = self.model(state.unsqueeze(0)) # Shape: (1, n_quantiles, n_actions)
-            expected_q = torch.mean(prediction, dim=1)  # Shape: (1, n_actions)
-            action = torch.argmax(expected_q, dim=1)
-            if self.eval:
-                for i, output in enumerate(Config.Arch.OUTPUTS_DESC):
-                    self.shared_dict["q_values"][output] = expected_q.squeeze(0)[i].item()
-                self.shared_dict["q_values"]["is_random"] = False
+        self.update_epsilon()
 
-            self.model.reset_noise()
+        if random.random() < self.epsilon:
+            # Epsilon-greedy policy
+            action = torch.randint(0, Config.Arch.OUTPUT_SIZE, (), device=self.device)
             return action
+        else:
+            with torch.no_grad():
+                prediction = self.model(state.unsqueeze(0)) # Shape: (1, n_quantiles, n_actions)
+                expected_q = torch.mean(prediction, dim=1)  # Shape: (1, n_actions)
+                action = torch.argmax(expected_q, dim=1)
+                if self.eval:
+                    for i, output in enumerate(Config.Arch.OUTPUTS_DESC):
+                        self.shared_dict["q_values"][output] = expected_q.squeeze(0)[i].item()
+                    self.shared_dict["q_values"]["is_random"] = False
+                return action
+
 
     def remember(self, state, action, reward, next_state, done) -> None:
         """

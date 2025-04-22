@@ -5,11 +5,19 @@ from .noisy_linear import NoisyLinear
 from ...config import Config
 
 class Model(nn.Module):
-    def __init__(self, device, n_quantiles, cosine_embedding_dim):
+    def __init__(self, device, n_quantiles, cosine_embedding_dim, noisy_network, dueling_dqn):
         # IQN implementation
         self.device = device
         self.n_quantiles = n_quantiles
         self.cosine_embedding_dim = cosine_embedding_dim
+
+        self.noisy_network = noisy_network
+        self.dueling_dqn = dueling_dqn
+
+        if noisy_network:
+            layer_type = NoisyLinear
+        else:
+            layer_type = nn.Linear
 
         super(Model, self).__init__()
         self.feature = nn.Sequential(
@@ -24,8 +32,20 @@ class Model(nn.Module):
             nn.ReLU(),
         )
 
-        self.advantage = NoisyLinear(Config.Arch.LAYER_SIZES[1], Config.Arch.OUTPUT_SIZE)
-        self.value = NoisyLinear(Config.Arch.LAYER_SIZES[1], 1)
+        if dueling_dqn:
+            self.advantage = nn.Sequential(
+                layer_type(Config.Arch.LAYER_SIZES[1], Config.Arch.VALUE_ADVANTAGE_LAYER_SIZE),
+                nn.ReLU(),
+                layer_type(Config.Arch.VALUE_ADVANTAGE_LAYER_SIZE, Config.Arch.OUTPUT_SIZE),
+            )
+            self.value = nn.Sequential(
+                layer_type(Config.Arch.LAYER_SIZES[1], Config.Arch.VALUE_ADVANTAGE_LAYER_SIZE),
+                nn.ReLU(),
+                layer_type(Config.Arch.VALUE_ADVANTAGE_LAYER_SIZE, 1),
+            )
+
+        else:
+            self.final = layer_type(Config.Arch.LAYER_SIZES[1], Config.Arch.OUTPUT_SIZE)
 
 
     def forward(self, state, taus=None):
@@ -53,10 +73,14 @@ class Model(nn.Module):
         cos_embedding = torch.cos(i_pi * taus.unsqueeze(-1))  # Shape: (batch_size, n_quantiles, cosine_embedding_dim). This is just the cosine of the tau values multiplied by pi
         cos_embedding = self.phi(cos_embedding)  # Shape: (batch_size, n_quantiles, hidden)
 
-        combined = state * cos_embedding
-        adv = self.advantage(combined)  # Shape: (batch_size, n_quantiles, n_actions)
-        val = self.value(combined)  # Shape: (batch_size, n_quantiles, 1)
-        q = val + adv - adv.mean(dim=-1, keepdim=True)  # Shape: (batch_size, n_quantiles, n_actions)
+        combined = state * cos_embedding    # Shape: (batch_size, n_quantiles, hidden)
+
+        if self.dueling_dqn:
+            adv = self.advantage(combined)  # Shape: (batch_size, n_quantiles, n_actions)
+            val = self.value(combined)  # Shape: (batch_size, n_quantiles, 1)
+            q = val + adv - adv.mean(dim=-1, keepdim=True)  # Shape: (batch_size, n_quantiles, n_actions)
+        else:
+            q = self.final(combined)  # Shape: (batch_size, n_quantiles, n_actions)
 
         return q
 
@@ -66,9 +90,14 @@ class Model(nn.Module):
         return torch.rand((batch_size, self.n_quantiles), device=self.device)
 
     def reset_noise(self):
-        for layer in [self.advantage, self.value]:
-            if hasattr(layer, "reset_noise"):
-                layer.reset_noise()
+        if self.noisy_network:
+            for module in self.advantage:
+                if hasattr(module, 'reset_noise'):
+                    module.reset_noise()
+
+            for module in self.value:
+                if hasattr(module, 'reset_noise'):
+                    module.reset_noise()
 
 class Trainer:
     def __init__(self, model, device, lr, gamma):
@@ -133,14 +162,14 @@ class Trainer:
         loss.backward()
         self.optimizer.step()
 
+        self.main_model.reset_noise()
+        self.target_model.reset_noise()
 
         td_errors_mean = td_error.abs().mean(dim=(1, 2))  # one TD error per sample for PER
         return td_errors_mean
 
     def huber_loss(self, td_error):
         return torch.where(td_error.abs() <= self.kappa, 0.5 * td_error.pow(2), self.kappa * (td_error.abs() - 0.5 * self.kappa))
-
-
 
     def update_target(self):
         # Soft update of target model
