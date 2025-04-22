@@ -1,21 +1,22 @@
 import tkinter as tk
 import re
-from tkinter import ttk
-from tkinter import messagebox
-import tkinter.filedialog
 import os
-
-from src.app.plot import Plot
 import pygetwindow as gw
 import win32gui
 import win32con
-from src.config import Config
-from ..utils.utils import trigger_map_event
+
 from time import sleep
+from tkinter import messagebox
+from tkinter import ttk
+
+from src.config import Config
+from src.app.plot import Plot
 from .action_keys import ActionKeys
+from ..utils.utils import trigger_map_event
+from ..horizon.events import Events
 
 class Interface:
-    def __init__(self, choose_map_event, print_state_event, load_model_event, save_model_event, quit_event, shared_dict) -> None:
+    def __init__(self, events: Events, shared_dict) -> None:
         self.root = tk.Tk()
         self.root.title("Tomate Mozza")
         self.full_screen = False
@@ -28,11 +29,7 @@ class Interface:
         self.best_reward_label = None
         self.game_speed_slider = None
 
-        self.choose_map_event = choose_map_event
-        self.print_state_event = print_state_event
-        self.load_model_event = load_model_event
-        self.save_model_event = save_model_event
-        self.quit_event = quit_event
+        self.events: Events = events
         self.shared_dict = shared_dict
 
         self.evaluation_toggle_variable = tk.IntVar(value=0)
@@ -50,8 +47,6 @@ class Interface:
         self.root.bind("<F11>", self.toggle_fullscreen)
 
         self.graph = Plot(parent=self.graph_frame, plot_size=200, title="Reward", xlabel="Iteration", ylabel="Reward")
-
-        self.embed_trackmania(self.game_frame)
 
         self.after_id = None
 
@@ -84,7 +79,7 @@ class Interface:
         self.load_map_button = ttk.Button(self.button_frame, text="Load the map", command=self.load_map)
         self.load_map_button.grid(row=0, column=0, padx=5, sticky="nsew")
     
-        self.print_state_button = ttk.Button(self.button_frame, text="Print the state", command=self.print_state_event.set)
+        self.print_state_button = ttk.Button(self.button_frame, text="Print the state", command=self.events.print_state_event.set)
         self.print_state_button.grid(row=0, column=1, padx=5,sticky="nsew")
 
         self.load_model_button = ttk.Button(self.button_frame, text="Load a model", command=self.load_model)
@@ -106,7 +101,7 @@ class Interface:
     def save_model(self):
         """Ask for a new model name using a popup instead of askdirectory"""
         if self.shared_dict["model_path"].value:
-            self.save_model_event.set()
+            self.events.save_model_event.set()
             return
 
         def validate():
@@ -127,7 +122,7 @@ class Interface:
             os.makedirs(path)
             self.shared_dict["model_path"].value = path
             top.destroy()
-            self.save_model_event.set()
+            self.events.save_model_event.set()
 
         top = tk.Toplevel(self.root)
         top.title("Create new model")
@@ -172,6 +167,10 @@ class Interface:
         self.shared_dict["game_speed"] = int(float(value))
 
     def update_interface(self):
+        if self.events.embed_game_event.is_set():
+            self.events.embed_game_event.clear()
+            self.embed_trackmania(self.game_frame)
+
         rewards = []
         # Collect all rewards before processing
         while not self.shared_dict["reward"].empty():
@@ -192,7 +191,7 @@ class Interface:
 
     def load_map(self):
         self.load_model_button["state"] = "disabled"
-        trigger_map_event(self.choose_map_event)
+        trigger_map_event(self.events.choose_map_event)
 
     def load_model(self):
         models = [model for model in os.listdir(Config.Paths.MODELS_PATH) if os.path.isdir(os.path.join(Config.Paths.MODELS_PATH, model))]
@@ -229,10 +228,10 @@ class Interface:
     def load_model_from_listbox(self, listbox, top):
         selected_model = listbox.get(listbox.curselection())
         if selected_model == "New model":
-            self.load_model_event.set()
+            self.events.load_model_event.set()
         else:
             self.shared_dict["model_path"].value = os.path.join(Config.Paths.MODELS_PATH, selected_model)
-            self.load_model_event.set()
+            self.events.load_model_event.set()
         top.destroy()
 
     def on_close(self):
@@ -250,10 +249,10 @@ class Interface:
             return 
     
         if response:
-            self.save_model_event.set()
+            self.events.save_model_event.set()
             sleep(2)
     
-        self.quit_event.set()
+        self.events.quit_event.set()
         self.on_close()
 
     def embed_trackmania(self, frame):

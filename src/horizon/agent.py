@@ -10,6 +10,7 @@ from tminterface.structs import SimStateData
 from collections import deque
 from abc import ABC, abstractmethod
 from time import sleep
+from datetime import datetime
 
 from .game_interaction import launch_map
 from ..map_interaction.agent_position import AgentPosition
@@ -91,6 +92,7 @@ class Agent(Client, ABC):
         iface.set_timeout(-1)
         print(f"Registered to {iface.server_name}")
         iface.log(f"Loaded a {self.algorithm} agent")
+        iface.execute_command("toggle_console")
 
     def _save_stats(self) -> str:
         """
@@ -122,8 +124,13 @@ class Agent(Client, ABC):
         """
         directory = self.shared_dict["model_path"].value
         if not directory:
-            print("Model path not set")
-            return
+            directory = datetime.now().strftime("%m-%d_%H-%M")
+            directory = os.path.join(Config.Paths.MODELS_PATH, directory)
+            self.shared_dict["model_path"].value = directory
+
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
         self.logger.set_directory(directory)
         result = self._save_stats()
         if not result:

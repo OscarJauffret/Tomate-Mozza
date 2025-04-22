@@ -13,6 +13,7 @@ class Config:
         LATEST_MODEL_PATH: str = os.path.join(MODELS_PATH, "latest")
         STAT_FILE_NAME: str = "stats.json"
         DQN_MODEL_FILE_NAME: str = "model.pth"
+        DQN_REPLAY_FILE_NAME: str = "replay.pt"
         ACTOR_FILE_NAME: str = "actor.pth"
         CRITIC_FILE_NAME: str = "critic.pth"
 
@@ -32,6 +33,7 @@ class Config:
         NUMBER_OF_ACTIONS_PER_SECOND: int = 10
         INTERVAL_BETWEEN_ACTIONS: int = 1000 // NUMBER_OF_ACTIONS_PER_SECOND
         GAME_SPEED: int = 8
+        RESTART_INTERVAL_SECONDS: int = 15
 
         RANDOM_SPAWN: bool = False
 

@@ -1,31 +1,25 @@
 import multiprocessing
-from time import sleep
+import os
 
 from .config import Config
 from .horizon.worker import Worker
-from .utils.tm_launcher import TMLauncher
 from .app.interface import Interface
+from .horizon.events import Events
 
 from argparse import ArgumentParser
 
-choose_map_event = multiprocessing.Event()
-print_state_event = multiprocessing.Event()
-load_model_event = multiprocessing.Event()
-save_model_event = multiprocessing.Event()
-quit_event = multiprocessing.Event()
+events = Events()
 
 argparser = ArgumentParser(description="Horizon - A reinforcement learning framework for TM")
 argparser.add_argument("--alg", type=str, default="ppo", help="Algorithm to use (ppo, dqn)")
+argparser.add_argument("--name", type=str, default="", help="Path to save the model")
 
 
 if __name__ == "__main__":
     args = argparser.parse_args()
-    launcher = TMLauncher(Config.Game.NUMBER_OF_CLIENTS)
-    launcher.launch_games()
-    sleep(1)
-    launcher.focus_windows()
 
-    servers = [i for i in range(Config.Game.NUMBER_OF_CLIENTS)]
+    if args.name:
+        args.name = os.path.join(Config.Paths.MODELS_PATH, args.name)
 
     manager = multiprocessing.Manager()
     outputs = Config.Arch.OUTPUTS_DESC
@@ -33,19 +27,15 @@ if __name__ == "__main__":
                                 "eval": False,
                                 "reward": manager.Queue(),
                                 "q_values": manager.dict({outputs[0]: 0, outputs[1]: 0, outputs[2]: 0, outputs[3]: 0, outputs[4]: 0, outputs[5]: 0, "is_random": False}),
-                                "model_path": manager.Value("u", ""),
+                                "model_path": manager.Value("u", args.name),
                                 "game_speed": Config.Game.GAME_SPEED,
                                 "personal_best": float("inf"),
                                 })
-    app = Interface(choose_map_event, print_state_event, load_model_event, save_model_event, quit_event, shared_dict)
+    app = Interface(events, shared_dict)
 
     # Create processes
-    workers = []
-    for server in servers:
-        worker = Worker(server, args.alg.upper() ,choose_map_event, print_state_event, load_model_event,
-                        save_model_event, quit_event, shared_dict)
-        workers.append(worker)
-        worker.start()
+    worker = Worker(args.alg.upper(), events, shared_dict)
+    worker.start()
 
     # Main loop
     try:
@@ -54,8 +44,7 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("KeyboardInterrupt")
     finally:
-        for worker in workers:
-            if worker.is_alive():
-                worker.terminate()
-                worker.join()
+        if worker.is_alive():
+            worker.terminate()
+            worker.join()
         print("Workers terminated")

@@ -40,6 +40,7 @@ class DQNAgent(Agent):
             path = self.shared_dict["model_path"].value
             self.logger.set_directory(path)
             model_pth = os.path.join(path, Config.Paths.DQN_MODEL_FILE_NAME)
+            buffer_path = os.path.join(path, Config.Paths.DQN_REPLAY_FILE_NAME)
             if os.path.exists(model_pth):
                 self.hyperparameters = self.load_hyperparameters(path)
                 self.model = Model(self.device, self.hyperparameters["number_of_quantiles"], self.hyperparameters["n_cos"],
@@ -47,6 +48,28 @@ class DQNAgent(Agent):
                 self.model.load_state_dict(torch.load(model_pth, map_location=self.device))
                 self.setup_training()
                 self.logger.load(path)
+
+                if os.path.exists(buffer_path):
+                    try:
+                        buffer_state = torch.load(buffer_path, map_location=self.device)
+
+                        max_idx = min(buffer_state["fill_level"], self.memory.capacity)
+                        self.memory.states[:max_idx] = buffer_state["states"][:max_idx]
+                        self.memory.actions[:max_idx] = buffer_state["actions"][:max_idx]
+                        self.memory.rewards[:max_idx] = buffer_state["rewards"][:max_idx]
+                        self.memory.next_states[:max_idx] = buffer_state["next_states"][:max_idx]
+                        self.memory.dones[:max_idx] = buffer_state["dones"][:max_idx]
+                        self.memory.priorities[:max_idx] = buffer_state["priorities"][:max_idx]
+
+                        self.memory.pos = buffer_state["pos"] if buffer_state["pos"] < self.memory.capacity else 0
+                        self.memory.fill_level = min(buffer_state["fill_level"], self.memory.capacity)
+                        self.memory.beta = buffer_state["beta"]
+
+                        print(f"Replay buffer loaded")
+                    except Exception as e:
+                        print(f"Error loading the replay buffer: {e}")
+                else:
+                    print("No replay buffer found, starting with an empty one")
                 print(f"Model loaded from {model_pth}")
             else:
                 print(f"Model not found at {model_pth}")
@@ -67,6 +90,26 @@ class DQNAgent(Agent):
         """
         model_path = os.path.join(directory, Config.Paths.DQN_MODEL_FILE_NAME)
         torch.save(self.model.state_dict(), model_path)
+
+        # Save the replay buffer
+        buffer_path = os.path.join(directory, Config.Paths.DQN_REPLAY_FILE_NAME)
+
+        buffer_state = {
+            "states": self.memory.states[:self.memory.fill_level],
+            "actions": self.memory.actions[:self.memory.fill_level],
+            "rewards": self.memory.rewards[:self.memory.fill_level],
+            "next_states": self.memory.next_states[:self.memory.fill_level],
+            "dones": self.memory.dones[:self.memory.fill_level],
+            "priorities": self.memory.priorities[:self.memory.fill_level],
+            "pos": self.memory.pos,
+            "fill_level": self.memory.fill_level,
+            "alpha": self.memory.alpha,
+            "beta": self.memory.beta,
+        }
+
+        print(f"Saving replay buffer")
+        torch.save(buffer_state, buffer_path)
+
 
     def setup_training(self) -> None:
         """
