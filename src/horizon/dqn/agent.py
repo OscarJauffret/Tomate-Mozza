@@ -187,7 +187,7 @@ class DQNAgent(Agent):
 
     def on_run_step(self, iface: TMInterface, _time: int) -> None:
         if _time == 0:
-            if Config.Game.RANDOM_SPAWN:
+            if Config.Game.CURRICULUM_LEARNING:
                 self.spawn_point = random.randint(0, len(self.unlocked_states))
                 iface.execute_command(f"load_state {self.random_states[self.spawn_point]}")
             self.ready = True
