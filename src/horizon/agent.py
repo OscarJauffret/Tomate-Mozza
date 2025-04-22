@@ -44,6 +44,7 @@ class Agent(Client, ABC):
         self.ready = False
         self.spawn_point = 0
 
+        self.best_reward = 0.0
         self.personal_best = float("inf")
         self.save_pb = False
         self.previous_finish_time: str = ""
@@ -53,7 +54,11 @@ class Agent(Client, ABC):
         self.eval: bool = shared_dict["eval"]
         self.game_speed: int = shared_dict["game_speed"]
         self.logger: TMLogger = TMLogger(self.algorithm, get_device_info(self.device.type))
+
         self.random_states = get_random_states()
+        self.unlocked_states = 0
+
+        self.reward_requirements = self.agent_position.get_reward_requirements_for_checkpoint(len(self.random_states))
 
     def __str__(self) -> str:
         """
@@ -242,6 +247,11 @@ class Agent(Client, ABC):
 
         if self.iterations % 10 ==  0:
             print(f"Iteration: {self.iterations:<8} reward: {self.reward:<8.2f}")
+
+        if self.reward > self.best_reward:
+            self.best_reward = self.reward
+            self.unlocked_states = np.clip(np.searchsorted(self.reward_requirements, self.best_reward) - 1, 0, len(self.random_states) - 2)
+
         self.reward = 0.0
         self.prev_positions.clear()
         self.prev_velocity = None
