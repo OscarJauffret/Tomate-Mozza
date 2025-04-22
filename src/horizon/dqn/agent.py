@@ -214,7 +214,7 @@ class DQNAgent(Agent):
                 self.n_step_buffer.add(self.current_state, action, current_reward)
             self.prev_positions.append((simulation_state.position[0], simulation_state.position[2]))
 
-            #send_input(iface, action.item())  # Send the action to the game
+            send_input(iface, action.item())  # Send the action to the game
 
             if self.n_step_buffer.is_full() and not self.eval:
                 state, action, reward = self.n_step_buffer.get_transition()
