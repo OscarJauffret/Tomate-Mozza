@@ -17,7 +17,7 @@ class AgentPosition:
         
         self.closest_edge = self.nodes[0], self.nodes[1]
         self.prev_closest_edge = self.nodes[0], self.nodes[1]
-
+        self.map_length = self._get_map_length()
 
     def update(self, agent_absolute_position: Tuple[float, float]) -> None:
         """
@@ -27,6 +27,24 @@ class AgentPosition:
         agent_block_position = self._absolute_position_to_block_position(agent_absolute_position)
         self.prev_closest_edge = self.closest_edge
         self._update_closest_edge(agent_block_position)
+
+    def _get_map_length(self) -> int:
+        """
+        Get the length of the map
+        :return: the length of the map
+        """
+        length = 0
+        for i in range(len(self.nodes) - 1):
+            length += self._get_edge_length((self.nodes[i], self.nodes[i + 1])) - Config.Game.BLOCK_SIZE
+        return length
+
+    def get_reward_requirements_for_checkpoint(self, number_of_checkpoints: int) -> np.ndarray:
+        """
+        Get the reward requirements for the checkpoint as an array of size number_of_checkpoints
+        :param number_of_checkpoints: the number of checkpoints
+        :return: the reward requirements for the checkpoint as an array of size number_of_checkpoints
+        """
+        return np.linspace(0, self.map_length, number_of_checkpoints)
 
     
     def _update_closest_edge(self, agent_block_position: Tuple[float, float]) -> Tuple[Tuple[int, int], Tuple[int, int]]:

@@ -188,7 +188,7 @@ class DQNAgent(Agent):
     def on_run_step(self, iface: TMInterface, _time: int) -> None:
         if _time == 0:
             if Config.Game.RANDOM_SPAWN:
-                self.spawn_point = random.randint(0, len(self.random_states) - 1)
+                self.spawn_point = random.randint(0, len(self.unlocked_states))
                 iface.execute_command(f"load_state {self.random_states[self.spawn_point]}")
             self.ready = True
             if self.save_pb:
@@ -214,7 +214,7 @@ class DQNAgent(Agent):
                 self.n_step_buffer.add(self.current_state, action, current_reward)
             self.prev_positions.append((simulation_state.position[0], simulation_state.position[2]))
 
-            send_input(iface, action.item())  # Send the action to the game
+            #send_input(iface, action.item())  # Send the action to the game
 
             if self.n_step_buffer.is_full() and not self.eval:
                 state, action, reward = self.n_step_buffer.get_transition()
