@@ -28,7 +28,7 @@ class TMLauncher:
         Launch a single Trackmania client
         :return: None
         """
-        from .utils import get_executable_path   #FIXME: Avoid circular import
+        from .utils import get_executable_path
 
         executable, path_to_executable = get_executable_path()
         subprocess.Popen([executable], cwd=path_to_executable, shell=True)
