@@ -187,16 +187,17 @@ class DQNAgent(Agent):
 
     def on_run_step(self, iface: TMInterface, _time: int) -> None:
         if _time == 0:
-            if Config.Game.CURRICULUM_LEARNING:
-                self.spawn_point = random.randint(0, self.unlocked_states)
-                if self.spawn_point != 0:
-                    iface.execute_command(f"load_state {self.random_states[self.spawn_point]}")
-            self.ready = True
             if self.save_pb:
                 self.save_pb = False
                 save_pb(self.shared_dict["model_path"].value, self.previous_finish_time, self.spawn_point != 0) # Save the pb only if not random spawn
                 launch_map(iface)
                 return
+            if Config.Game.CURRICULUM_LEARNING:
+                self.spawn_point = random.randint(0, self.unlocked_states)
+                if self.spawn_point != 0:
+                    iface.execute_command(f"load_state {self.random_states[self.spawn_point]}")
+            self.ready = True
+
 
 
         if _time >= 0 and _time % Config.Game.INTERVAL_BETWEEN_ACTIONS == 0 and self.ready:
