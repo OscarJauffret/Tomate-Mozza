@@ -34,9 +34,19 @@ def get_random_states() -> list[str]:
         print(f"Map directory not found at {os.path.join(get_states_path(), Config.Paths.MAP)}")
         return []
     else:
-        return [os.path.join(Config.Paths.MAP, state) for state in
-                os.listdir(os.path.join(get_states_path(), Config.Paths.MAP))
-                if state.endswith(".bin")]
+        states = [state for state in os.listdir(os.path.join(get_states_path(), Config.Paths.MAP))
+                  if state.endswith(".bin")]
+
+        # Sort by the number in the filename
+        def extract_number(filename):
+            try:
+                return int(filename.split('.')[0])
+            except ValueError:
+                return float('inf')
+
+        states.sort(key=extract_number)
+
+        return [os.path.join(Config.Paths.MAP, state) for state in states]
 
 def trigger_map_event(event):
     event.set()

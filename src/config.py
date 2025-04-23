@@ -74,9 +74,9 @@ class Config:
         MIN_MEMORY: int = 10_000
         BATCH_SIZE: int = 512
 
-        EPSILON_START: float = 0.8
+        EPSILON_START: float = 0.9
         EPSILON_END: float = 0.05
-        EPSILON_DECAY: int = 5000
+        EPSILON_DECAY: int = 10000
 
         UPDATE_TARGET_EVERY: int = 1
         TAU: float = 0.02

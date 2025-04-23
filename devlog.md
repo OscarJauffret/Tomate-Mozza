@@ -208,3 +208,16 @@ Launch multiple clients at the same time, logging in, launching the map and focu
 - It managed to improve its time from 8:00 at first to 5:00 right now (450h of training).
 - Changed the mechanism to save a model, now we save in the same directory, instead of creating a new one each time. This will be easier to manage.
 - Added tracking of personal best time.
+
+---
+
+### 17 - 22 April 2025, 10h
+- Ran a lot of time with the IQN agent. It struggled getting past 4:40.
+- Reduced the n_step to 3 because it is the value that was used in the paper.
+- Added a lot of inputs to the neural network, notably the wheel contacts, whether they are sliding, the turning rate, the pitch and the roll
+- Tried increasing the size of the network
+- Implemented Noisy Networks. Alone it was able to finish the track but it was very slow (9 minutes)
+- Implemented Dueling Networks. When combining with Noisy Networks, it was very bad
+- Changed the Dueling Networks approach to add one more layer when we use it
+- Added flags to choose if we want to use Noisy Networks or Dueling Networks
+- Reintroduced the epsilon greedy policy which we removed when we implemented Noisy Networks because we thought it was redundant

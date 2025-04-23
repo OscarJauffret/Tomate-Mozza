@@ -121,7 +121,8 @@ class PPOAgent(Agent):
         if _time == 0:
             if Config.Game.CURRICULUM_LEARNING:
                 self.spawn_point = random.randint(0, self.unlocked_states)
-                iface.execute_command(f"load_state {self.random_states[self.spawn_point]}")
+                if self.spawn_point != 0:
+                    iface.execute_command(f"load_state {self.random_states[self.spawn_point]}")
             self.ready = True
             if self.save_pb:
                 self.save_pb = False
