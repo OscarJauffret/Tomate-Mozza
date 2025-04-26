@@ -69,7 +69,6 @@ class Worker(multiprocessing.Process):
 
                     if time.time() - start_time > max_runtime:
                         print(f"Session timed out after {max_runtime} seconds, restarting...")
-                        self.close_signal_handler(None, None)
                         break
 
                     if self.events.choose_map_event.is_set():

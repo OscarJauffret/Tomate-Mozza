@@ -35,7 +35,7 @@ class Config:
         GAME_SPEED: int = 8
         RESTART_INTERVAL_SECONDS: int = 60 * 60 * 6
 
-        CURRICULUM_LEARNING: bool = True
+        CURRICULUM_LEARNING: bool = False
 
     class PPO:
         LEARNING_RATE: float = 0.0003

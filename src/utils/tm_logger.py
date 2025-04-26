@@ -196,6 +196,13 @@ class TMLogger:
             self.run_stats = [_RunStats(run["iteration"], run["run_time"], run["reward"],
                                         run["spawn_point"], run["has_finished"]) for run in log["runs"]]
 
+    def update_learning_rate(self, learning_rate: float) -> None:
+        """
+        Update the learning rate in the log
+        :param learning_rate: The new learning rate
+        :return: None
+        """
+        self.hyperparameters["learning_rate"] = learning_rate
 
 
 class _RunStats:

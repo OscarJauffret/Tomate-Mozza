@@ -122,6 +122,14 @@ class Agent(Client, ABC):
         """
         pass
 
+    @abstractmethod
+    def get_learning_rate(self) -> float:
+        """
+        Get the learning rate of the model
+        :return: the learning rate
+        """
+        pass
+
     def save(self) -> None:
         """
         Save the model and the statistics
@@ -137,6 +145,7 @@ class Agent(Client, ABC):
             os.makedirs(directory)
 
         self.logger.set_directory(directory)
+        self.logger.update_learning_rate(self.get_learning_rate())
         result = self._save_stats()
         if not result:
             print("Failed to save the model")

@@ -183,6 +183,15 @@ class DQNAgent(Agent):
 
         td_sample = self.trainer.train_step(states, actions, rewards, next_states, dones, weights)
         self.memory.update_priorities(indices, td_sample)
+        if self.iterations > 15000: # warmup
+            self.trainer.step(self.reward)
+
+    def get_learning_rate(self) -> float:
+        """
+        Get the learning rate of the model
+        :return: the learning rate
+        """
+        return self.trainer.optimizer.param_groups[0]['lr']
 
 
     def on_run_step(self, iface: TMInterface, _time: int) -> None:
@@ -241,6 +250,8 @@ class DQNAgent(Agent):
                     if self.iterations % Config.DQN.UPDATE_TARGET_EVERY == 0:
                         self.trainer.update_target()
 
+                if self.iterations % 10 == 0:
+                    print("the learning rate is ", self.trainer.optimizer.param_groups[0]['lr'])
                 self.n_step_buffer.clear()
                 self.reset(iface, _time)
                 iface.set_speed(self.game_speed)
