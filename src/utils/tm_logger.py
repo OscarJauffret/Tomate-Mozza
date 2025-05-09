@@ -32,7 +32,7 @@ class TMLogger:
         """
         self.directory = directory
 
-    def add_run(self, iteration, run_time, reward, spawn_point, has_finished):
+    def add_run(self, iteration, run_time, reward, spawn_point, has_finished, epsilon, epsilon_boltzmann):
         """
         Add a run to the logger
         :param iteration: The iteration of the run
@@ -40,8 +40,10 @@ class TMLogger:
         :param reward: The reward obtained from the run
         :param spawn_point: The spawn point of the run
         :param has_finished: Whether the run has finished
+        :param epsilon: The epsilon value of the run
+        :param epsilon_boltzmann: The epsilon boltzmann value of the run
         """
-        self.run_stats.append(_RunStats(iteration, run_time, reward, spawn_point, has_finished))
+        self.run_stats.append(_RunStats(iteration, run_time, reward, spawn_point, has_finished, epsilon, epsilon_boltzmann))
 
     def _compute_stats(self):
         """
@@ -194,12 +196,12 @@ class TMLogger:
             self.training_device = log["device"]
             self.architecture = log["architecture"]
             self.run_stats = [_RunStats(run["iteration"], run["run_time"], run["reward"],
-                                        run["spawn_point"], run["has_finished"]) for run in log["runs"]]
+                                        run["spawn_point"], run["has_finished"], run["epsilon"], run["epsilon_boltzmann"]) for run in log["runs"]]
 
 
 
 class _RunStats:
-    def __init__(self, iteration, run_time, reward, spawn_point, has_finished):
+    def __init__(self, iteration, run_time, reward, spawn_point, has_finished, epsilon, epsilon_boltzmann):
         """
         Constructor for RunStats class
         :param iteration: The iteration of the run
@@ -207,12 +209,16 @@ class _RunStats:
         :param reward: The reward obtained from the run
         :param spawn_point: The spawn point of the run
         :param has_finished: Whether the run has finished
+        :param epsilon: The epsilon value of the run
+        :param epsilon_boltzmann: The epsilon boltzmann value of the run
         """
         self.iteration = iteration
         self.run_time = run_time
         self.reward = reward
         self.spawn_point = spawn_point
         self.has_finished = has_finished
+        self.epsilon = epsilon
+        self.epsilon_boltzmann = epsilon_boltzmann
 
     def get_stats(self):
         """
@@ -224,5 +230,7 @@ class _RunStats:
             "run_time": self.run_time,
             "reward": self.reward,
             "spawn_point": self.spawn_point,
-            "has_finished": self.has_finished
+            "has_finished": self.has_finished,
+            "epsilon": self.epsilon,
+            "epsilon_boltzmann": self.epsilon_boltzmann
         }

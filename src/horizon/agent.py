@@ -30,7 +30,7 @@ class Agent(Client, ABC):
 
         self.agent_position = AgentPosition()
 
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device("cpu") #torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print(f"Using device: {self.device}")
 
         self.reward = 0.0
@@ -59,6 +59,11 @@ class Agent(Client, ABC):
         self.unlocked_states = 0
 
         self.reward_requirements = self.agent_position.get_reward_requirements_for_checkpoint(len(self.random_states))
+
+        self.total_time = 0
+
+        self.epsilon = 0
+        self.epsilon_boltzmann = 0
 
     def __str__(self) -> str:
         """
@@ -243,7 +248,8 @@ class Agent(Client, ABC):
         if not self.eval:
             self.iterations += 1
             self.shared_dict["reward"].put(self.reward)
-            self.logger.add_run(self.iterations, time, self.reward, self.spawn_point, self.has_finished)
+            self.logger.add_run(self.iterations, time, self.reward, self.spawn_point, self.has_finished, self.epsilon, self.epsilon_boltzmann)
+            self.total_time += time
 
         if self.iterations % 10 ==  0:
             print(f"Iteration: {self.iterations:<8} reward: {self.reward:<8.2f}")
@@ -276,7 +282,7 @@ class Agent(Client, ABC):
         else:
             self.spawn_point = 0
             iface.horn()
-            iface.execute_command(f"press enter")
+            iface.execute_command("press enter")
 
     def refresh_shared_dict(self) -> None:
         """

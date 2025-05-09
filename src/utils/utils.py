@@ -3,6 +3,7 @@ import torch
 import time
 import functools
 import shutil
+import math
 
 from dotenv import load_dotenv
 from time import sleep
@@ -111,6 +112,34 @@ def get_device_info(device: str):
                             device_name = line.split(':')[1].strip()
                             break
     return device_name
+
+def from_schedule(schedule: list[tuple[int, float]], time: int) -> float:
+    run_steps = time / Config.Game.INTERVAL_BETWEEN_ACTIONS
+
+    if not schedule:
+        raise ValueError("Schedule must not be empty")
+    # Sort schedule by step to ensure correct order
+    schedule = sorted(schedule, key=lambda x: x[0])
+    # Check if we have a value for step 0
+    if schedule[0][0] != 0:
+        raise ValueError("Schedule must contain a value for step 0")
+    # If time is beyond the last scheduled step, return the last value
+    if run_steps >= schedule[-1][0]:
+        return schedule[-1][1]
+    # Find the surrounding steps for interpolation
+    for i in range(len(schedule) - 1):
+        if schedule[i][0] <= run_steps < schedule[i + 1][0]:
+            # Get the surrounding points
+            begin_step, begin_value = schedule[i]
+            end_step, end_value = schedule[i + 1]
+            # Calculate the ratio between end and begin values
+            ratio = begin_value / end_value
+            # Calculate the annealing period
+            annealing_period = end_step - begin_step
+            # Calculate the current value using exponential decay
+            return begin_value * math.exp(-math.log(ratio) * (run_steps - begin_step) / annealing_period)
+    # This should never happen due to the earlier checks
+    raise ValueError("Invalid schedule or time value")
 
 def profile_time(func):
     @functools.wraps(func)

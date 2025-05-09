@@ -74,9 +74,19 @@ class Config:
         MIN_MEMORY: int = 10_000
         BATCH_SIZE: int = 512
 
-        EPSILON_START: float = 0.9
-        EPSILON_END: float = 0.05
-        EPSILON_DECAY: int = 10000
+        # EPSILON_START: float = 0.9
+        # EPSILON_END: float = 0.05
+        # EPSILON_DECAY: int = 10000
+
+        EPSILON_SCHEDULE: list[tuple[int, float]] = [(0, 1),
+                                                     (50_000, 1),
+                                                     (3_000_000, 0.05),
+                                                     (12_000_000, 0.03)]
+
+        EPSILON_BOLTZMANN_SCHEDULE: list[tuple[int, float]] = [(0, 0.15),
+                                                               (12_000_000, 0.03)]
+
+        TAU_EPSILON_BOLTZMANN: float = 0.01
 
         UPDATE_TARGET_EVERY: int = 1
         TAU: float = 0.02
@@ -103,9 +113,9 @@ class Config:
                 "max_memory": Config.DQN.MAX_MEMORY,
                 "min_memory": Config.DQN.MIN_MEMORY,
                 "batch_size": Config.DQN.BATCH_SIZE,
-                "epsilon_start": Config.DQN.EPSILON_START,
-                "epsilon_end": Config.DQN.EPSILON_END,
-                "epsilon_decay": Config.DQN.EPSILON_DECAY,
+                "epsilon_schedule": Config.DQN.EPSILON_SCHEDULE,
+                "epsilon_boltzmann_schedule": Config.DQN.EPSILON_BOLTZMANN_SCHEDULE,
+                "tau_epsilon_boltzmann": Config.DQN.TAU_EPSILON_BOLTZMANN,
                 "update_target_every": Config.DQN.UPDATE_TARGET_EVERY,
                 "tau": Config.DQN.TAU,
                 "alpha": Config.DQN.ALPHA,
