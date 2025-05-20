@@ -36,7 +36,8 @@ TMInterface is used to interact with the game.
 
 7. Go to [config.py](src/config.py) and verify that the Config.Paths.MAP variable is set to the same as the filename you chose in step 6.
 
-8. > [!Caution] the following step only works on Linux (install a WSL if you are on Windows)
+> [!Caution] The following step only works on Linux (install a WSL if you are on Windows)
+8. 
     - Install pygbx by running `pip install pygbx`
     - Run the following command to generate the layout of the map:
     ```bash
