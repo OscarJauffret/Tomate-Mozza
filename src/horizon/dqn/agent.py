@@ -12,7 +12,7 @@ from .prioritized_replay_buffer import PrioritizedReplayBuffer
 from ..game_interaction import send_input, launch_map
 from ..agent import Agent
 from ...config import Config
-from ...utils.utils import save_pb
+from ...utils.utils import save_pb, from_schedule
 
 class DQNAgent(Agent):
     def __init__(self, shared_dict) -> None:
@@ -26,7 +26,9 @@ class DQNAgent(Agent):
                                                                        beta=self.hyperparameters["beta_start"], device=self.device)
 
         self.n_step_buffer: NStepBuffer = NStepBuffer(self.hyperparameters["n_steps"], self.device)
-        self.epsilon = self.hyperparameters["epsilon_start"]
+        self.epsilon_schedule = self.hyperparameters["epsilon_schedule"]
+        self.epsilon_boltzmann_schedule = self.hyperparameters["epsilon_boltzmann_schedule"]
+        self.tau_epsilon_boltzmann = self.hyperparameters["tau_epsilon_boltzmann"]
 
         self.model.train()
 
@@ -43,6 +45,9 @@ class DQNAgent(Agent):
             buffer_path = os.path.join(path, Config.Paths.DQN_REPLAY_FILE_NAME)
             if os.path.exists(model_pth):
                 self.hyperparameters = self.load_hyperparameters(path)
+                self.epsilon_schedule = self.hyperparameters["epsilon_schedule"]
+                self.epsilon_boltzmann_schedule = self.hyperparameters["epsilon_boltzmann_schedule"]
+                self.tau_epsilon_boltzmann = self.hyperparameters["tau_epsilon_boltzmann"]
                 self.model = Model(self.device, self.hyperparameters["number_of_quantiles"], self.hyperparameters["n_cos"],
                                   self.hyperparameters["enable_noisy_network"], self.hyperparameters["enable_dueling_network"]).to(self.device)
                 self.model.load_state_dict(torch.load(model_pth, map_location=self.device))
@@ -65,7 +70,7 @@ class DQNAgent(Agent):
                         self.memory.fill_level = min(buffer_state["fill_level"], self.memory.capacity)
                         self.memory.beta = buffer_state["beta"]
 
-                        print(f"Replay buffer loaded")
+                        print("Replay buffer loaded")
                     except Exception as e:
                         print(f"Error loading the replay buffer: {e}")
                 else:
@@ -77,6 +82,9 @@ class DQNAgent(Agent):
             self.logger.set_directory(None)
             # Load fresh model with random weights
             self.hyperparameters = Config.DQN.get_hyperparameters()
+            self.epsilon_schedule = self.hyperparameters["epsilon_schedule"]
+            self.epsilon_boltzmann_schedule = self.hyperparameters["epsilon_boltzmann_schedule"]
+            self.tau_epsilon_boltzmann = self.hyperparameters["tau_epsilon_boltzmann"]
             self.model = Model(self.device, Config.DQN.NUMBER_OF_QUANTILES, Config.DQN.N_COS, Config.DQN.ENABLE_NOISY_NETWORK,
                                   Config.DQN.ENABLE_DUELING_NETWORK).to(self.device)
             self.setup_training()
@@ -107,7 +115,7 @@ class DQNAgent(Agent):
             "beta": self.memory.beta,
         }
 
-        print(f"Saving replay buffer")
+        print("Saving replay buffer")
         torch.save(buffer_state, buffer_path)
 
 
