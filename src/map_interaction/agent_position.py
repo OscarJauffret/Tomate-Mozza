@@ -36,7 +36,7 @@ class AgentPosition:
         length = 0
         for i in range(len(self.nodes) - 1):
             length += self._get_edge_length((self.nodes[i], self.nodes[i + 1])) - Config.Game.BLOCK_SIZE
-        return length
+        return length * Config.Game.REWARD_PER_METER_ALONG_CENTERLINE
 
     def get_reward_requirements_for_checkpoint(self, number_of_checkpoints: int) -> np.ndarray:
         """

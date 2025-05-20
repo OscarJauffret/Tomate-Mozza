@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import numpy as np
 import copy
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from .noisy_linear import NoisyLinear
@@ -20,33 +21,66 @@ class Model(nn.Module):
         else:
             layer_type = nn.Linear
 
+        activation = nn.LeakyReLU
+
         super(Model, self).__init__()
         self.feature = nn.Sequential(
             nn.Linear(Config.Arch.INPUT_SIZE, Config.Arch.LAYER_SIZES[0]),
-            nn.ReLU(),
+            activation(),
             nn.Linear(Config.Arch.LAYER_SIZES[0], Config.Arch.LAYER_SIZES[1]),
-            nn.ReLU(),
+            activation(),
         )
 
         self.phi = nn.Sequential(
             nn.Linear(self.cosine_embedding_dim, Config.Arch.LAYER_SIZES[1]),
-            nn.ReLU(),
+            activation(),
         )
 
         if dueling_dqn:
             self.advantage = nn.Sequential(
                 layer_type(Config.Arch.LAYER_SIZES[1], Config.Arch.VALUE_ADVANTAGE_LAYER_SIZE),
-                nn.ReLU(),
+                activation(),
                 layer_type(Config.Arch.VALUE_ADVANTAGE_LAYER_SIZE, Config.Arch.OUTPUT_SIZE),
             )
             self.value = nn.Sequential(
                 layer_type(Config.Arch.LAYER_SIZES[1], Config.Arch.VALUE_ADVANTAGE_LAYER_SIZE),
-                nn.ReLU(),
+                activation(),
                 layer_type(Config.Arch.VALUE_ADVANTAGE_LAYER_SIZE, 1),
             )
 
         else:
             self.final = layer_type(Config.Arch.LAYER_SIZES[1], Config.Arch.OUTPUT_SIZE)
+
+        self.initialize_weights()
+
+    def initialize_weights(self):
+        """
+        Initialize the weights of the model using orthogonal initialization (taken from linesight)
+        :return:
+        """
+        lrelu_neg_slope = 1e-2
+        activation_gain = torch.nn.init.calculate_gain("leaky_relu", lrelu_neg_slope)
+        layers = [self.feature]
+        if self.dueling_dqn:
+            layers += [self.advantage[:-1], self.value[:-1]]
+        for module in layers:
+            for m in module:
+                if isinstance(m, nn.Linear):
+                    torch.nn.init.orthogonal_(m.weight, activation_gain)
+                    torch.nn.init.zeros_(m.bias)
+
+        # init phi layer
+        torch.nn.init.orthogonal_(self.phi[0].weight, activation_gain * np.sqrt(2))
+        torch.nn.init.zeros_(self.phi[0].bias)
+
+        if self.dueling_dqn:
+            for module in [self.advantage[-1], self.value[-1]]:
+                if isinstance(module, nn.Linear):
+                    torch.nn.init.orthogonal_(module.weight, 1.0)
+                    torch.nn.init.zeros_(module.bias)
+        else:
+            torch.nn.init.orthogonal_(self.final.weight, 1.0)
+            torch.nn.init.zeros_(self.final.bias)
 
 
     def forward(self, state, taus=None):

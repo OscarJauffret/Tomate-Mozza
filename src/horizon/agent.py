@@ -91,6 +91,7 @@ class Agent(Client, ABC):
                 stats = json.load(f)
                 hyperparameters = stats["hyperparameters"]
                 self.iterations = stats["statistics"]["total number of runs"]
+                self.total_time = stats["statistics"]["training time"]["milliseconds"]
         return hyperparameters
 
     def on_registered(self, iface: TMInterface) -> None:
