@@ -220,7 +220,9 @@ class Agent(Client, ABC):
 
         prev_position = self.prev_positions[-1]
         current_position = (simulation_state.position[0], simulation_state.position[2])
-        current_reward = self.agent_position.get_distance_reward(prev_position, current_position)
+        distance_advanced_along_centerline = self.agent_position.get_distance_reward(prev_position, current_position)
+
+        current_reward = distance_advanced_along_centerline * Config.Game.REWARD_PER_METER_ALONG_CENTERLINE
 
         if self.has_finished:
             current_reward += Config.Game.BLOCK_SIZE

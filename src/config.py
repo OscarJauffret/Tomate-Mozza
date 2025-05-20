@@ -38,6 +38,7 @@ class Config:
         CURRICULUM_LEARNING: bool = False
 
         REWARD_PER_MS: float = -6 / 5000
+        REWARD_PER_METER_ALONG_CENTERLINE: float = 1 / 100
 
     class PPO:
         LEARNING_RATE: float = 0.0003
