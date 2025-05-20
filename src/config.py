@@ -33,9 +33,11 @@ class Config:
         NUMBER_OF_ACTIONS_PER_SECOND: int = 10
         INTERVAL_BETWEEN_ACTIONS: int = 1000 // NUMBER_OF_ACTIONS_PER_SECOND
         GAME_SPEED: int = 8
-        RESTART_INTERVAL_SECONDS: int = 60 * 60 * 6
+        RESTART_INTERVAL_SECONDS: int = 60 * 60 * 4
 
         CURRICULUM_LEARNING: bool = False
+
+        REWARD_PER_MS: float = -6 / 5000
 
     class PPO:
         LEARNING_RATE: float = 0.0003
@@ -80,11 +82,11 @@ class Config:
 
         EPSILON_SCHEDULE: list[tuple[int, float]] = [(0, 1),
                                                      (50_000, 1),
-                                                     (3_000_000, 0.05),
-                                                     (12_000_000, 0.03)]
+                                                     (1_000_000, 0.05),
+                                                     (5_000_000, 0.03)]
 
         EPSILON_BOLTZMANN_SCHEDULE: list[tuple[int, float]] = [(0, 0.15),
-                                                               (12_000_000, 0.03)]
+                                                               (5_000_000, 0.03)]
 
         TAU_EPSILON_BOLTZMANN: float = 0.01
 

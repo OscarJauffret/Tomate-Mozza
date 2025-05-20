@@ -225,6 +225,8 @@ class Agent(Client, ABC):
         if self.has_finished:
             current_reward += Config.Game.BLOCK_SIZE
 
+        current_reward -= Config.Game.REWARD_PER_MS * Config.Game.INTERVAL_BETWEEN_ACTIONS
+
         return torch.tensor(current_reward, device=self.device)
 
     def determine_done(self, simulation_state: SimStateData) -> torch.Tensor:

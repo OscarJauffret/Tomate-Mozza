@@ -106,7 +106,7 @@ class Trainer:
         self.gamma = gamma
         self.main_model = model
         self.device = device
-        self.optimizer = torch.optim.Adam(model.parameters(), lr=self.lr)
+        self.optimizer = torch.optim.RAdam(model.parameters(), lr=self.lr)
 
         self.scheduler = ReduceLROnPlateau(self.optimizer, mode='max', factor=0.5, patience=1000, min_lr=2e-5)
 

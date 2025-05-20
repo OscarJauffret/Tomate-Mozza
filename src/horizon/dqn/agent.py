@@ -130,41 +130,39 @@ class DQNAgent(Agent):
         self.memory = PrioritizedReplayBuffer(self.hyperparameters["max_memory"], alpha=self.hyperparameters["alpha"],
                                               beta=self.hyperparameters["beta_start"], device=self.device)
 
-    def update_epsilon(self) -> None:
-        """
-        Update the epsilon value for the epsilon-greedy policy
-        :return: None
-        """
-        if self.eval:
-            self.epsilon = 0
-        else:
-            self.epsilon = self.hyperparameters["epsilon_end"] + \
-                           (self.hyperparameters["epsilon_start"] - self.hyperparameters["epsilon_end"]) \
-                           * np.exp(-1. * self.iterations / self.hyperparameters["epsilon_decay"])
-
-    def get_action(self, state: torch.Tensor) -> torch.Tensor:
+    def get_action(self, state: torch.Tensor, time: int) -> tuple[torch.Tensor, bool]:
         """
         Get the action from the model using epsilon-boltzmann policy
         :param state: the state of the environment
-        :return: the action
+        :param time: the current time
+        :return: the action and whether it matches the argmax of the q-value
         """
-        self.update_epsilon()
+        epsilon = from_schedule(self.epsilon_schedule, self.total_time + time)
+        epsilon_boltzmann = from_schedule(self.epsilon_boltzmann_schedule, self.total_time + time)
 
-        if random.random() < self.epsilon:
-            # Epsilon-greedy policy
-            action = torch.randint(0, Config.Arch.OUTPUT_SIZE, (), device=self.device)
-            return action
-        else:
-            with torch.no_grad():
-                prediction = self.model(state.unsqueeze(0)) # Shape: (1, n_quantiles, n_actions)
-                expected_q = torch.mean(prediction, dim=1)  # Shape: (1, n_actions)
-                action = torch.argmax(expected_q, dim=1)
-                if self.eval:
-                    for i, output in enumerate(Config.Arch.OUTPUTS_DESC):
-                        self.shared_dict["q_values"][output] = expected_q.squeeze(0)[i].item()
-                    self.shared_dict["q_values"]["is_random"] = False
-                return action
+        self.epsilon = epsilon
+        self.epsilon_boltzmann = epsilon_boltzmann
 
+        if time == 0:
+            print(f"Epsilon: {epsilon}, Epsilon Boltzmann: {epsilon_boltzmann}")
+
+        with torch.no_grad():
+            prediction = self.model(state.unsqueeze(0)) # Shape: (1, n_quantiles, n_actions)
+            expected_q = torch.mean(prediction, dim=1)  # Shape: (1, n_actions)
+            expected_q = expected_q.squeeze(0)
+
+            random_number = random.random()
+            if random_number < epsilon:
+                get_arg_max_on = torch.rand_like(expected_q)
+            elif random_number < epsilon + epsilon_boltzmann:
+                get_arg_max_on = expected_q + self.tau_epsilon_boltzmann * torch.randn_like(expected_q)
+            else:
+                get_arg_max_on = expected_q
+
+            action = torch.argmax(get_arg_max_on)
+            q_value_argmax = torch.argmax(expected_q)
+
+            return action, action == q_value_argmax
 
     def remember(self, state, action, reward, next_state, done) -> None:
         """
@@ -228,9 +226,9 @@ class DQNAgent(Agent):
                 current_reward = self.get_reward(simulation_state)
                 self.reward += current_reward.item()
 
-            action = self.get_action(self.current_state)
+            action, action_matches_argmax = self.get_action(self.current_state, _time)
             if not self.eval:
-                self.n_step_buffer.add(self.current_state, action, current_reward)
+                self.n_step_buffer.add(self.current_state, action, current_reward, action_matches_argmax)
             self.prev_positions.append((simulation_state.position[0], simulation_state.position[2]))
 
             send_input(iface, action.item())  # Send the action to the game
