@@ -5,7 +5,6 @@
 ![GitHub Stars](https://img.shields.io/github/stars/OscarJauffret/Tomate-Mozza)
 ![GitHub Contributors](https://img.shields.io/github/contributors/OscarJauffret/Tomate-Mozza)
 ![GitHub Last Commit](https://img.shields.io/github/last-commit/OscarJauffret/Tomate-Mozza)
-![GitHub Top Language](https://img.shields.io/github/languages/top/OscarJauffret/Tomate-Mozza)
 
 This is a reinforcement learning project that aims to teach an agent to play the game Trackmania Nations Forever.
 TMInterface is used to interact with the game.
