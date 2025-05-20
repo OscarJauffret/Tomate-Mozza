@@ -1,4 +1,4 @@
-# Horizon
+# 🏎️ Horizon
 
 ![Language](https://img.shields.io/badge/language-Python-blue)
 ![Status](https://img.shields.io/badge/status-InProgress-yellow)
