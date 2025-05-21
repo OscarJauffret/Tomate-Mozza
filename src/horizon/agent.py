@@ -228,7 +228,7 @@ class Agent(Client, ABC):
         if self.has_finished:
             current_reward += Config.Game.BLOCK_SIZE
 
-        current_reward -= Config.Game.REWARD_PER_MS * Config.Game.INTERVAL_BETWEEN_ACTIONS
+        current_reward += Config.Game.REWARD_PER_MS * Config.Game.INTERVAL_BETWEEN_ACTIONS
 
         return torch.tensor(current_reward, device=self.device)
 
@@ -283,6 +283,7 @@ class Agent(Client, ABC):
             formatted_time = f"{int(minutes):02}.{seconds:05.2f}"
 
             if time < self.personal_best and self.spawn_point == 0:
+                self.save()
                 self.personal_best = time
                 self.shared_dict["personal_best"] = self.personal_best
                 print(f"New personal best: {formatted_time}")

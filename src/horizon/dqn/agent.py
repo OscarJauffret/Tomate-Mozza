@@ -143,9 +143,6 @@ class DQNAgent(Agent):
         self.epsilon = epsilon
         self.epsilon_boltzmann = epsilon_boltzmann
 
-        if time == 0:
-            print(f"Epsilon: {epsilon}, Epsilon Boltzmann: {epsilon_boltzmann}")
-
         with torch.no_grad():
             prediction = self.model(state.unsqueeze(0)) # Shape: (1, n_quantiles, n_actions)
             expected_q = torch.mean(prediction, dim=1)  # Shape: (1, n_actions)
