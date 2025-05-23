@@ -13,7 +13,7 @@ class SaveStateClient(Client):
         print(f"Registered to {iface.server_name}")
 
     def on_run_step(self, iface: TMInterface, _time: int):
-        if _time >= 0 and _time % 5000 == 0:
+        if _time >= 0 and _time % Config.Game.STATES_INTERVAL == 0:
             iface.execute_command(f"save_state {self.state_dir}/{self.last_state_id}.bin")
             self.last_state_id += 1
             iface.horn()

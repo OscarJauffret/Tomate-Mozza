@@ -38,7 +38,9 @@ class Config:
         CURRICULUM_LEARNING: bool = True
 
         REWARD_PER_MS: float = -6 / 5000
-        REWARD_PER_METER_ALONG_CENTERLINE: float = 1 / 10
+        REWARD_PER_METER_ALONG_CENTERLINE: float = 1 / 50
+
+        STATES_INTERVAL: int = 5000
 
     class PPO:
         LEARNING_RATE: float = 0.0003
@@ -66,7 +68,10 @@ class Config:
             }
 
     class DQN:
-        LEARNING_RATE: float = 0.0005
+        LEARNING_RATE_SCHEDULE: list[tuple[int, float]] = [(0, 1e-3),
+                                                           (3_000_000, 5e-5),
+                                                           (12_000_000, 5e-5),
+                                                           (15_000_000, 1e-5)]
         # GAMMA: float = 0.99
         GAMMA_SCHEDULE: list[tuple[int, float]] = [(0, 0.99),
                                                    (1_500_000, 0.999),
@@ -111,7 +116,8 @@ class Config:
         @staticmethod
         def get_hyperparameters():
             return {
-                "learning_rate": Config.DQN.LEARNING_RATE,
+                #"learning_rate": Config.DQN.LEARNING_RATE,
+                "learning_rate_schedule": Config.DQN.LEARNING_RATE_SCHEDULE,
                 #"gamma": Config.DQN.GAMMA,
                 "gamma_schedule": Config.DQN.GAMMA_SCHEDULE,
                 "number_of_quantiles": Config.DQN.NUMBER_OF_QUANTILES,

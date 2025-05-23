@@ -21,7 +21,7 @@ class DQNAgent(Agent):
         self.hyperparameters = Config.DQN.get_hyperparameters()
         self.model: Model = Model(self.device, Config.DQN.NUMBER_OF_QUANTILES, Config.DQN.N_COS, Config.DQN.ENABLE_NOISY_NETWORK,
                                   Config.DQN.ENABLE_DUELING_NETWORK).to(self.device)
-        self.trainer: Trainer = Trainer(self.model, self.device, self.hyperparameters["learning_rate"])
+        self.trainer: Trainer = Trainer(self.model, self.device, from_schedule(self.hyperparameters["learning_rate_schedule"], 0))
         self.memory: PrioritizedReplayBuffer = PrioritizedReplayBuffer(self.hyperparameters["max_memory"], alpha=self.hyperparameters["alpha"],
                                                                        beta=self.hyperparameters["beta_start"], device=self.device)
 
@@ -124,7 +124,7 @@ class DQNAgent(Agent):
         Setup the training parameters: Trainer, n_step_buffer, and memory
         :return: None
         """
-        self.trainer = Trainer(self.model, self.device, self.hyperparameters["learning_rate"])
+        self.trainer = Trainer(self.model, self.device, from_schedule(self.hyperparameters["learning_rate_schedule"], 0))
         self.n_step_buffer = NStepBuffer(self.hyperparameters["n_steps"], self.device)
         self.memory = PrioritizedReplayBuffer(self.hyperparameters["max_memory"], alpha=self.hyperparameters["alpha"],
                                               beta=self.hyperparameters["beta_start"], device=self.device)
@@ -208,9 +208,8 @@ class DQNAgent(Agent):
                 self.spawn_point = random.randint(0, self.unlocked_states)
                 if self.spawn_point != 0:
                     iface.execute_command(f"load_state {self.random_states[self.spawn_point]}")
+                self.current_run_start_time = Config.Game.STATES_INTERVAL * self.spawn_point
             self.ready = True
-
-
 
         if _time >= 0 and _time % Config.Game.INTERVAL_BETWEEN_ACTIONS == 0 and self.ready:
             start_time = time.time()
@@ -253,8 +252,7 @@ class DQNAgent(Agent):
                     if self.iterations % Config.DQN.UPDATE_TARGET_EVERY == 0:
                         self.trainer.update_target()
 
-                if self.iterations % 10 == 0:
-                    print("the learning rate is ", self.trainer.optimizer.param_groups[0]['lr'])
+                self.trainer.update_lr(from_schedule(self.hyperparameters["learning_rate_schedule"], self.total_time))
                 self.n_step_buffer.clear()
                 self.reset(iface, _time)
                 iface.set_speed(self.game_speed)

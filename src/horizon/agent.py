@@ -56,11 +56,12 @@ class Agent(Client, ABC):
         self.logger: TMLogger = TMLogger(self.algorithm, get_device_info(self.device.type))
 
         self.random_states = get_random_states()
-        self.unlocked_states = 0
+        self.unlocked_states = len(self.random_states) - 1  # unlock everything
 
         self.reward_requirements = self.agent_position.get_reward_requirements_for_checkpoint(len(self.random_states))
 
         self.total_time = 0
+        self.current_run_start_time = 0
 
         self.epsilon = 0
         self.epsilon_boltzmann = 0
@@ -262,15 +263,16 @@ class Agent(Client, ABC):
         if not self.eval:
             self.iterations += 1
             self.shared_dict["reward"].put(self.reward)
-            self.logger.add_run(self.iterations, time, self.reward, self.spawn_point, self.has_finished, self.epsilon, self.epsilon_boltzmann)
-            self.total_time += time
+            run_duration = time - self.current_run_start_time
+            self.logger.add_run(self.iterations, run_duration, self.reward, self.spawn_point, self.has_finished, self.epsilon, self.epsilon_boltzmann)
+            self.total_time += run_duration
 
         if self.iterations % 10 ==  0:
             print(f"Iteration: {self.iterations:<8} reward: {self.reward:<8.2f}")
 
         if self.reward > self.best_reward:
             self.best_reward = self.reward
-            self.unlocked_states = np.clip(np.searchsorted(self.reward_requirements, self.best_reward) - 1, 0, len(self.random_states) - 2)
+            #self.unlocked_states = max(np.clip(np.searchsorted(self.reward_requirements, self.best_reward) - 1, 0, len(self.random_states) - 2), self.unlocked_states)
 
         self.reward = 0.0
         self.prev_positions.clear()

@@ -141,8 +141,6 @@ class Trainer:
         self.device = device
         self.optimizer = torch.optim.RAdam(model.parameters(), lr=self.lr)
 
-        self.scheduler = ReduceLROnPlateau(self.optimizer, mode='max', factor=0.5, patience=1000, min_lr=2e-5)
-
         self.criterion = nn.SmoothL1Loss(reduction="none")  # Huber loss
 
         self.n_quantiles = model.n_quantiles
@@ -213,10 +211,11 @@ class Trainer:
         for target_param, main_param in zip(self.target_model.parameters(), self.main_model.parameters()):
             target_param.data.copy_(Config.DQN.TAU * main_param.data + (1 - Config.DQN.TAU) * target_param.data)
 
-    def step(self, reward):
+    def update_lr(self, lr):
         """
-        Step the scheduler
-        :param reward: The reward received
-        :return: None
+        Update the learning rate of the optimizer
+        :param lr: The new learning rate
+        :return:
         """
-        self.scheduler.step(reward)
+        for param_group in self.optimizer.param_groups:
+            param_group['lr'] = lr
