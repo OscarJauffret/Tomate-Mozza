@@ -135,9 +135,8 @@ class Model(nn.Module):
                     module.reset_noise()
 
 class Trainer:
-    def __init__(self, model, device, lr, gamma):
+    def __init__(self, model, device, lr):
         self.lr = lr
-        self.gamma = gamma
         self.main_model = model
         self.device = device
         self.optimizer = torch.optim.RAdam(model.parameters(), lr=self.lr)
@@ -153,7 +152,7 @@ class Trainer:
         self.target_model = copy.deepcopy(self.main_model).to(self.device)
         self.target_model.eval()
 
-    def train_step(self, state, action, reward, next_state, done, weights=None):
+    def train_step(self, state, action, reward, next_state, done, gamma, weights=None):
         """
         Train the model using the given state, action, reward, next state and done flag
         :param state: The state of the environment: Shape: (batch_size, Config.Arch.INPUT_SIZE)
@@ -161,6 +160,7 @@ class Trainer:
         :param reward: The rewards received: Shape: (batch_size)
         :param next_state: The next state of the environment: Shape: (batch_size, Config.Arch.INPUT_SIZE)
         :param done: The done flag: Shape: (batch_size)
+        :param gamma: The discount factor
         :param weights: The weights for the loss function: Shape: (batch_size)
         :return: The td_error
         """
@@ -180,7 +180,7 @@ class Trainer:
             target_quantiles = self.target_model(next_state, taus_target)     # Shape: (batch_size, n_quantiles, n_actions)
             next_q_values = target_quantiles.gather(2, best_action.unsqueeze(1).expand(-1, self.n_target_quantiles, 1)).transpose(1, 2) # (batch_size, 1, n_target_quantiles)
 
-            target = reward.unsqueeze(1).unsqueeze(2) + (1 - done.unsqueeze(1).unsqueeze(2)) * (self.gamma ** Config.DQN.N_STEPS) * next_q_values  # Shape: (batch_size, 1, n_quantiles)
+            target = reward.unsqueeze(1).unsqueeze(2) + (1 - done.unsqueeze(1).unsqueeze(2)) * (gamma ** Config.DQN.N_STEPS) * next_q_values  # Shape: (batch_size, 1, n_quantiles)
             target = target.detach()
 
         # Compute pairwise TD error between pred and target quantiles

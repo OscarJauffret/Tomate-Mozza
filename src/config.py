@@ -94,7 +94,7 @@ class Config:
 
         TAU_EPSILON_BOLTZMANN: float = 0.01
 
-        UPDATE_TARGET_EVERY: int = 1
+        UPDATE_TARGET_EVERY: int = 2
         TAU: float = 0.02
 
         ALPHA: float = 0.6

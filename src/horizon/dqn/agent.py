@@ -21,7 +21,7 @@ class DQNAgent(Agent):
         self.hyperparameters = Config.DQN.get_hyperparameters()
         self.model: Model = Model(self.device, Config.DQN.NUMBER_OF_QUANTILES, Config.DQN.N_COS, Config.DQN.ENABLE_NOISY_NETWORK,
                                   Config.DQN.ENABLE_DUELING_NETWORK).to(self.device)
-        self.trainer: Trainer = Trainer(self.model, self.device, self.hyperparameters["learning_rate"], self.hyperparameters["gamma"])
+        self.trainer: Trainer = Trainer(self.model, self.device, self.hyperparameters["learning_rate"])
         self.memory: PrioritizedReplayBuffer = PrioritizedReplayBuffer(self.hyperparameters["max_memory"], alpha=self.hyperparameters["alpha"],
                                                                        beta=self.hyperparameters["beta_start"], device=self.device)
 
@@ -124,8 +124,7 @@ class DQNAgent(Agent):
         Setup the training parameters: Trainer, n_step_buffer, and memory
         :return: None
         """
-        self.trainer = Trainer(self.model, self.device, self.hyperparameters["learning_rate"],
-                               self.hyperparameters["gamma"])
+        self.trainer = Trainer(self.model, self.device, self.hyperparameters["learning_rate"])
         self.n_step_buffer = NStepBuffer(self.hyperparameters["n_steps"], self.device)
         self.memory = PrioritizedReplayBuffer(self.hyperparameters["max_memory"], alpha=self.hyperparameters["alpha"],
                                               beta=self.hyperparameters["beta_start"], device=self.device)
@@ -184,7 +183,8 @@ class DQNAgent(Agent):
 
         (states, actions, rewards, next_states, dones), indices, weights = batch
 
-        td_sample = self.trainer.train_step(states, actions, rewards, next_states, dones, weights)
+        td_sample = self.trainer.train_step(states, actions, rewards, next_states, dones,
+                                            from_schedule(Config.DQN.GAMMA_SCHEDULE, self.total_time),weights)
         self.memory.update_priorities(indices, td_sample)
         if self.iterations > 15000: # warmup
             self.trainer.step(self.reward)
