@@ -211,12 +211,17 @@ class Agent(Client, ABC):
             wheels[3].real_time_state.is_sliding,
         ], dtype=torch.float, device=self.device)
 
-    def get_reward(self, simulation_state: SimStateData) -> torch.Tensor:
+    def get_reward(self, simulation_state: SimStateData, done: torch.tensor) -> torch.Tensor:
         """
         Get the reward for the current state
+        :param done:
         :param simulation_state: the simulation state
+        :param done: whether the simulation is done
         :return: the reward
         """
+        if done.item():
+            return torch.tensor(Config.Game.REWARD_PER_MS * Config.Game.INTERVAL_BETWEEN_ACTIONS, device=self.device)
+
         if not self.prev_positions:
             return torch.tensor(0, device=self.device)
 

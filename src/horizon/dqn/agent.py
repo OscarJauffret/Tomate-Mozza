@@ -219,7 +219,7 @@ class DQNAgent(Agent):
             done = self.determine_done(simulation_state)
             current_reward = 0
             if len(self.n_step_buffer) > 0:
-                current_reward = self.get_reward(simulation_state)
+                current_reward = self.get_reward(simulation_state, done)
                 self.reward += current_reward.item()
 
             action, action_matches_argmax = self.get_action(self.current_state, _time)

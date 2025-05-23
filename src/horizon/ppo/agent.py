@@ -135,14 +135,10 @@ class PPOAgent(Agent):
             start_time = time.time()
             simulation_state = iface.get_simulation_state()
             self.agent_position.update((simulation_state.position[0], simulation_state.position[2]))
+            self.update_state(simulation_state)  # Get the current state
+            done = self.determine_done(simulation_state)
 
-            future_state = self.thread_pool.submit(self.update_state, simulation_state)
-            future_done = self.thread_pool.submit(self.determine_done, simulation_state)
-            future_reward = self.thread_pool.submit(self.get_reward, simulation_state)
-
-            future_state.result()
-            done = future_done.result()
-            current_reward = future_reward.result()
+            current_reward = self.get_reward(simulation_state, done)
             self.reward += current_reward.item()
 
             action, log_probs, value = self.get_action(self.current_state)
