@@ -2,6 +2,7 @@ import numpy as np
 import torch
 
 from ...config import Config
+from ...utils.utils import from_schedule
 
 class NStepBuffer:
     def __init__(self, n_steps: int, device) -> None:
@@ -14,7 +15,7 @@ class NStepBuffer:
         self.actions = torch.zeros(self.n_steps, dtype=torch.int64, device=self.device)
         self.rewards = torch.zeros(self.n_steps, dtype=torch.float, device=self.device)
         self.action_matches_argmax = torch.zeros(self.n_steps, dtype=torch.bool, device=self.device)
-        self.gammas = torch.tensor(Config.DQN.GAMMA ** np.arange(self.n_steps), dtype=torch.float, device=self.device)
+        self.gammas = torch.tensor(from_schedule(Config.DQN.GAMMA_SCHEDULE, 0) ** np.arange(self.n_steps), dtype=torch.float, device=self.device)
 
     def __len__(self):
         return self.current_size
@@ -27,7 +28,9 @@ class NStepBuffer:
         self.current_size = 0
         self.position = 0
 
-    def get_transition(self):
+    def get_transition(self, time):
+        with torch.no_grad():
+            self.gammas.copy_(torch.tensor(from_schedule(Config.DQN.GAMMA_SCHEDULE, time) ** np.arange(self.n_steps), dtype=torch.float, device=self.device))
         idx = (self.position - self.current_size) % self.n_steps
         return self.states[idx], self.actions[idx], self.cumulative_reward()
 

@@ -231,7 +231,7 @@ class DQNAgent(Agent):
             send_input(iface, action.item())  # Send the action to the game
 
             if self.n_step_buffer.is_full() and not self.eval:
-                state, action, reward = self.n_step_buffer.get_transition()
+                state, action, reward = self.n_step_buffer.get_transition(self.total_time)
                 next_state = self.current_state
                 self.remember(state.clone(), action.clone(), reward, next_state, done)
 
@@ -245,7 +245,7 @@ class DQNAgent(Agent):
 
                 if not self.eval:
                     while not self.n_step_buffer.is_empty():
-                        state, action, reward = self.n_step_buffer.get_transition()
+                        state, action, reward = self.n_step_buffer.get_transition(self.total_time)
                         next_state = self.current_state
                         self.n_step_buffer.pop_transition()
                         self.remember(state.clone(), action.clone(), reward, next_state, done)
