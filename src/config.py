@@ -5,7 +5,7 @@ class Config:
 
     class Paths:
         MAP_PREFIX: str = "maps"
-        MAP: str = "horizon_unlimited"        # Verify that the map here is the same as the one in your .env file
+        MAP: str = "short_horizon"        # Verify that the map here is the same as the one in your .env file
         MAP_BLOCKS_PATH: str = os.path.join(MAP_PREFIX, MAP, "ordered_blocks.json")
         MAP_LAYOUT_PATH: str = os.path.join(MAP_PREFIX, MAP, "layout.txt")
 
@@ -35,10 +35,10 @@ class Config:
         GAME_SPEED: int = 8
         RESTART_INTERVAL_SECONDS: int = 60 * 60 * 4
 
-        CURRICULUM_LEARNING: bool = False
+        CURRICULUM_LEARNING: bool = True
 
         REWARD_PER_MS: float = -6 / 5000
-        REWARD_PER_METER_ALONG_CENTERLINE: float = 1 / 100
+        REWARD_PER_METER_ALONG_CENTERLINE: float = 1 / 10
 
     class PPO:
         LEARNING_RATE: float = 0.0003
@@ -67,7 +67,10 @@ class Config:
 
     class DQN:
         LEARNING_RATE: float = 0.0005
-        GAMMA: float = 0.99
+        # GAMMA: float = 0.99
+        GAMMA_SCHEDULE: list[tuple[int, float]] = [(0, 0.99),
+                                                   (1_500_000, 0.999),
+                                                   (2_500_000, 1)]
 
         NUMBER_OF_QUANTILES: int = 8
         N_COS: int = 64 # Number of cosine embedding dimensions
@@ -83,11 +86,11 @@ class Config:
 
         EPSILON_SCHEDULE: list[tuple[int, float]] = [(0, 1),
                                                      (50_000, 1),
-                                                     (1_000_000, 0.05),
-                                                     (5_000_000, 0.03)]
+                                                     (500_000, 0.05),
+                                                     (3_000_000, 0.03)]
 
         EPSILON_BOLTZMANN_SCHEDULE: list[tuple[int, float]] = [(0, 0.15),
-                                                               (5_000_000, 0.03)]
+                                                               (3_000_000, 0.03)]
 
         TAU_EPSILON_BOLTZMANN: float = 0.01
 
@@ -109,7 +112,8 @@ class Config:
         def get_hyperparameters():
             return {
                 "learning_rate": Config.DQN.LEARNING_RATE,
-                "gamma": Config.DQN.GAMMA,
+                #"gamma": Config.DQN.GAMMA,
+                "gamma_schedule": Config.DQN.GAMMA_SCHEDULE,
                 "number_of_quantiles": Config.DQN.NUMBER_OF_QUANTILES,
                 "n_cos": Config.DQN.N_COS,
                 "kappa": Config.DQN.KAPPA,
