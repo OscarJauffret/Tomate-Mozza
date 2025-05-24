@@ -31,14 +31,14 @@ class Config:
         BLOCK_SIZE: int = 32
 
         NUMBER_OF_ACTIONS_PER_SECOND: int = 10
-        INTERVAL_BETWEEN_ACTIONS: int = 1000 // NUMBER_OF_ACTIONS_PER_SECOND
+        INTERVAL_BETWEEN_ACTIONS: int = (1000 // NUMBER_OF_ACTIONS_PER_SECOND) // 10 * 10
         GAME_SPEED: int = 8
         RESTART_INTERVAL_SECONDS: int = 60 * 60 * 4
 
         CURRICULUM_LEARNING: bool = True
 
         REWARD_PER_MS: float = -6 / 5000
-        REWARD_PER_METER_ALONG_CENTERLINE: float = 1 / 50
+        REWARD_PER_METER_ALONG_CENTERLINE: float = 1 / 20
 
         STATES_INTERVAL: int = 5000
 
@@ -68,6 +68,7 @@ class Config:
             }
 
     class DQN:
+        LEARNING_RATE: float = 1e-3     # Only used if no learning rate schedule is defined
         LEARNING_RATE_SCHEDULE: list[tuple[int, float]] = [(0, 1e-3),
                                                            (3_000_000, 5e-5),
                                                            (12_000_000, 5e-5),
@@ -116,7 +117,7 @@ class Config:
         @staticmethod
         def get_hyperparameters():
             return {
-                #"learning_rate": Config.DQN.LEARNING_RATE,
+                "learning_rate": Config.DQN.LEARNING_RATE,
                 "learning_rate_schedule": Config.DQN.LEARNING_RATE_SCHEDULE,
                 #"gamma": Config.DQN.GAMMA,
                 "gamma_schedule": Config.DQN.GAMMA_SCHEDULE,

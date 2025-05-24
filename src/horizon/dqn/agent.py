@@ -21,7 +21,8 @@ class DQNAgent(Agent):
         self.hyperparameters = Config.DQN.get_hyperparameters()
         self.model: Model = Model(self.device, Config.DQN.NUMBER_OF_QUANTILES, Config.DQN.N_COS, Config.DQN.ENABLE_NOISY_NETWORK,
                                   Config.DQN.ENABLE_DUELING_NETWORK).to(self.device)
-        self.trainer: Trainer = Trainer(self.model, self.device, from_schedule(self.hyperparameters["learning_rate_schedule"], 0))
+
+        self.trainer: Trainer = Trainer(self.model, self.device, self.get_lr_value())
         self.memory: PrioritizedReplayBuffer = PrioritizedReplayBuffer(self.hyperparameters["max_memory"], alpha=self.hyperparameters["alpha"],
                                                                        beta=self.hyperparameters["beta_start"], device=self.device)
 
@@ -124,7 +125,7 @@ class DQNAgent(Agent):
         Setup the training parameters: Trainer, n_step_buffer, and memory
         :return: None
         """
-        self.trainer = Trainer(self.model, self.device, from_schedule(self.hyperparameters["learning_rate_schedule"], 0))
+        self.trainer = Trainer(self.model, self.device, self.get_lr_value())
         self.n_step_buffer = NStepBuffer(self.hyperparameters["n_steps"], self.device)
         self.memory = PrioritizedReplayBuffer(self.hyperparameters["max_memory"], alpha=self.hyperparameters["alpha"],
                                               beta=self.hyperparameters["beta_start"], device=self.device)
@@ -186,8 +187,6 @@ class DQNAgent(Agent):
         td_sample = self.trainer.train_step(states, actions, rewards, next_states, dones,
                                             from_schedule(Config.DQN.GAMMA_SCHEDULE, self.total_time),weights)
         self.memory.update_priorities(indices, td_sample)
-        if self.iterations > 15000: # warmup
-            self.trainer.step(self.reward)
 
     def get_learning_rate(self) -> float:
         """
@@ -195,6 +194,14 @@ class DQNAgent(Agent):
         :return: the learning rate
         """
         return self.trainer.optimizer.param_groups[0]['lr']
+
+    def get_lr_value(self) -> float:
+        lr = self.hyperparameters.get("learning_rate_schedule", None)
+        if lr is None:
+            lr = self.hyperparameters["learning_rate"]
+        else:
+            lr = from_schedule(self.hyperparameters["learning_rate_schedule"], self.total_time)
+        return lr
 
 
     def on_run_step(self, iface: TMInterface, _time: int) -> None:
@@ -227,7 +234,7 @@ class DQNAgent(Agent):
                 self.n_step_buffer.add(self.current_state, action, current_reward, action_matches_argmax)
             self.prev_positions.append((simulation_state.position[0], simulation_state.position[2]))
 
-            send_input(iface, action.item())  # Send the action to the game
+            #send_input(iface, action.item())  # Send the action to the game
 
             if self.n_step_buffer.is_full() and not self.eval:
                 state, action, reward = self.n_step_buffer.get_transition(self.total_time)
@@ -252,7 +259,7 @@ class DQNAgent(Agent):
                     if self.iterations % Config.DQN.UPDATE_TARGET_EVERY == 0:
                         self.trainer.update_target()
 
-                self.trainer.update_lr(from_schedule(self.hyperparameters["learning_rate_schedule"], self.total_time))
+                self.trainer.update_lr(self.get_lr_value())
                 self.n_step_buffer.clear()
                 self.reset(iface, _time)
                 iface.set_speed(self.game_speed)

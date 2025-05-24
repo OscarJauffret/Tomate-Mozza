@@ -219,7 +219,7 @@ class Agent(Client, ABC):
         :param done: whether the simulation is done
         :return: the reward
         """
-        if done.item():
+        if done.item() and not self.has_finished:
             return torch.tensor(Config.Game.REWARD_PER_MS * Config.Game.INTERVAL_BETWEEN_ACTIONS, device=self.device)
 
         if not self.prev_positions:
