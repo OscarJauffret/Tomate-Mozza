@@ -137,8 +137,9 @@ class DQNAgent(Agent):
         :param time: the current time
         :return: the action and whether it matches the argmax of the q-value
         """
-        epsilon = from_schedule(self.epsilon_schedule, self.total_time + time - self.current_run_start_time)
-        epsilon_boltzmann = from_schedule(self.epsilon_boltzmann_schedule, self.total_time + time - self.current_run_start_time)
+        schedule_time = max(0, self.total_time + time - self.current_run_start_time)
+        epsilon = from_schedule(self.epsilon_schedule, schedule_time)
+        epsilon_boltzmann = from_schedule(self.epsilon_boltzmann_schedule, schedule_time)
 
         self.epsilon = epsilon
         self.epsilon_boltzmann = epsilon_boltzmann
@@ -211,7 +212,7 @@ class DQNAgent(Agent):
                 save_pb(self.shared_dict["model_path"].value, self.previous_finish_time, self.spawn_point != 0) # Save the pb only if not random spawn
                 launch_map(iface)
                 return
-            if Config.Game.CURRICULUM_LEARNING:
+            if Config.Game.CURRICULUM_LEARNING and self.total_time < max(Config.DQN.EPSILON_SCHEDULE[-1][0], Config.DQN.EPSILON_BOLTZMANN_SCHEDULE[-1][0]):
                 self.spawn_point = random.randint(0, self.unlocked_states)
                 if self.spawn_point != 0:
                     iface.execute_command(f"load_state {self.random_states[self.spawn_point]}")
@@ -226,7 +227,7 @@ class DQNAgent(Agent):
             done = self.determine_done(simulation_state)
             current_reward = 0
             if len(self.n_step_buffer) > 0:
-                current_reward = self.get_reward(simulation_state, done)
+                current_reward = self.get_reward(simulation_state, done, _time)
                 self.reward += current_reward.item()
 
             action, action_matches_argmax = self.get_action(self.current_state, _time)

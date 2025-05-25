@@ -138,7 +138,7 @@ class PPOAgent(Agent):
             self.update_state(simulation_state)  # Get the current state
             done = self.determine_done(simulation_state)
 
-            current_reward = self.get_reward(simulation_state, done)
+            current_reward = self.get_reward(simulation_state, done, _time)
             self.reward += current_reward.item()
 
             action, log_probs, value = self.get_action(self.current_state)

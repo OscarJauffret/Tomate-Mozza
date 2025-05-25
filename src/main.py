@@ -26,7 +26,9 @@ if __name__ == "__main__":
     shared_dict = manager.dict({
                                 "eval": False,
                                 "reward": manager.Queue(),
-                                "q_values": manager.dict({outputs[0]: 0, outputs[1]: 0, outputs[2]: 0, outputs[3]: 0, outputs[4]: 0, outputs[5]: 0, "is_random": False}),
+                                "q_values": manager.dict({outputs[0]: 0, outputs[1]: 0, outputs[2]: 0, outputs[3]: 0, outputs[4]: 0, outputs[5]: 0,
+                                                          outputs[6]: 0, outputs[7]: 0, outputs[8]: 0, outputs[9]: 0, outputs[10]: 0, outputs[11]: 0,
+                                                          "is_random": False}),
                                 "model_path": manager.Value("u", args.name),
                                 "game_speed": Config.Game.GAME_SPEED,
                                 "personal_best": float("inf"),

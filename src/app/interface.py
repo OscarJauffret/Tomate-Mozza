@@ -149,7 +149,7 @@ class Interface:
         self.best_reward_label.grid(row=1, column=1, padx=50, sticky="nsew")
 
     def create_actions_squares(self):
-        self.action_keys = ActionKeys(self.root, 2, 1, key_size=40, padding=3, margin=10)
+        self.action_keys = ActionKeys(self.root, 2, 1, key_size=20, padding=3, margin=5)
 
     def create_game_speed_slider(self):
         """Create the game speed slider"""

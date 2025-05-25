@@ -56,7 +56,7 @@ class Agent(Client, ABC):
         self.logger: TMLogger = TMLogger(self.algorithm, get_device_info(self.device.type))
 
         self.random_states = get_random_states()
-        self.unlocked_states = len(self.random_states) - 1  # unlock everything
+        self.unlocked_states = len(self.random_states) - 1 if Config.Game.UNLOCK_ALL_STATES else 0
 
         self.reward_requirements = self.agent_position.get_reward_requirements_for_checkpoint(len(self.random_states))
 
@@ -211,12 +211,12 @@ class Agent(Client, ABC):
             wheels[3].real_time_state.is_sliding,
         ], dtype=torch.float, device=self.device)
 
-    def get_reward(self, simulation_state: SimStateData, done: torch.tensor) -> torch.Tensor:
+    def get_reward(self, simulation_state: SimStateData, done: torch.tensor, time: int) -> torch.Tensor:
         """
         Get the reward for the current state
-        :param done:
         :param simulation_state: the simulation state
         :param done: whether the simulation is done
+        :param time: The current time in milliseconds
         :return: the reward
         """
         if done.item() and not self.has_finished:
@@ -232,11 +232,24 @@ class Agent(Client, ABC):
         current_reward = distance_advanced_along_centerline * Config.Game.REWARD_PER_METER_ALONG_CENTERLINE
 
         if self.has_finished:
-            current_reward += Config.Game.BLOCK_SIZE
+            bonus = self.final_bonus(time)
+            current_reward += bonus
+
 
         current_reward += Config.Game.REWARD_PER_MS * Config.Game.INTERVAL_BETWEEN_ACTIONS
 
         return torch.tensor(current_reward, device=self.device)
+
+    def final_bonus(self, time: int):
+        """
+        Bonus = max_bonus * (per_sec_ratio) ** (time_ref - time)
+        time < time_ref → bonus increases
+        time > time_ref → bonus decreases
+        :time: time in milliseconds
+        :return: the final bonus
+        """
+        return Config.Game.MAX_BONUS * (Config.Game.PER_SEC_RATIO ** (Config.Game.TIME_REF - time))
+
 
     def determine_done(self, simulation_state: SimStateData) -> torch.Tensor:
         """
@@ -277,7 +290,7 @@ class Agent(Client, ABC):
 
         if self.reward > self.best_reward:
             self.best_reward = self.reward
-            #self.unlocked_states = max(np.clip(np.searchsorted(self.reward_requirements, self.best_reward) - 1, 0, len(self.random_states) - 2), self.unlocked_states)
+            self.unlocked_states = max(np.clip(np.searchsorted(self.reward_requirements, self.best_reward) - 1, 0, len(self.random_states) - 2), self.unlocked_states)
 
         self.reward = 0.0
         self.prev_positions.clear()
