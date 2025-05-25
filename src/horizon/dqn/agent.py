@@ -212,7 +212,7 @@ class DQNAgent(Agent):
                 save_pb(self.shared_dict["model_path"].value, self.previous_finish_time, self.spawn_point != 0) # Save the pb only if not random spawn
                 launch_map(iface)
                 return
-            if Config.Game.CURRICULUM_LEARNING and self.total_time < max(Config.DQN.EPSILON_SCHEDULE[-1][0], Config.DQN.EPSILON_BOLTZMANN_SCHEDULE[-1][0]):
+            if Config.Game.CURRICULUM_LEARNING and self.total_time < max(Config.DQN.EPSILON_SCHEDULE[-1][0], Config.DQN.EPSILON_BOLTZMANN_SCHEDULE[-1][0]) * Config.Game.INTERVAL_BETWEEN_ACTIONS:
                 self.spawn_point = random.randint(0, self.unlocked_states)
                 if self.spawn_point != 0:
                     iface.execute_command(f"load_state {self.random_states[self.spawn_point]}")
