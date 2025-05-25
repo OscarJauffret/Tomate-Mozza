@@ -35,7 +35,7 @@ class Config:
         GAME_SPEED: int = 8
         RESTART_INTERVAL_SECONDS: int = 60 * 60 * 4
 
-        CURRICULUM_LEARNING: bool = True
+        CURRICULUM_LEARNING: bool = False
 
         REWARD_PER_MS: float = -6 / 5000
         REWARD_PER_METER_ALONG_CENTERLINE: float = 1 / 20
@@ -172,6 +172,7 @@ class Config:
                 "input_size": Config.Arch.INPUT_SIZE,
                 "output_size": Config.Arch.OUTPUT_SIZE,
                 "layer_sizes": Config.Arch.LAYER_SIZES,
+                "value_advantage_layer_size": Config.Arch.VALUE_ADVANTAGE_LAYER_SIZE,
                 "number_of_hidden_layers": Config.Arch.get_number_of_hidden_layers(),
                 "reward_description": Config.Arch.REWARD_DESC
             }

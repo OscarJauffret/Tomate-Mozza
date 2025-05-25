@@ -137,8 +137,8 @@ class DQNAgent(Agent):
         :param time: the current time
         :return: the action and whether it matches the argmax of the q-value
         """
-        epsilon = from_schedule(self.epsilon_schedule, self.total_time + time)
-        epsilon_boltzmann = from_schedule(self.epsilon_boltzmann_schedule, self.total_time + time)
+        epsilon = from_schedule(self.epsilon_schedule, self.total_time + time - self.current_run_start_time)
+        epsilon_boltzmann = from_schedule(self.epsilon_boltzmann_schedule, self.total_time + time - self.current_run_start_time)
 
         self.epsilon = epsilon
         self.epsilon_boltzmann = epsilon_boltzmann
@@ -149,9 +149,9 @@ class DQNAgent(Agent):
             expected_q = expected_q.squeeze(0)
 
             random_number = random.random()
-            if random_number < epsilon:
+            if random_number < self.epsilon:
                 get_arg_max_on = torch.rand_like(expected_q)
-            elif random_number < epsilon + epsilon_boltzmann:
+            elif random_number < self.epsilon + self.epsilon_boltzmann:
                 get_arg_max_on = expected_q + self.tau_epsilon_boltzmann * torch.randn_like(expected_q)
             else:
                 get_arg_max_on = expected_q
