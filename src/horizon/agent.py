@@ -248,7 +248,8 @@ class Agent(Client, ABC):
         :time: time in milliseconds
         :return: the final bonus
         """
-        return Config.Game.MAX_BONUS * (Config.Game.PER_SEC_RATIO ** (Config.Game.TIME_REF - time))
+        ref = min(self.personal_best, Config.Game.TIME_REF)
+        return Config.Game.MAX_BONUS * (Config.Game.PER_SEC_RATIO ** ((ref - time) / 1000))
 
 
     def determine_done(self, simulation_state: SimStateData) -> torch.Tensor:
