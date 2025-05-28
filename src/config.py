@@ -32,7 +32,7 @@ class Config:
 
         NUMBER_OF_ACTIONS_PER_SECOND: int = 10
         INTERVAL_BETWEEN_ACTIONS: int = (1000 // NUMBER_OF_ACTIONS_PER_SECOND) // 10 * 10
-        GAME_SPEED: int = 8
+        GAME_SPEED: int = 16
         RESTART_INTERVAL_SECONDS: int = 60 * 60 * 4
 
         CURRICULUM_LEARNING: bool = True
@@ -44,9 +44,9 @@ class Config:
         STATES_INTERVAL: int = 5000
 
         # Final bonus
-        MAX_BONUS: float = BLOCK_SIZE
-        PER_SEC_RATIO: float = 1.3  # one-second difference gives 30% more reward
-        TIME_REF: int = 33 * 1000
+        MAX_BONUS: float = 10
+        PER_SEC_RATIO: float = 1  # one-second difference gives 30% more reward
+        TIME_REF: int = 240 * 1000
 
     class PPO:
         LEARNING_RATE: float = 0.0003
@@ -91,10 +91,6 @@ class Config:
         MAX_MEMORY: int = 100_000
         MIN_MEMORY: int = 10_000
         BATCH_SIZE: int = 512
-
-        # EPSILON_START: float = 0.9
-        # EPSILON_END: float = 0.05
-        # EPSILON_DECAY: int = 10000
 
         EPSILON_SCHEDULE: list[tuple[int, float]] = [(0, 1),
                                                      (50_000, 1),
@@ -153,10 +149,13 @@ class Config:
                                   "next_turn", "second_edge_length", "second_turn", "third_edge_length", "third_turn",
                                   "pitch", "roll", "wheel_0_contact", "wheel_1_contact", "wheel_2_contact", "wheel_3_contact",
                                   "wheel_0_sliding", "wheel_1_sliding", "wheel_2_sliding", "wheel_3_sliding",]
-        OUTPUTS_DESC: list[str] = ["release", "forward", "right", "left", "forward_right", "forward_left",
-                                   "brake", "forward_brake", "right_brake", "left_brake", "forward_right_brake", "forward_left_brake"]
-        ACTIVATED_KEYS_PER_OUTPUT: list[tuple[int]] = [(1, 1, 1, 1), (1, 0, 0, 0), (0, 0, 0, 1), (0, 1, 0, 0), (1, 0, 0, 1), (1, 1, 0, 0),
-                                                       (0, 0, 1, 0), (1, 0, 1, 0), (0, 0, 1, 1), (0, 1, 1, 0), (1, 0, 1, 1), (1, 1, 1, 0)]
+        ENABLE_BRAKE: bool = False
+        OUTPUTS_DESC: list[str] = ["release", "forward", "right", "left", "forward_right", "forward_left"]
+        ACTIVATED_KEYS_PER_OUTPUT: list[tuple[int]] = [(1, 1, 1, 1), (1, 0, 0, 0), (0, 0, 0, 1), (0, 1, 0, 0), (1, 0, 0, 1), (1, 1, 0, 0)]
+        if ENABLE_BRAKE:
+            OUTPUTS_DESC += ["brake", "forward_brake", "right_brake", "left_brake", "forward_right_brake", "forward_left_brake"]
+            ACTIVATED_KEYS_PER_OUTPUT += [(0, 0, 1, 0), (1, 0, 1, 0), (0, 0, 1, 1), (0, 1, 1, 0), (1, 0, 1, 1), (1, 1, 1, 0)]
+
         REWARD_DESC: str = "distance travelled projected on the section's x axis (progression on the track)"
 
         INPUT_SIZE: int = len(INPUTS_DESC)

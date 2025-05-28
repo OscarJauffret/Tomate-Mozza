@@ -1,6 +1,8 @@
 import multiprocessing
 import os
 
+from torch.onnx.symbolic_opset10 import quantized_cat
+
 from .config import Config
 from .horizon.worker import Worker
 from .app.interface import Interface
@@ -23,12 +25,12 @@ if __name__ == "__main__":
 
     manager = multiprocessing.Manager()
     outputs = Config.Arch.OUTPUTS_DESC
+    q_vals = dict.fromkeys(outputs, 0)
+    q_vals["is_random"] = False
     shared_dict = manager.dict({
                                 "eval": False,
                                 "reward": manager.Queue(),
-                                "q_values": manager.dict({outputs[0]: 0, outputs[1]: 0, outputs[2]: 0, outputs[3]: 0, outputs[4]: 0, outputs[5]: 0,
-                                                          outputs[6]: 0, outputs[7]: 0, outputs[8]: 0, outputs[9]: 0, outputs[10]: 0, outputs[11]: 0,
-                                                          "is_random": False}),
+                                "q_values": manager.dict(q_vals),
                                 "model_path": manager.Value("u", args.name),
                                 "game_speed": Config.Game.GAME_SPEED,
                                 "personal_best": float("inf"),
