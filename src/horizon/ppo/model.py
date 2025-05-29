@@ -1,9 +1,9 @@
 import torch
-import numpy as np
 import torch.nn as nn
 import torch.optim as optim
 from torch.distributions import Categorical
 from itertools import repeat
+from torch.optim.lr_scheduler import LinearLR
 
 from .rollout_buffer import RolloutBuffer
 from src.config import Config
@@ -69,6 +69,9 @@ class Trainer:
         self.epsilon = epsilon
         self.c1 = c1
         self.c2 = c2
+
+        self.actor_scheduler = LinearLR(self.actor_optimizer, start_factor=1.0, end_factor=0.1, total_iters=Config.PPO.NUMBER_OF_LR_UPDATES)
+        self.critic_scheduler = LinearLR(self.critic_optimizer, start_factor=1.0, end_factor=0.1, total_iters=Config.PPO.NUMBER_OF_LR_UPDATES)
 
     def compute_gae(self, rewards, values, dones):
         """
@@ -145,3 +148,21 @@ class Trainer:
                 total_loss.backward()
                 self.actor_optimizer.step()
                 self.critic_optimizer.step()
+
+    def update_lr(self) -> None:
+        """
+        Update the learning rate of the actor and critic
+        :return: None
+        """
+        self.actor_scheduler.step()
+        self.critic_scheduler.step()
+
+    def get_lr(self):
+        """
+        Get the learning rate of the actor and critic
+        :return: the learning rate
+        """
+        actor_lr = self.actor_optimizer.param_groups[0]['lr']
+        # critic_lr = self.critic_optimizer.param_groups[0]['lr']
+        # As of now, we are using the same learning rate for both actor and critic
+        return actor_lr
