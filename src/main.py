@@ -1,8 +1,6 @@
 import multiprocessing
 import os
 
-from torch.onnx.symbolic_opset10 import quantized_cat
-
 from .config import Config
 from .horizon.worker import Worker
 from .app.interface import Interface
