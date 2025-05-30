@@ -104,6 +104,9 @@ class PPOAgent(Agent):
 
         return action, log_prob, value
 
+    def get_learning_rate(self):
+        return self.trainer.actor_optimizer.param_groups[0]['lr']
+
     def remember(self, state: Tensor, action: Tensor, log_prob: Tensor, reward: Tensor, done: Tensor, value: Tensor) -> None:
         """
         Store the state, action, log probability, reward, done and value in the rollout buffer

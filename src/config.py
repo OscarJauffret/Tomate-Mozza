@@ -5,7 +5,7 @@ class Config:
 
     class Paths:
         MAP_PREFIX: str = "maps"
-        MAP: str = "short_horizon"        # Verify that the map here is the same as the one in your .env file
+        MAP: str = "horizon_unlimited"        # Verify that the map here is the same as the one in your .env file
         MAP_BLOCKS_PATH: str = os.path.join(MAP_PREFIX, MAP, "ordered_blocks.json")
         MAP_LAYOUT_PATH: str = os.path.join(MAP_PREFIX, MAP, "layout.txt")
 

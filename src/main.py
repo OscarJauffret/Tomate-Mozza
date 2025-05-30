@@ -10,7 +10,7 @@ from argparse import ArgumentParser
 
 events = Events()
 
-argparser = ArgumentParser(description="Horizon - A reinforcement learning framework for TM")
+argparser = ArgumentParser(description="Tomate Mozza - A reinforcement learning framework for TM")
 argparser.add_argument("--alg", type=str, default="ppo", help="Algorithm to use (ppo, dqn)")
 argparser.add_argument("--name", type=str, default="", help="Path to save the model")
 
