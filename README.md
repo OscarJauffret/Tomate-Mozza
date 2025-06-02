@@ -9,9 +9,6 @@
 This is a reinforcement learning project that aims to teach an agent to play the game Trackmania Nations Forever.
 TMInterface is used to interact with the game.
 
-> [!Note]
-> This is a university project, it is still under development.
-
 ## Requirements
 
 - [Trackamania Nations Forever (Steam, it's free)](https://store.steampowered.com/app/11020/TrackMania_Nations_Forever/)
